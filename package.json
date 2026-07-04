@@ -2,6 +2,8 @@
   "name": "revel",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Mojeeb Titilayo <hello@blindspotlab.xyz> (https://mojeeb.xyz)",
   "scripts": {
     "dev": "next dev --webpack",
     "dev:turbo": "next dev --turbopack",

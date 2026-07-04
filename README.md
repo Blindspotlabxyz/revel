@@ -4,7 +4,9 @@
 
 **Revel** is an AI product strategist by [BlindspotLab](https://blindspotlab.xyz). Paste a public website URL, and Revel analyzes positioning, UX, messaging, and competition — then returns a scored **Reveal Index**, prioritized **Blueprint**, and exportable **Action Queue**.
 
-**Live:** [tryrevel.xyz](https://tryrevel.xyz) · **Repo:** [github.com/Blindspotlabxyz/revel](https://github.com/Blindspotlabxyz/revel)
+**Author:** [Mojeeb Titilayo](https://mojeeb.xyz) · **Company:** [BlindspotLab](https://blindspotlab.xyz)
+
+**Live:** [tryrevel.xyz](https://tryrevel.xyz) · **Repo:** [github.com/Blindspotlabxyz/revel](https://github.com/Blindspotlabxyz/revel) · **License:** Proprietary — see [LICENSE](LICENSE)
 
 ---
 
@@ -146,10 +148,20 @@ Production builds auto-ping [IndexNow](https://www.indexnow.org/) for Bing and p
 
 ---
 
+## License
+
+This project is **proprietary and not open source**. All rights reserved by **Mojeeb Titilayo** and **BlindspotLab**.
+
+You may not copy, modify, distribute, sublicense, or commercially use this code without written permission. See [LICENSE](LICENSE) for full terms.
+
+For licensing or partnership inquiries: [hello@blindspotlab.xyz](mailto:hello@blindspotlab.xyz)
+
+---
+
 ## Vision
 
 Revel is building toward an intelligence layer that AI agents and applications can call to deeply understand products — not another generic chat audit. **Blindspot Audit** (website analysis) is the first module on that path.
 
 ---
 
-Built by **BlindspotLab** · [hello@blindspotlab.xyz](mailto:hello@blindspotlab.xyz)
+Created by **[Mojeeb Titilayo](https://mojeeb.xyz)** · **BlindspotLab** · [hello@blindspotlab.xyz](mailto:hello@blindspotlab.xyz)

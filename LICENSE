@@ -1,0 +1,31 @@
+Copyright (c) 2026 Mojeeb Titilayo and BlindspotLab. All rights reserved.
+
+This repository and all associated source code, documentation, designs, assets,
+and intellectual property (collectively, the "Software") are the exclusive
+property of Mojeeb Titilayo and BlindspotLab.
+
+Unless you have prior written permission from Mojeeb Titilayo or BlindspotLab,
+you may NOT:
+
+- Use, copy, modify, merge, publish, distribute, sublicense, or sell the Software
+- Create derivative works based on the Software
+- Deploy, host, or offer the Software (or any part of it) as a product or service
+- Remove or alter copyright, trademark, or proprietary notices
+- Use the Revel name, BlindspotLab name, or related branding without permission
+
+Viewing this repository on GitHub does not grant any license to use the code.
+
+Permitted without a separate agreement:
+
+- Forking or cloning for private reference and learning only, with no
+  redistribution or commercial use
+- Reporting security issues responsibly to hello@blindspotlab.xyz
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY ARISING FROM USE OF THE SOFTWARE.
+
+For licensing inquiries: hello@blindspotlab.xyz
+
+Revel — https://tryrevel.xyz
+BlindspotLab — https://blindspotlab.xyz
