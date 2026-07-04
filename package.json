@@ -6,6 +6,8 @@
     "dev": "next dev --webpack",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
+    "postbuild": "node scripts/indexnow-ping.mjs",
+    "indexnow:ping": "node scripts/indexnow-ping.mjs --force",
     "start": "next start",
     "lint": "next lint",
     "verify:illustrations": "node scripts/verify-illustration-consistency.mjs",
