@@ -18,7 +18,7 @@ export function resolveDatabaseUrl(url?: string): string {
     const rest = url.slice(prefix.length);
     const hostMarker = rest.search(/@(aws-|db\.)/);
     if (hostMarker === -1) {
-      throw new Error("Could not parse database URL — check DIRECT_URL / DATABASE_URL");
+      throw new Error("Could not parse database URL. Check DIRECT_URL / DATABASE_URL.");
     }
 
     const credentials = rest.slice(0, hostMarker);

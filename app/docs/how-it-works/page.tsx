@@ -1,36 +1,38 @@
 import type { Metadata } from "next";
-import { FeaturesSection } from "@/components/landing/features-section";
+import { HowItWorks } from "@/components/landing/how-it-works";
 import { MarketingPage } from "@/components/landing/marketing-page";
 import { PageSeo } from "@/components/seo/page-seo";
 import { pageKeywords } from "@/lib/seo/keywords";
-import { featuresItemListJsonLd } from "@/lib/seo/json-ld-schemas";
+import { howToJsonLd } from "@/lib/seo/json-ld-schemas";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
-const title = "Features";
+const title = "How It Works";
 const description =
-  "Product analysis, UX review, messaging audit, competitor review, Reveal Index, and Blueprint roadmap. Everything Revel delivers.";
+  "See how Revel analyzes your website, reveals blindspots, and generates a prioritized product roadmap in under a minute.";
+const path = "/docs/how-it-works";
 
 export const metadata: Metadata = createPageMetadata({
   title,
   description,
-  path: "/features",
-  keywords: pageKeywords.features,
+  path,
+  keywords: pageKeywords["how-it-works"],
 });
 
-export default function FeaturesPage() {
+export default function DocsHowItWorksPage() {
   return (
     <MarketingPage>
       <PageSeo
         title={title}
         description={description}
-        path="/features"
+        path={path}
         breadcrumbs={[
           { name: "Home", path: "/" },
-          { name: title, path: "/features" },
+          { name: "Docs", path: "/docs" },
+          { name: title, path },
         ]}
-        extraSchemas={[featuresItemListJsonLd()]}
+        extraSchemas={[howToJsonLd()]}
       />
-      <FeaturesSection />
+      <HowItWorks />
     </MarketingPage>
   );
 }

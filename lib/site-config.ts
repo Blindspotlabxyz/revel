@@ -1,4 +1,4 @@
-/** Ensures env URLs work with `new URL()` — accepts `tryrevel.xyz` or `https://tryrevel.xyz` */
+/** Ensures env URLs work with `new URL()`. Accepts `tryrevel.xyz` or `https://tryrevel.xyz`. */
 export function normalizeSiteUrl(
   value: string | undefined,
   fallback: string

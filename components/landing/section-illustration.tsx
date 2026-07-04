@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-/** Shared image sizes — hero column on desktop, full width on mobile. */
+/** Shared image sizes: hero column on desktop, full width on mobile. */
 const DESKTOP_SIZES = "(max-width: 47.99rem) 0px, 50vw";
 const MOBILE_SIZES = "(max-width: 47.99rem) 100vw, 0px";
 
@@ -22,7 +22,7 @@ export function SectionIllustration({
   return (
     <div className="illustration-frame">
       <div className="illustration-frame__media relative">
-        {/* Desktop — 16:9 asset, visible md+ */}
+        {/* Desktop: 16:9 asset, visible md+ */}
         <Image
           src={desktopSrc}
           alt={alt}
@@ -31,7 +31,7 @@ export function SectionIllustration({
           priority={priority}
           className="hidden object-contain md:block"
         />
-        {/* Mobile — 9:16 asset, visible below md */}
+        {/* Mobile: 9:16 asset, visible below md */}
         <Image
           src={mobileSrc}
           alt={alt}

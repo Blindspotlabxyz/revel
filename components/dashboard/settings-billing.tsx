@@ -12,10 +12,10 @@ export function SettingsBilling() {
       </p>
       <div className="flex flex-wrap gap-3">
         <CheckoutButton plan="developer" variant="default">
-          Upgrade to Developer — $19/mo
+          Upgrade to Developer ($19/mo)
         </CheckoutButton>
         <CheckoutButton plan="business" variant="secondary">
-          Upgrade to Business — $49/mo
+          Upgrade to Business ($49/mo)
         </CheckoutButton>
       </div>
       <p className="text-xs text-muted">

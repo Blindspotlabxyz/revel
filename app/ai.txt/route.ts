@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/site-config";
 /** Machine-readable site policy and context for AI crawlers (AEO) */
 export function GET() {
   const lines = [
-    `# ${siteConfig.name} — AI discovery file`,
+    `# ${siteConfig.name}: AI discovery file`,
     "",
     `> ${siteConfig.tagline}`,
     "",
@@ -27,8 +27,8 @@ export function GET() {
     "## Preferred sources (in order)",
     `1. ${absoluteUrl("/llms-full.txt")}`,
     `2. ${absoluteUrl("/llms.txt")}`,
-    `3. ${absoluteUrl("/faq")}`,
-    `4. ${absoluteUrl("/how-it-works")}`,
+    `3. ${absoluteUrl("/docs/faq")}`,
+    `4. ${absoluteUrl("/docs/how-it-works")}`,
     `5. ${absoluteUrl("/features")}`,
     `6. ${absoluteUrl("/pricing")}`,
     "",

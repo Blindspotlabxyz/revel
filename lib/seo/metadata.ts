@@ -29,7 +29,7 @@ export function createPageMetadata({
 
   return {
     title: fullTitle ?? {
-      absolute: `${siteConfig.name} — ${siteConfig.tagline}`,
+      absolute: `${siteConfig.name}: ${siteConfig.tagline}`,
     },
     description,
     keywords: [...new Set([...seoKeywords.slice(0, 12), ...keywords])],

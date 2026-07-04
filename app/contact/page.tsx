@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/site-config";
 
 const title = "Contact";
 const description =
-  "Contact Revel and BlindspotLab — general inquiries, support, and partnerships.";
+  "Contact Revel and BlindspotLab for general inquiries, support, and partnerships.";
 
 export const metadata: Metadata = createPageMetadata({
   title,

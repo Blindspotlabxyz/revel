@@ -2,11 +2,11 @@
 
 > Find the hidden gaps stopping your product from growing.
 
-**Revel** is an AI product strategist by [BlindspotLab](https://blindspotlab.xyz). Paste a public website URL, and Revel analyzes positioning, UX, messaging, and competition — then returns a scored **Reveal Index**, prioritized **Blueprint**, and exportable **Action Queue**.
+**Revel** is an AI product strategist by [BlindspotLab](https://blindspotlab.xyz). Paste a public website URL, and Revel analyzes positioning, UX, messaging, and competition, then returns a scored **Reveal Index**, prioritized **Blueprint**, and exportable **Action Queue**.
 
 **Author:** [Mojeeb Titilayo](https://mojeeb.xyz) · **Company:** [BlindspotLab](https://blindspotlab.xyz)
 
-**Live:** [tryrevel.xyz](https://tryrevel.xyz) · **Repo:** [github.com/Blindspotlabxyz/revel](https://github.com/Blindspotlabxyz/revel) · **License:** Proprietary — see [LICENSE](LICENSE)
+**Live:** [tryrevel.xyz](https://tryrevel.xyz) · **Repo:** [github.com/Blindspotlabxyz/revel](https://github.com/Blindspotlabxyz/revel) · **License:** Proprietary. See [LICENSE](LICENSE)
 
 ---
 
@@ -117,7 +117,9 @@ types/            # Shared TypeScript types
 
 ## Routes
 
-**Marketing:** `/`, `/how-it-works`, `/features`, `/pricing`, `/faq`, `/sample-reports`, `/about`, `/contact`, `/docs`, `/docs/api`
+**Marketing:** `/`, `/features`, `/pricing`, `/about`, `/contact`
+
+**Docs:** `/docs`, `/docs/api`, `/docs/how-it-works`, `/docs/faq`, `/docs/sample-reports` (also `docs.tryrevel.xyz/*`)
 
 **App:** `/mission-control`, `/mission-control/analysis/[id]`, `/mission-control/report/[id]`, `/mission-control/history`, `/mission-control/settings`
 
@@ -160,7 +162,7 @@ For licensing or partnership inquiries: [hello@blindspotlab.xyz](mailto:hello@bl
 
 ## Vision
 
-Revel is building toward an intelligence layer that AI agents and applications can call to deeply understand products — not another generic chat audit. **Blindspot Audit** (website analysis) is the first module on that path.
+Revel is building toward an intelligence layer that AI agents and applications can call to deeply understand products, not another generic chat audit. **Blindspot Audit** (website analysis) is the first module on that path.
 
 ---
 

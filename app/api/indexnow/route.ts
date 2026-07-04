@@ -45,8 +45,8 @@ async function handleIndexNow(request: Request) {
 }
 
 /**
- * POST — manual or external deploy hook (Bearer INDEXNOW_SECRET).
- * GET — Vercel Cron daily re-index (Bearer CRON_SECRET).
+ * POST: manual or external deploy hook (Bearer INDEXNOW_SECRET).
+ * GET: Vercel Cron daily re-index (Bearer CRON_SECRET).
  */
 export async function POST(request: Request) {
   return handleIndexNow(request);

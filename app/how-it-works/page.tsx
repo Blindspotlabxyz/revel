@@ -1,36 +1,5 @@
-import type { Metadata } from "next";
-import { HowItWorks } from "@/components/landing/how-it-works";
-import { MarketingPage } from "@/components/landing/marketing-page";
-import { PageSeo } from "@/components/seo/page-seo";
-import { pageKeywords } from "@/lib/seo/keywords";
-import { howToJsonLd } from "@/lib/seo/json-ld-schemas";
-import { createPageMetadata } from "@/lib/seo/metadata";
+import { redirect } from "next/navigation";
 
-const title = "How It Works";
-const description =
-  "See how Revel analyzes your website, reveals blindspots, and generates a prioritized product roadmap in under a minute.";
-
-export const metadata: Metadata = createPageMetadata({
-  title,
-  description,
-  path: "/how-it-works",
-  keywords: pageKeywords["how-it-works"],
-});
-
-export default function HowItWorksPage() {
-  return (
-    <MarketingPage>
-      <PageSeo
-        title={title}
-        description={description}
-        path="/how-it-works"
-        breadcrumbs={[
-          { name: "Home", path: "/" },
-          { name: title, path: "/how-it-works" },
-        ]}
-        extraSchemas={[howToJsonLd()]}
-      />
-      <HowItWorks />
-    </MarketingPage>
-  );
+export default function HowItWorksRedirectPage() {
+  redirect("/docs/how-it-works");
 }

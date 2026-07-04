@@ -7,7 +7,7 @@ import { createPageMetadata } from "@/lib/seo/metadata";
 
 const title = "API Reference";
 const description =
-  "Revel HTTP API — analyze products, fetch reports, export roadmaps, and list history.";
+  "Revel HTTP API to analyze products, fetch reports, export roadmaps, and list history.";
 
 export const metadata: Metadata = createPageMetadata({
   title,

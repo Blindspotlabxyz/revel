@@ -13,15 +13,15 @@ const INDEXNOW_ENDPOINTS = [
 
 const PUBLIC_PATHS = [
   "/",
-  "/how-it-works",
   "/features",
   "/pricing",
-  "/faq",
-  "/sample-reports",
   "/about",
   "/contact",
   "/docs",
   "/docs/api",
+  "/docs/how-it-works",
+  "/docs/faq",
+  "/docs/sample-reports",
   "/privacy",
   "/terms",
   "/llms.txt",

@@ -10,7 +10,7 @@ import { siteConfig } from "@/lib/site-config";
 
 const title = "About";
 const description =
-  "Revel is an AI product strategist by BlindspotLab — helping founders and teams reveal hidden gaps and ship better products faster.";
+  "Revel is an AI product strategist by BlindspotLab, helping founders and teams reveal hidden gaps and ship better products faster.";
 
 export const metadata: Metadata = createPageMetadata({
   title,
@@ -47,8 +47,8 @@ export default function AboutPage() {
           <p>
             {name} is an AI product strategist for founders, product managers,
             indie hackers, agencies, and growth teams. It reviews your website
-            the way an experienced strategist would — positioning, UX, messaging,
-            and competition — then turns findings into a prioritized roadmap you
+            the way an experienced strategist would: positioning, UX, messaging,
+            and competition. It then turns findings into a prioritized roadmap you
             can export and ship.
           </p>
           <p>
@@ -60,7 +60,7 @@ export default function AboutPage() {
           <p>
             {name} surfaces blindspots, scores product health with the Reveal
             Index™, and generates a Blueprint™ plus Action Queue™ your team can
-            implement this week — not someday.
+            implement this week, not someday.
           </p>
         </div>
 
@@ -68,14 +68,15 @@ export default function AboutPage() {
           <h2 className="font-heading text-2xl font-semibold">The mission</h2>
           <p className="mt-4 leading-relaxed text-muted">
             Make world-class product strategy accessible to every builder.
-            {organization.name} exists so teams ship with clarity — not guesswork.
+            {organization.name} exists so teams ship with clarity, not guesswork.
           </p>
         </section>
 
         <section className="mt-12">
           <h2 className="font-heading text-2xl font-semibold">Built by</h2>
           <p className="mt-4 text-muted">
-            <strong className="text-foreground">{organization.name}</strong> —
+            <strong className="text-foreground">{organization.name}</strong>.
+            {" "}
             {organization.slogan}
           </p>
           <p className="mt-4 text-muted">
@@ -105,7 +106,7 @@ export default function AboutPage() {
             <Link href="/mission-control">Run Revel</Link>
           </Button>
           <Button asChild variant="secondary">
-            <Link href="/how-it-works">How it works</Link>
+            <Link href="/docs/how-it-works">How it works</Link>
           </Button>
           <Button asChild variant="ghost">
             <Link href="/contact">Contact us</Link>

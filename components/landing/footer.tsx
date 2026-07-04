@@ -3,19 +3,19 @@ import { RevelLogo } from "@/components/brand/logo";
 
 const footerLinks = {
   Product: [
-    { label: "How it Works", href: "/how-it-works" },
+    { label: "How it Works", href: "/docs/how-it-works" },
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing" },
     { label: "Mission Control", href: "/mission-control" },
   ],
   Resources: [
     { label: "Docs", href: "/docs" },
-    { label: "Sample Reports", href: "/sample-reports" },
-    { label: "FAQ", href: "/faq" },
+    { label: "Sample Reports", href: "/docs/sample-reports" },
+    { label: "FAQ", href: "/docs/faq" },
   ],
   Developers: [
     { label: "API", href: "/docs/api" },
-    { label: "GitHub", href: "https://github.com" },
+    { label: "GitHub", href: "https://github.com/Blindspotlabxyz/revel" },
   ],
   Company: [
     { label: "About", href: "/about" },
@@ -51,7 +51,7 @@ export function Footer() {
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
           <RevelLogo size="sm" className="[&_span]:text-base" />
           <p className="text-sm text-muted">
-            Built by BlindspotLab — Reveal what others miss.
+            Built by BlindspotLab. Reveal what others miss.
           </p>
         </div>
       </div>

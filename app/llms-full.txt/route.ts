@@ -3,7 +3,7 @@ import { absoluteUrl } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/site-config";
 
 export function GET() {
-  const content = `# ${siteConfig.name} — Complete product context for AI systems
+  const content = `# ${siteConfig.name}: Complete product context for AI systems
 
 ## Summary
 ${siteConfig.name} is an AI product strategist that analyzes public websites and product experiences.
@@ -24,30 +24,30 @@ who need strategic product feedback without hiring consultants.
 5. User exports tasks to Markdown or JSON
 
 ## Key features
-- Product Analysis — positioning, features, clarity
-- UX Review — friction across the user journey
-- Messaging Audit — headlines, trust, communication
-- Competitor Review — relative market positioning
-- Reveal Index — overall product health score
-- Blueprint — prioritized improvement sequence
-- Action Queue — concrete tasks with export
+- Product Analysis: positioning, features, clarity
+- UX Review: friction across the user journey
+- Messaging Audit: headlines, trust, communication
+- Competitor Review: relative market positioning
+- Reveal Index: overall product health score
+- Blueprint: prioritized improvement sequence
+- Action Queue: concrete tasks with export
 
 ## Pricing (USD)
 - Starter: Free (limited analyses per month)
-- Developer: $19/month — unlimited analyses, exports, priority processing
-- Business: $49/month — team features, shared history, API access
+- Developer: $19/month, unlimited analyses, exports, priority processing
+- Business: $49/month, team features, shared history, API access
 
 ## API endpoints (application)
-- POST /api/analyze — start analysis with { url }
-- GET /api/report/:id — fetch report
-- POST /api/export — export { id, format: markdown|json }
-- GET /api/history — list user analyses
+- POST /api/analyze: start analysis with { url }
+- GET /api/report/:id: fetch report
+- POST /api/export: export { id, format: markdown|json }
+- GET /api/history: list user analyses
 
 ## FAQ
 ${revelFaqs.map((f) => `### ${f.question}\n${f.answer}`).join("\n\n")}
 
 ## Company
-- **${siteConfig.organization.name}** — ${siteConfig.organization.slogan}
+- **${siteConfig.organization.name}**: ${siteConfig.organization.slogan}
 - URL: ${siteConfig.organization.url}
 - Email: ${siteConfig.organization.email}
 - Founder: ${siteConfig.founder.name} (${siteConfig.founder.jobTitle})
@@ -55,13 +55,14 @@ ${revelFaqs.map((f) => `### ${f.question}\n${f.answer}`).join("\n\n")}
 
 ## Canonical URLs
 - Home: ${absoluteUrl("/")}
-- How it works: ${absoluteUrl("/how-it-works")}
+- How it works: ${absoluteUrl("/docs/how-it-works")}
 - Features: ${absoluteUrl("/features")}
 - Pricing: ${absoluteUrl("/pricing")}
-- FAQ: ${absoluteUrl("/faq")}
+- FAQ: ${absoluteUrl("/docs/faq")}
 - Docs: ${absoluteUrl("/docs")}
 - API docs: ${absoluteUrl("/docs/api")}
-- Sample: ${absoluteUrl("/mission-control/sample")}
+- Sample reports: ${absoluteUrl("/docs/sample-reports")}
+- Sample report (app): ${absoluteUrl("/mission-control/sample")}
 - About: ${absoluteUrl("/about")}
 - Contact: ${absoluteUrl("/contact")}
 

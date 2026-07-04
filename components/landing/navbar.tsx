@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 const clerkEnabled = isClerkClientEnabled();
 
 const navItems = [
-  { label: "How it Works", href: "/how-it-works" },
+  { label: "How it Works", href: "/docs/how-it-works" },
   { label: "Features", href: "/features" },
   { label: "Pricing", href: "/pricing" },
   { label: "Docs", href: "/docs" },

@@ -14,8 +14,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  const cookieDomain = process.env.NEXT_PUBLIC_CLERK_DOMAIN;
+
   return (
     <ClerkProvider
+      {...(cookieDomain ? { domain: cookieDomain } : {})}
       signInUrl="/log-in"
       signUpUrl="/sign-up"
       appearance={{

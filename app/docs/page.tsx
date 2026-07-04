@@ -8,7 +8,7 @@ import { siteConfig } from "@/lib/site-config";
 
 const title = "Documentation";
 const description =
-  "Get started with Revel — quick start guide, API reference, FAQ, and sample reports.";
+  "Get started with Revel: quick start guide, API reference, FAQ, and sample reports.";
 
 export const metadata: Metadata = createPageMetadata({
   title,
@@ -47,14 +47,14 @@ export default function DocsPage() {
         <nav className="mt-10 grid gap-3 sm:grid-cols-2">
           {[
             { href: "/docs/api", label: "API Reference", desc: "REST endpoints" },
-            { href: "/faq", label: "FAQ", desc: "Common questions" },
+            { href: "/docs/faq", label: "FAQ", desc: "Common questions" },
             {
-              href: "/sample-reports",
+              href: "/docs/sample-reports",
               label: "Sample Reports",
               desc: "See example output",
             },
             {
-              href: "/how-it-works",
+              href: "/docs/how-it-works",
               label: "How It Works",
               desc: "Analysis flow",
             },

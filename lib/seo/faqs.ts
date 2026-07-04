@@ -42,7 +42,7 @@ export const revelFaqs = [
   {
     question: "How is Revel different from a generic AI chat?",
     answer:
-      "Revel runs a structured product investigation workflow and returns scored blindspots, a roadmap, and exportable tasks — not open-ended chat replies.",
+      "Revel runs a structured product investigation workflow and returns scored blindspots, a roadmap, and exportable tasks, not open-ended chat replies.",
   },
   {
     question: "Is there a free plan?",
