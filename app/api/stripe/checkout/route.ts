@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUserId } from "@/lib/auth";
 import { getStripe, isStripeEnabled, PLANS } from "@/lib/stripe";
+import { siteConfig } from "@/lib/site-config";
 
 export async function POST(request: Request) {
   try {
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const stripe = getStripe()!;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appUrl = siteConfig.url;
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",

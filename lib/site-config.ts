@@ -1,12 +1,36 @@
+/** Ensures env URLs work with `new URL()` — accepts `tryrevel.xyz` or `https://tryrevel.xyz` */
+export function normalizeSiteUrl(
+  value: string | undefined,
+  fallback: string
+): string {
+  const raw = (value?.trim() || fallback).replace(/\/$/, "");
+  if (/^https?:\/\//i.test(raw)) {
+    return raw;
+  }
+  return `https://${raw}`;
+}
+
 export const siteConfig = {
   name: "Revel",
   tagline: "Find the hidden gaps stopping your product from growing",
   description:
     "Revel analyzes your website, product experience, messaging and competitors, then generates a prioritized roadmap your team can implement.",
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "https://tryrevel.xyz",
-  docsUrl: process.env.NEXT_PUBLIC_DOCS_URL ?? "https://docs.tryrevel.xyz",
-  legalUrl: process.env.NEXT_PUBLIC_LEGAL_URL ?? "https://legal.tryrevel.xyz",
-  authUrl: process.env.NEXT_PUBLIC_AUTH_URL ?? "https://auth.tryrevel.xyz",
+  url: normalizeSiteUrl(
+    process.env.NEXT_PUBLIC_APP_URL,
+    "https://tryrevel.xyz"
+  ),
+  docsUrl: normalizeSiteUrl(
+    process.env.NEXT_PUBLIC_DOCS_URL,
+    "https://docs.tryrevel.xyz"
+  ),
+  legalUrl: normalizeSiteUrl(
+    process.env.NEXT_PUBLIC_LEGAL_URL,
+    "https://legal.tryrevel.xyz"
+  ),
+  authUrl: normalizeSiteUrl(
+    process.env.NEXT_PUBLIC_AUTH_URL,
+    "https://auth.tryrevel.xyz"
+  ),
   organization: {
     name: "BlindspotLab",
     legalName: "BlindspotLab",

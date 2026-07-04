@@ -1,4 +1,5 @@
 import { buildAnalysisPrompt } from "./prompt-builder";
+import { siteConfig } from "./site-config";
 import type { AnalysisReport } from "@/types/analysis";
 
 /** Override via OPENROUTER_MODEL. Free tier picks below work with JSON analysis. */
@@ -25,7 +26,7 @@ export async function generateAnalysis(
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      "HTTP-Referer": siteConfig.url,
       "X-Title": "Revel",
     },
     body: JSON.stringify({
