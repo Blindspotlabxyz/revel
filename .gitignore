@@ -29,7 +29,10 @@ yarn-error.log*
 
 # env files and secrets (never commit)
 .env
-.env.*
+.env.local
+.env.development
+.env.production
+.env.test
 .env*.local
 .env.vercel
 .flaskenv
@@ -41,6 +44,8 @@ credentials.json
 secrets.json
 secrets.yaml
 secrets.yml
+# safe templates (keep tracked)
+!.env.example
 
 # vercel
 .vercel
