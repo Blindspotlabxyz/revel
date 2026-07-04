@@ -1,0 +1,13 @@
+/* TEAM */
+Founder: Mojeeb Titilayo — AI Product Engineer
+Company: BlindspotLab
+Site: https://tryrevel.xyz
+Contact: hello@blindspotlab.xyz
+
+/* THANKS */
+Built for founders who ship.
+
+/* SITE */
+Last update: 2026
+Standards: HTML5, CSS3, Schema.org JSON-LD, llms.txt
+Software: Revel — AI product strategist

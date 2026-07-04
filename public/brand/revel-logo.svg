@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none" role="img" aria-label="Revel">
+  <rect x="2" y="6" width="36" height="36" rx="8" fill="#111111"/>
+  <path d="M26 6h12v12c-5-3.5-9-5.5-12-7V6z" fill="#F7F2EB"/>
+  <path d="M26 6h12v12l-8-5C29 11 27 8.5 26 6z" fill="#E07A5F"/>
+  <path d="M26 6l12 12" stroke="#C96A52" stroke-width="1.75" stroke-linecap="round"/>
+  <circle cx="18" cy="28" r="2.75" fill="#E07A5F"/>
+  <text x="48" y="33" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="700" letter-spacing="-0.02em" fill="#111111">Revel</text>
+</svg>

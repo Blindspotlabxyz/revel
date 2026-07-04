@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String     @id
+  email     String?
+  createdAt DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
+  analyses  Analysis[]
+
+  @@map("users")
+}
+
+model Analysis {
+  id        String    @id @db.Uuid
+  userId    String?   @map("user_id")
+  website   String
+  status    String    @default("processing")
+  score     Int?
+  error     String?
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  report    Report?
+
+  @@index([userId], map: "idx_analyses_user_id")
+  @@index([createdAt(sort: Desc)], map: "idx_analyses_created_at")
+  @@map("analyses")
+}
+
+model Report {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  analysisId String    @unique @map("analysis_id") @db.Uuid
+  jsonResult Json      @map("json_result") @db.JsonB
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  analysis   Analysis  @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId], map: "idx_reports_analysis_id")
+  @@map("reports")
+}

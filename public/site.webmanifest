@@ -1,0 +1,21 @@
+{
+  "name": "Revel",
+  "short_name": "Revel",
+  "description": "Find the hidden gaps stopping your product from growing.",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#F7F2EB",
+  "background_color": "#F7F2EB",
+  "display": "standalone",
+  "start_url": "/"
+}

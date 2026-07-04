@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Illustration container diff — Revel</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        background: #e9e9e9;
+        padding: 24px;
+      }
+      h1 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #111;
+      }
+      p.lead {
+        font-size: 0.875rem;
+        color: #555;
+        margin-bottom: 20px;
+        max-width: 900px;
+      }
+      .panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        max-width: 1400px;
+      }
+      .panel {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #ccc;
+      }
+      .panel-header {
+        padding: 12px 16px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .panel-header.before {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .panel-header.after {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .panel-body {
+        padding: 20px;
+      }
+      .panel.before .panel-body {
+        background: #f0f0f0;
+      }
+      .panel.after .panel-body {
+        background: #f7f2eb;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .label {
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: #707070;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 6px;
+      }
+      /* --- BEFORE: inconsistent per-section decisions --- */
+      .before .frame-hero {
+        border-radius: 1rem;
+        padding: 1rem;
+        background: #fff;
+        box-shadow: 0 1px 2px rgb(17 17 17 / 0.04), 0 4px 16px rgb(17 17 17 / 0.06);
+        border: 1px solid #e9ddd2;
+      }
+      .before .frame-insight {
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        background: #fff;
+        box-shadow: 0 2px 8px rgb(224 122 95 / 0.12), 0 8px 24px rgb(17 17 17 / 0.08);
+        border: 1px solid #e9ddd2;
+        position: relative;
+      }
+      .before .frame-insight::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 1.25rem;
+        right: 1.25rem;
+        height: 2px;
+        background: rgb(224 122 95 / 0.3);
+        border-radius: 9999px;
+      }
+      .before .frame-map {
+        border-radius: 1rem;
+        padding: 0.5rem;
+        background: #f7f2eb;
+        box-shadow: 0 12px 32px rgb(17 17 17 / 0.12);
+        border: 1px solid #e9ddd2;
+        max-width: 72%;
+      }
+      .before .media {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: #fff;
+      }
+      .before .media img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .before .insight-wrap {
+        background: #fff;
+        padding: 12px;
+        border-radius: 8px;
+      }
+      /* --- AFTER: unified token system --- */
+      .after .frame {
+        border-radius: 1rem;
+        padding: 0.5rem;
+        background: #f7f2eb;
+        box-shadow: 0 8px 24px rgb(17 17 17 / 0.07);
+        border: 1px solid #e9ddd2;
+      }
+      .after .media {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        background: #f7f2eb;
+      }
+      .after .media img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .after .section-bg {
+        background: #f7f2eb;
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .notes {
+        margin-top: 16px;
+        font-size: 0.7rem;
+        color: #666;
+        line-height: 1.5;
+      }
+      .notes li {
+        margin-left: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Illustration containers — before / after</h1>
+    <p class="lead">
+      Side-by-side of the three homepage illustration boxes only. Before: per-section
+      shadow, padding, radius, and background drift. After: one token system +
+      shared section backdrop (#f7f2eb).
+    </p>
+    <div class="panels">
+      <div class="panel before">
+        <div class="panel-header before">Before — three separate decisions</div>
+        <div class="panel-body">
+          <div class="row">
+            <div>
+              <div class="label">Hero</div>
+              <div class="frame-hero">
+                <div class="media">
+                  <img src="/images/hero-peel-desktop-16x9.jpg" alt="" />
+                </div>
+              </div>
+            </div>
+            <div class="insight-wrap">
+              <div class="label">Insight (white section)</div>
+              <div class="frame-insight">
+                <div class="media">
+                  <img src="/images/insight-telescope-desktop-16x9.jpg" alt="" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="label">Map (narrow + heavy shadow)</div>
+              <div class="frame-map">
+                <div class="media">
+                  <img src="/images/map-reveal-desktop-16x9.jpg" alt="" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notes">
+            <li>Insight sat on white <code>bg-surface</code></li>
+            <li>Mixed padding (16px / 20px / 8px)</li>
+            <li>Coral accent + white inner well on some</li>
+            <li>Shadow weight varied; map box narrower</li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel after">
+        <div class="panel-header after">After — one system</div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="section-bg">
+              <div class="label">Hero</div>
+              <div class="frame">
+                <div class="media">
+                  <img src="/images/hero-peel-desktop-16x9.jpg" alt="" />
+                </div>
+              </div>
+            </div>
+            <div class="section-bg">
+              <div class="label">Insight</div>
+              <div class="frame">
+                <div class="media">
+                  <img src="/images/insight-telescope-desktop-16x9.jpg" alt="" />
+                </div>
+              </div>
+            </div>
+            <div class="section-bg">
+              <div class="label">Map</div>
+              <div class="frame">
+                <div class="media">
+                  <img src="/images/map-reveal-desktop-16x9.jpg" alt="" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notes">
+            <li>Section + frame: <code>#f7f2eb</code> everywhere</li>
+            <li>Radius 1rem · padding 50% of radius</li>
+            <li>One shadow: <code>0 8px 24px / 7%</code></li>
+            <li>Only image content differs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

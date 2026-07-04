@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #f7f2eb;
+  --color-surface: #ffffff;
+  --color-primary: #e07a5f;
+  --color-primary-foreground: #ffffff;
+  --color-foreground: #111111;
+  --color-muted: #707070;
+  --color-border: #e9ddd2;
+  --color-primary-hover: #c96a52;
+  --font-heading: var(--font-fraunces);
+  --font-body: var(--font-dm-sans);
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  /* Container chrome — one radius; padding is 50% of radius (relative, never per-section) */
+  --illustration-container-radius: 1rem;
+  --illustration-container-padding: calc(var(--illustration-container-radius) * 0.5);
+  --illustration-media-radius: calc(
+    var(--illustration-container-radius) - var(--illustration-container-padding)
+  );
+  --illustration-section-bg: var(--color-background);
+  --illustration-container-border: 1px solid var(--color-border);
+  --illustration-container-bg: var(--illustration-section-bg);
+  /* Match container — prevents white letterbox strips around artwork */
+  --illustration-media-bg: var(--illustration-container-bg);
+  /* Legacy alias — container padding never changes at breakpoints */
+  --spacing-illustration-padding: var(--illustration-container-padding);
+  /* Aspect ratios — desktop 16:9, mobile 9:16 (per spec, never crop) */
+  --illustration-aspect-mobile: 9 / 16;
+  --illustration-aspect-desktop: 16 / 9;
+  --illustration-breakpoint: 48rem;
+
+  /* Illustration shadow — one neutral recipe for all three homepage images */
+  --illustration-shadow-color: 17 17 17;
+  --illustration-shadow-opacity: 0.07;
+  --illustration-shadow-offset-x: 0px;
+  --illustration-shadow-offset-y: 8px;
+  --illustration-shadow-blur: 24px;
+  --illustration-shadow-spread: 0px;
+  --shadow-illustration: var(--illustration-shadow-offset-x)
+    var(--illustration-shadow-offset-y) var(--illustration-shadow-blur)
+    var(--illustration-shadow-spread)
+    rgb(var(--illustration-shadow-color) / var(--illustration-shadow-opacity));
+}
+
+/* Reusable illustration shadow — hero-peel, insight-telescope, map-reveal */
+@utility illustration-shadow {
+  box-shadow: var(--shadow-illustration);
+}
+
+/*
+ * Illustration container (frame) — hero-peel, insight-telescope, map-reveal
+ *
+ * FIXED at every breakpoint (never override in media queries):
+ *   radius, padding, border, shadow, background color
+ *
+ * ONLY changes at breakpoint:
+ *   inner __media aspect-ratio (9:16 mobile → 16:9 desktop)
+ */
+.illustration-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--illustration-container-radius);
+  border: var(--illustration-container-border);
+  background-color: var(--illustration-container-bg);
+  padding: var(--illustration-container-padding);
+  box-shadow: var(--shadow-illustration);
+}
+
+/* Aspect box — background & radius fixed; only aspect-ratio swaps below */
+.illustration-frame__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--illustration-aspect-mobile);
+  overflow: hidden;
+  border-radius: var(--illustration-media-radius);
+  background-color: var(--illustration-media-bg);
+}
+
+.illustration-frame__media img {
+  object-fit: contain;
+}
+
+@media (min-width: 48rem) {
+  .illustration-frame__media {
+    aspect-ratio: var(--illustration-aspect-desktop);
+  }
+}
+
+/* Section backdrop — hero, insight, map share one warm tone (not bg-surface) */
+.illustration-section {
+  background-color: var(--illustration-section-bg);
+}
+
+/* Illustration slot — full width of parent grid column (hero, insight, map) */
+.illustration-slot {
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
