@@ -18,6 +18,7 @@
     "db:pull": "prisma db pull",
     "db:push": "prisma db push",
     "db:setup": "node scripts/check-db.mjs",
+    "env:merge": "node scripts/merge-env-keys.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {
