@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { NavLink } from "@/components/nav-link";
 import { RevelLogo } from "@/components/brand/logo";
 
 const footerLinks = {
@@ -35,12 +35,12 @@ export function Footer() {
               <ul className="mt-4 space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <Link
+                    <NavLink
                       href={link.href}
                       className="text-sm text-muted transition-colors hover:text-foreground"
                     >
                       {link.label}
-                    </Link>
+                    </NavLink>
                   </li>
                 ))}
               </ul>

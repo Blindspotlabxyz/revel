@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { siteConfig, subdomainRedirectsEnabled } from "@/lib/site-config";
 
+const PRODUCT_SUBDOMAINS = new Set(["docs", "auth", "legal"]);
+
+const DOCS_SURFACE_PATHS = new Set([
+  "/",
+  "/api",
+  "/how-it-works",
+  "/sample-reports",
+  "/faq",
+]);
+
 function external(path: string, base: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return `${base.replace(/\/$/, "")}${normalized}`;
@@ -11,8 +21,16 @@ function hostname(request: NextRequest): string {
   return host.split(":")[0].toLowerCase();
 }
 
+/** Always resolve to the apex registrable domain, even if APP_URL points at a product subdomain. */
 function baseHostname(): string {
-  return new URL(siteConfig.url).hostname.toLowerCase();
+  let host = new URL(siteConfig.url).hostname.toLowerCase().replace(/^www\./, "");
+
+  const parts = host.split(".");
+  if (parts.length >= 3 && PRODUCT_SUBDOMAINS.has(parts[0])) {
+    host = parts.slice(1).join(".");
+  }
+
+  return host;
 }
 
 type SubdomainLabel = "docs" | "auth" | "legal" | "www" | "apex";
@@ -34,6 +52,11 @@ function resolveSubdomain(host: string): SubdomainLabel | null {
   return null;
 }
 
+function isDocsSubdomainPath(pathname: string): boolean {
+  if (pathname === "/docs" || pathname.startsWith("/docs/")) return true;
+  return DOCS_SURFACE_PATHS.has(pathname);
+}
+
 /** Prefix any docs-subdomain path with /docs for internal routing. */
 function docsInternalPath(pathname: string): string {
   if (pathname === "/" || pathname === "") {
@@ -43,6 +66,25 @@ function docsInternalPath(pathname: string): string {
     return pathname;
   }
   return `/docs${pathname}`;
+}
+
+function sameUrl(a: URL, b: URL): boolean {
+  return (
+    a.hostname === b.hostname &&
+    a.pathname === b.pathname &&
+    a.search === b.search
+  );
+}
+
+function safeRedirect(request: NextRequest, destination: string): NextResponse {
+  const current = new URL(request.url);
+  const target = new URL(destination, request.url);
+
+  if (sameUrl(current, target)) {
+    return NextResponse.next();
+  }
+
+  return NextResponse.redirect(target);
 }
 
 function rewriteTo(request: NextRequest, pathname: string): NextResponse {
@@ -59,6 +101,17 @@ function inboundSubdomainRewrite(
   const query = search || "";
 
   if (subdomain === "docs") {
+    if (!isDocsSubdomainPath(pathname)) {
+      return safeRedirect(
+        request,
+        external(`${pathname}${query}`, siteConfig.url)
+      );
+    }
+
+    if (pathname === "/docs" || pathname.startsWith("/docs/")) {
+      return NextResponse.next();
+    }
+
     return rewriteTo(request, docsInternalPath(pathname));
   }
 
@@ -71,11 +124,11 @@ function inboundSubdomainRewrite(
       pathname.startsWith("/sign-in/");
 
     if (isAuthPath) {
-      return rewriteTo(request, pathname);
+      return NextResponse.next();
     }
 
     if (pathname === "/") {
-      return NextResponse.redirect(new URL(`/log-in${query}`, request.url));
+      return safeRedirect(request, `/log-in${query}`);
     }
 
     return null;
@@ -83,11 +136,11 @@ function inboundSubdomainRewrite(
 
   if (subdomain === "legal") {
     if (pathname === "/privacy" || pathname === "/terms") {
-      return rewriteTo(request, pathname);
+      return NextResponse.next();
     }
 
     if (pathname === "/") {
-      return NextResponse.redirect(new URL(`/privacy${query}`, request.url));
+      return safeRedirect(request, `/privacy${query}`);
     }
 
     return null;
@@ -106,7 +159,7 @@ function outboundApexRedirect(
   if (pathname === "/docs" || pathname.startsWith("/docs/")) {
     const docsPath =
       pathname === "/docs" ? "/" : pathname.slice("/docs".length) || "/";
-    return NextResponse.redirect(external(`${docsPath}${query}`, docsUrl));
+    return safeRedirect(request, external(`${docsPath}${query}`, docsUrl));
   }
 
   const exactRedirects: Record<string, string> = {
@@ -122,7 +175,7 @@ function outboundApexRedirect(
 
   const destination = exactRedirects[pathname];
   if (destination) {
-    return NextResponse.redirect(`${destination}${query}`);
+    return safeRedirect(request, `${destination}${query}`);
   }
 
   return null;

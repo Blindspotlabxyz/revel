@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NavLink } from "@/components/nav-link";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserEmail, isClerkEnabled } from "@/lib/auth";
@@ -43,9 +44,9 @@ export default async function SettingsPage({
               <p className="mt-2 text-sm text-muted">{email}</p>
             ) : clerkEnabled ? (
               <p className="mt-2 text-sm text-muted">
-                <Link href="/log-in" className="text-primary hover:underline">
+                <NavLink href="/log-in" className="text-primary hover:underline">
                   Sign in
-                </Link>{" "}
+                </NavLink>{" "}
                 to manage your account.
               </p>
             ) : (

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { navigateTo } from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 
 interface CheckoutButtonProps {
@@ -38,7 +39,7 @@ export function CheckoutButton({
       }
 
       if (res.status === 401) {
-        router.push("/log-in");
+        navigateTo("/log-in");
         return;
       }
 
