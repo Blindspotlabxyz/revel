@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = createPageMetadata({
   title: "Mission Control",
   description: "Run Revel analyses, view reports, and export your product roadmap.",

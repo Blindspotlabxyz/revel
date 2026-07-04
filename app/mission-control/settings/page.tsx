@@ -6,6 +6,8 @@ import { getCurrentUserEmail, isClerkEnabled } from "@/lib/auth";
 import { isStripeEnabled } from "@/lib/stripe";
 import { SettingsBilling } from "@/components/dashboard/settings-billing";
 
+export const dynamic = "force-dynamic";
+
 export default async function SettingsPage({
   searchParams,
 }: {

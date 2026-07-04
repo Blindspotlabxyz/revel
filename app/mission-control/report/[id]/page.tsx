@@ -3,6 +3,8 @@ import { getAnalysis } from "@/services/store";
 import { sampleAnalysis } from "@/lib/sample-report";
 import { ReportTabs } from "@/components/dashboard/report-tabs";
 
+export const dynamic = "force-dynamic";
+
 export default async function ReportPage({
   params,
 }: {

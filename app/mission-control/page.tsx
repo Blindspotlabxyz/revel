@@ -1,6 +1,8 @@
 import { AnalysisForm } from "@/components/dashboard/analysis-form";
 import { RecentAnalyses } from "@/components/dashboard/recent-analyses";
 
+export const dynamic = "force-dynamic";
+
 export default function MissionControlPage() {
   return (
     <div className="max-w-xl">
