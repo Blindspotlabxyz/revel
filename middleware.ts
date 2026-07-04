@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse, type NextRequest } from "next/server";
+import { blockScannerRequest } from "@/lib/security/scanner-block";
 import { getSubdomainRedirect } from "@/lib/subdomain-redirects";
 import { subdomainRedirectsEnabled } from "@/lib/site-config";
 
@@ -20,6 +21,9 @@ function isClerkMiddlewareEnabled(): boolean {
 }
 
 function runSharedMiddleware(req: NextRequest): NextResponse | null {
+  const blocked = blockScannerRequest(req);
+  if (blocked) return blocked;
+
   const subdomainRedirect = getSubdomainRedirect(req);
   if (subdomainRedirect) return subdomainRedirect;
 

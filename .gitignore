@@ -20,7 +20,6 @@
 
 # misc
 .DS_Store
-*.pem
 
 # debug
 npm-debug.log*
@@ -28,10 +27,20 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
-.env*.local
+# env files and secrets (never commit)
 .env
+.env.*
+.env*.local
 .env.vercel
+.flaskenv
+.envrc
+env.json
+*.pem
+*.key
+credentials.json
+secrets.json
+secrets.yaml
+secrets.yml
 
 # vercel
 .vercel
