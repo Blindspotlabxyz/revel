@@ -1,7 +1,13 @@
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig, subdomainRedirectsEnabled } from "@/lib/site-config";
 
 /** Canonical auth host for OAuth callbacks — never use VERCEL_URL or request host. */
 export function getCanonicalAuthUrl(): string {
+  // When subdomains are enabled, OAuth must always use auth.tryrevel.xyz even if
+  // NEXTAUTH_URL was mistakenly set to the marketing apex (tryrevel.xyz).
+  if (subdomainRedirectsEnabled()) {
+    return siteConfig.authUrl.replace(/\/$/, "");
+  }
+
   const raw =
     process.env.AUTH_URL ??
     process.env.NEXTAUTH_URL ??
