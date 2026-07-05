@@ -121,7 +121,8 @@ function inboundSubdomainRewrite(
       authPaths.includes(pathname) ||
       pathname.startsWith("/log-in/") ||
       pathname.startsWith("/sign-up/") ||
-      pathname.startsWith("/sign-in/");
+      pathname.startsWith("/sign-in/") ||
+      pathname.startsWith("/api/auth/");
 
     if (isAuthPath) {
       return NextResponse.next();

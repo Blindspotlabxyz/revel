@@ -64,7 +64,7 @@ export default function ApiDocsPage() {
         <h1 className="mt-4 font-heading text-4xl font-semibold">API</h1>
         <p className="mt-4 text-lg text-muted">
           REST endpoints on the main Revel app. Authentication required for
-          protected routes when Clerk is enabled.
+          protected routes when NextAuth is enabled.
         </p>
 
         <div className="mt-12 space-y-4">

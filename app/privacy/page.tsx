@@ -54,7 +54,8 @@ export default function PrivacyPage() {
               Third-party services
             </h2>
             <p className="mt-3 leading-relaxed">
-              Revel uses Clerk (authentication), Supabase (data storage), OpenRouter
+              Revel uses Google sign-in via NextAuth (authentication), Supabase
+              (data storage), OpenRouter
               (AI analysis), Stripe (payments), and Vercel (hosting). Each service
               operates under its own privacy policy.
             </p>

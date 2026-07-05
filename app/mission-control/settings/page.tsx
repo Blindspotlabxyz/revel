@@ -2,7 +2,7 @@ import Link from "next/link";
 import { NavLink } from "@/components/nav-link";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getCurrentUserEmail, isClerkEnabled } from "@/lib/auth";
+import { getCurrentUserEmail, isAuthEnabled } from "@/lib/auth";
 import { isStripeEnabled } from "@/lib/stripe";
 import { SettingsBilling } from "@/components/dashboard/settings-billing";
 
@@ -15,7 +15,7 @@ export default async function SettingsPage({
 }) {
   const params = await searchParams;
   const email = await getCurrentUserEmail();
-  const clerkEnabled = isClerkEnabled();
+  const authEnabled = isAuthEnabled();
   const stripeEnabled = isStripeEnabled();
 
   return (
@@ -42,9 +42,9 @@ export default async function SettingsPage({
         <Card>
           <CardContent className="pt-0">
             <CardTitle>Account</CardTitle>
-            {clerkEnabled && email ? (
+            {authEnabled && email ? (
               <p className="mt-2 text-sm text-muted">{email}</p>
-            ) : clerkEnabled ? (
+            ) : authEnabled ? (
               <p className="mt-2 text-sm text-muted">
                 <NavLink href="/log-in" className="text-primary hover:underline">
                   Sign in
@@ -53,7 +53,8 @@ export default async function SettingsPage({
               </p>
             ) : (
               <p className="mt-2 text-sm text-muted">
-                Authentication not configured. Add Clerk keys to enable accounts.
+                Authentication not configured. Add NextAuth and Google OAuth keys to
+                enable accounts.
               </p>
             )}
           </CardContent>

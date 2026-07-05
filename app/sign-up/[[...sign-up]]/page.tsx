@@ -1,21 +1,27 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { SignUp } from "@clerk/nextjs";
+import { AuthPage } from "@/components/auth/auth-page";
+import { isAuthConfigured } from "@/lib/auth-config";
+import { siteConfig } from "@/lib/site-config";
+
+function SignUpContent() {
+  return (
+    <AuthPage
+      title="Create your Revel account"
+      description="Sign up with Google to save analyses and manage your roadmap."
+      defaultCallbackUrl={siteConfig.url}
+    />
+  );
+}
 
 export default function SignUpPage() {
-  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+  if (!isAuthConfigured()) {
     redirect("/mission-control");
   }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6">
-      <SignUp
-        appearance={{
-          variables: {
-            colorPrimary: "#E07A5F",
-            colorBackground: "#FFFFFF",
-            borderRadius: "0.75rem",
-          },
-        }}
-      />
-    </div>
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <SignUpContent />
+    </Suspense>
   );
 }

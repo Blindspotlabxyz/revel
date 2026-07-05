@@ -1,18 +1,23 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse, type NextRequest } from "next/server";
-import { clerkSignInRedirectUrl } from "@/lib/clerk-config";
-import { isClerkClientEnabled } from "@/lib/clerk-client";
+import { authSignInRedirectUrl, isAuthConfigured } from "@/lib/auth-config";
 import { blockScannerRequest } from "@/lib/security/scanner-block";
 import { getSubdomainRedirect } from "@/lib/subdomain-redirects";
 import { subdomainRedirectsEnabled } from "@/lib/site-config";
+import { auth } from "@/auth";
 
-const isProtectedRoute = createRouteMatcher([
-  "/mission-control(.*)",
-  "/api/analyze(.*)",
-  "/api/export(.*)",
-  "/api/history(.*)",
-  "/api/stripe/checkout(.*)",
-]);
+const PROTECTED_PREFIXES = [
+  "/mission-control",
+  "/api/analyze",
+  "/api/export",
+  "/api/history",
+  "/api/stripe/checkout",
+];
+
+function isProtectedRoute(pathname: string): boolean {
+  return PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
 
 function runSharedMiddleware(req: NextRequest): NextResponse | null {
   const blocked = blockScannerRequest(req);
@@ -32,25 +37,10 @@ function runSharedMiddleware(req: NextRequest): NextResponse | null {
   return null;
 }
 
-function redirectUnauthenticatedToSignIn(
-  req: NextRequest
-): NextResponse {
+function redirectUnauthenticatedToSignIn(req: NextRequest): NextResponse {
   const returnBackUrl = req.nextUrl.href;
-  return NextResponse.redirect(clerkSignInRedirectUrl(returnBackUrl));
+  return NextResponse.redirect(authSignInRedirectUrl(returnBackUrl));
 }
-
-const clerkHandler = clerkMiddleware(async (auth, req) => {
-  const shared = runSharedMiddleware(req);
-  if (shared) return shared;
-
-  if (isProtectedRoute(req)) {
-    const { isAuthenticated } = await auth();
-
-    if (!isAuthenticated) {
-      return redirectUnauthenticatedToSignIn(req);
-    }
-  }
-});
 
 function baseHandler(req: NextRequest) {
   const shared = runSharedMiddleware(req);
@@ -58,15 +48,22 @@ function baseHandler(req: NextRequest) {
   return NextResponse.next();
 }
 
-const clerkProxyEnabled =
-  isClerkClientEnabled() && !!process.env.CLERK_SECRET_KEY;
+const authHandler = auth((req) => {
+  const shared = runSharedMiddleware(req);
+  if (shared) return shared;
 
-export default clerkProxyEnabled ? clerkHandler : baseHandler;
+  if (!req.auth && isProtectedRoute(req.nextUrl.pathname)) {
+    return redirectUnauthenticatedToSignIn(req);
+  }
+
+  return NextResponse.next();
+});
+
+export default isAuthConfigured() ? authHandler : baseHandler;
 
 export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
-    "/__clerk/:path*",
   ],
 };

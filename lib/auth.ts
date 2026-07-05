@@ -1,30 +1,27 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth as nextAuth } from "@/auth";
+import { isAuthConfigured } from "@/lib/auth-config";
 
-export function isClerkEnabled(): boolean {
-  return (
-    !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-    !!process.env.CLERK_SECRET_KEY &&
-    process.env.NEXT_PUBLIC_DISABLE_CLERK !== "true"
-  );
+export function isAuthEnabled(): boolean {
+  return isAuthConfigured();
 }
 
 export async function getCurrentUserId(): Promise<string | null> {
-  if (!isClerkEnabled()) return null;
+  if (!isAuthEnabled()) return null;
 
   try {
-    const { userId } = await auth();
-    return userId;
+    const session = await nextAuth();
+    return session?.user?.id ?? null;
   } catch {
     return null;
   }
 }
 
 export async function getCurrentUserEmail(): Promise<string | null> {
-  if (!isClerkEnabled()) return null;
+  if (!isAuthEnabled()) return null;
 
   try {
-    const user = await currentUser();
-    return user?.emailAddresses[0]?.emailAddress ?? null;
+    const session = await nextAuth();
+    return session?.user?.email ?? null;
   } catch {
     return null;
   }

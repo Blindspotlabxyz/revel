@@ -17,7 +17,7 @@
 | Website analysis | Public URLs via Mission Control |
 | Outputs | Blindspot Map, Reveal Index, Blueprint, Action Queue |
 | Export | Markdown, JSON |
-| Auth | Clerk (`/log-in`, `/sign-up`) |
+| Auth | NextAuth + Google (`/log-in`, `/sign-up`) |
 | Billing | Stripe scaffold (503 until configured) |
 | Database | Supabase + Prisma (production), Supabase JS fallback locally |
 | SEO / AEO | Sitemap, robots, JSON-LD, `llms.txt`, `ai.txt`, IndexNow |
@@ -31,7 +31,7 @@
 - **Framework:** Next.js 16, React 19, TypeScript
 - **Styling:** Tailwind CSS 4, Framer Motion, Radix UI
 - **AI:** OpenRouter (configurable model)
-- **Auth:** Clerk
+- **Auth:** NextAuth (Auth.js v5) + Google OAuth
 - **Data:** Supabase Postgres, Prisma 7
 - **Deploy:** Vercel
 
@@ -42,7 +42,7 @@
 ### Prerequisites
 
 - Node.js 20+
-- Accounts: [OpenRouter](https://openrouter.ai), [Clerk](https://clerk.com), [Supabase](https://supabase.com)
+- Accounts: [OpenRouter](https://openrouter.ai), [Google Cloud Console](https://console.cloud.google.com) (OAuth), [Supabase](https://supabase.com)
 
 ### Setup
 
@@ -59,11 +59,7 @@ npm run db:setup           # verify database connection
 npm run dev                # http://localhost:3000
 ```
 
-Pull Clerk keys for the linked app:
-
-```bash
-npx clerk@latest env pull --app app_3FzZ2S8oAI7yFCSPcy5UyRvealy
-```
+Configure Google OAuth credentials and set `NEXTAUTH_*` / `GOOGLE_*` vars in `.env.local` (see `.env.example`).
 
 ### Key scripts
 
@@ -86,7 +82,7 @@ Copy `.env.example` to `.env.local` and fill in values. For **Vercel production*
 |-------|-----------|
 | Site | `NEXT_PUBLIC_APP_URL`, subdomain URLs |
 | AI | `OPENROUTER_API_KEY`, `OPENROUTER_MODEL` |
-| Auth | `NEXT_PUBLIC_CLERK_*`, `CLERK_SECRET_KEY` |
+| Auth | `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | Database | `SUPABASE_*`, `DATABASE_URL`, `DIRECT_URL` |
 | SEO | `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`, `INDEXNOW_KEY`, `CRON_SECRET` |
 | Billing | `STRIPE_*` (optional) |
@@ -135,7 +131,7 @@ types/            # Shared TypeScript types
 
 1. Import `Blindspotlabxyz/revel` from GitHub
 2. Paste env vars from `.env.local` (production URL overrides above)
-3. Add `tryrevel.xyz` in Clerk Dashboard → Domains (+ DNS CNAME records)
+3. Add Google OAuth redirect URI: `https://auth.tryrevel.xyz/api/auth/callback/google`
 4. Submit `https://tryrevel.xyz/sitemap.xml` in Google Search Console and Bing Webmaster
 
 Production builds auto-ping [IndexNow](https://www.indexnow.org/) for Bing and partners.
