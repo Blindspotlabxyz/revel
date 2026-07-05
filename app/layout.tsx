@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, DM_Sans } from "next/font/google";
-import { Providers } from "@/components/providers";
+import { ClerkRootProvider } from "@/components/clerk-root-provider";
 import { Analytics } from "@/components/analytics";
 import { GlobalJsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/lib/site-config";
@@ -95,7 +95,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <Providers>
+    <ClerkRootProvider>
       <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`}>
         <body className="min-h-screen antialiased">
           <GlobalJsonLd />
@@ -103,6 +103,6 @@ export default function RootLayout({
           <Analytics />
         </body>
       </html>
-    </Providers>
+    </ClerkRootProvider>
   );
 }

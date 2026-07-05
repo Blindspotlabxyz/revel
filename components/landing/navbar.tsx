@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ClerkLoaded, ClerkLoading } from "@clerk/nextjs";
 import { isClerkClientEnabled } from "@/lib/clerk-client";
 import { NavbarAuthButtons } from "@/components/landing/navbar-auth-buttons";
 import { RevelLogo } from "@/components/brand/logo";
@@ -15,13 +16,24 @@ const navItems = [
   { label: "Docs", href: "/docs" },
 ];
 
+function AuthButtonsPlaceholder() {
+  return (
+    <div className="flex items-center gap-3">
+      <Button variant="ghost" size="sm" disabled aria-hidden>
+        Sign in
+      </Button>
+      <Button variant="secondary" size="sm" disabled aria-hidden>
+        Sign up
+      </Button>
+    </div>
+  );
+}
+
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const clerkEnabled = isClerkClientEnabled();
 
   useEffect(() => {
-    setMounted(true);
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -53,7 +65,16 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          {mounted && clerkEnabled ? <NavbarAuthButtons /> : null}
+          {clerkEnabled ? (
+            <>
+              <ClerkLoading>
+                <AuthButtonsPlaceholder />
+              </ClerkLoading>
+              <ClerkLoaded>
+                <NavbarAuthButtons />
+              </ClerkLoaded>
+            </>
+          ) : null}
           <Button asChild size="sm">
             <Link href="/mission-control">Run Revel</Link>
           </Button>

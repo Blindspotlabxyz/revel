@@ -1,22 +1,23 @@
 "use client";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { isClerkClientEnabled } from "@/lib/clerk-client";
+import { clerkSignInUrl, clerkSignUpUrl } from "@/lib/clerk-config";
 
-export function Providers({ children }: { children: React.ReactNode }) {
-  if (!isClerkClientEnabled()) {
-    return <>{children}</>;
-  }
+const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+export function ClerkRootProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const cookieDomain = process.env.NEXT_PUBLIC_CLERK_DOMAIN;
 
   return (
     <ClerkProvider
-      publishableKey={publishableKey}
+      publishableKey={publishableKey ?? ""}
       {...(cookieDomain ? { domain: cookieDomain } : {})}
-      signInUrl="/log-in"
-      signUpUrl="/sign-up"
+      signInUrl={clerkSignInUrl()}
+      signUpUrl={clerkSignUpUrl()}
       appearance={{
         variables: {
           colorPrimary: "#E07A5F",

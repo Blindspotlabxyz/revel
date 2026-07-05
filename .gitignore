@@ -60,3 +60,9 @@ next-env.d.ts
 
 # local dev terminals output
 /terminals
+
+# local agent skills (dev-only, not for public repo)
+.agents/skills/code-reviewer/
+.agents/skills/frontend-design/
+.agents/skills/remotion-best-practices/
+.claude/

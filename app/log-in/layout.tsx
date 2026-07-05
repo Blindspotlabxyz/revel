@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BackToHome } from "@/components/back-to-home";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = createPageMetadata({
@@ -13,5 +14,10 @@ export default function LogInLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <>
+      <BackToHome />
+      {children}
+    </>
+  );
 }
