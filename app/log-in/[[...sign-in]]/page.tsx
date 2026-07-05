@@ -1,18 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { AuthPage } from "@/components/auth/auth-page";
+import { SignInPage } from "@/components/auth/sign-in-page";
 import { isAuthConfigured } from "@/lib/auth-config";
-import { siteConfig } from "@/lib/site-config";
-
-function LogInContent() {
-  return (
-    <AuthPage
-      title="Sign in to Revel"
-      description="Use your Google account to access Mission Control."
-      defaultCallbackUrl={siteConfig.url}
-    />
-  );
-}
 
 export default function LogInPage() {
   if (!isAuthConfigured()) {
@@ -21,7 +10,7 @@ export default function LogInPage() {
 
   return (
     <Suspense fallback={<div className="min-h-screen bg-background" />}>
-      <LogInContent />
+      <SignInPage />
     </Suspense>
   );
 }
