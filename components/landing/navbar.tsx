@@ -2,18 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  Show,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
-import { isClerkClientEnabled } from "@/components/providers";
+import { isClerkClientEnabled } from "@/lib/clerk-client";
+import { NavbarAuthButtons } from "@/components/landing/navbar-auth-buttons";
 import { RevelLogo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-const clerkEnabled = isClerkClientEnabled();
 
 const navItems = [
   { label: "How it Works", href: "/docs/how-it-works" },
@@ -24,8 +17,11 @@ const navItems = [
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const clerkEnabled = isClerkClientEnabled();
 
   useEffect(() => {
+    setMounted(true);
     const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -57,29 +53,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          {clerkEnabled ? (
-            <>
-              <Show when="signed-out">
-                <SignInButton mode="modal">
-                  <Button variant="ghost" size="sm">
-                    Sign in
-                  </Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button variant="secondary" size="sm">
-                    Sign up
-                  </Button>
-                </SignUpButton>
-              </Show>
-              <Show when="signed-in">
-                <UserButton
-                  appearance={{
-                    elements: { avatarBox: "h-8 w-8" },
-                  }}
-                />
-              </Show>
-            </>
-          ) : null}
+          {mounted && clerkEnabled ? <NavbarAuthButtons /> : null}
           <Button asChild size="sm">
             <Link href="/mission-control">Run Revel</Link>
           </Button>

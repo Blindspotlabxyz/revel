@@ -1,10 +1,11 @@
 "use client";
 
 import { useAuth, SignInButton, UserButton } from "@clerk/nextjs";
+import { isClerkClientEnabled } from "@/lib/clerk-client";
 import { Button } from "@/components/ui/button";
 
 export function UserMenu() {
-  const clerkEnabled = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkEnabled = isClerkClientEnabled();
 
   if (!clerkEnabled) {
     return (

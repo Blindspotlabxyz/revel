@@ -8,7 +8,7 @@ import { SectionIllustration } from "@/components/landing/section-illustration";
 
 export function Hero() {
   return (
-    <section className="illustration-section mx-auto grid max-w-6xl gap-12 px-6 pb-20 pt-32 md:grid-cols-2 md:items-center md:gap-16">
+    <section className="illustration-section mx-auto grid max-w-6xl gap-8 px-6 pb-12 pt-32 md:grid-cols-2 md:items-start md:gap-16">
       <div className="max-w-xl">
         <motion.h1
           initial={{ opacity: 0, y: 12 }}
@@ -59,7 +59,7 @@ export function Hero() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, delay: 0.1 }}
       >
-        <IllustrationSlot>
+        <IllustrationSlot className="hero-illustration-slot">
           <SectionIllustration
             desktopSrc="/images/hero-peel-desktop-16x9.jpg"
             mobileSrc="/images/hero-peel-mobile-9x16.jpg"

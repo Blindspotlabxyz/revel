@@ -25,7 +25,7 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: `${siteConfig.name}: ${siteConfig.tagline}`,
+    default: `${siteConfig.name} | ${siteConfig.tagline}`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -95,12 +95,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`}>
-      <body className="min-h-screen antialiased">
-        <GlobalJsonLd />
-        <Providers>{children}</Providers>
-        <Analytics />
-      </body>
-    </html>
+    <Providers>
+      <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`}>
+        <body className="min-h-screen antialiased">
+          <GlobalJsonLd />
+          {children}
+          <Analytics />
+        </body>
+      </html>
+    </Providers>
   );
 }

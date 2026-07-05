@@ -99,6 +99,13 @@
   width: 100%;
 }
 
+/* Hero only: use landscape ratio on mobile so the image does not push SocialProof far down */
+@media (max-width: 47.99rem) {
+  .hero-illustration-slot .illustration-frame__media {
+    aspect-ratio: var(--illustration-aspect-desktop);
+  }
+}
+
 * {
   box-sizing: border-box;
 }
