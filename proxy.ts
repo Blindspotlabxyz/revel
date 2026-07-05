@@ -42,24 +42,20 @@ function redirectUnauthenticatedToSignIn(req: NextRequest): NextResponse {
   return NextResponse.redirect(authSignInRedirectUrl(returnBackUrl));
 }
 
-function baseHandler(req: NextRequest) {
-  const shared = runSharedMiddleware(req);
-  if (shared) return shared;
-  return NextResponse.next();
-}
-
-const authHandler = auth((req) => {
+export const proxy = auth((req) => {
   const shared = runSharedMiddleware(req);
   if (shared) return shared;
 
-  if (!req.auth && isProtectedRoute(req.nextUrl.pathname)) {
+  if (
+    isAuthConfigured() &&
+    !req.auth &&
+    isProtectedRoute(req.nextUrl.pathname)
+  ) {
     return redirectUnauthenticatedToSignIn(req);
   }
 
   return NextResponse.next();
 });
-
-export default isAuthConfigured() ? authHandler : baseHandler;
 
 export const config = {
   matcher: [
