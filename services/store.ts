@@ -34,6 +34,12 @@ function useSupabase(): boolean {
   return isSupabaseEnabled();
 }
 
+/** Local JSON file fallback — not available on Vercel's read-only filesystem. */
+function useFileStore(): boolean {
+  if (process.env.VERCEL === "1") return false;
+  return !usePrisma() && !useSupabase();
+}
+
 export async function getAnalysis(id: string): Promise<Analysis | null> {
   if (usePrisma()) {
     const result = await getAnalysisFromPrisma(id);
@@ -66,11 +72,20 @@ export async function getAllAnalyses(
 export async function saveAnalysis(analysis: Analysis): Promise<void> {
   if (usePrisma()) {
     await saveAnalysisToPrisma(analysis);
-  } else if (useSupabase()) {
-    await saveAnalysisToSupabase(analysis);
+    return;
   }
 
-  await saveAnalysisToFile(analysis);
+  if (useSupabase()) {
+    await saveAnalysisToSupabase(analysis);
+    return;
+  }
+
+  if (useFileStore()) {
+    await saveAnalysisToFile(analysis);
+    return;
+  }
+
+  throw new Error("No analysis storage is configured.");
 }
 
 export async function deleteAnalysis(id: string): Promise<boolean> {
@@ -82,6 +97,10 @@ export async function deleteAnalysis(id: string): Promise<boolean> {
     deleted = await deleteAnalysisFromSupabase(id);
   }
 
-  const fileDeleted = await deleteAnalysisFromFile(id);
-  return deleted || fileDeleted;
+  if (useFileStore()) {
+    const fileDeleted = await deleteAnalysisFromFile(id);
+    return deleted || fileDeleted;
+  }
+
+  return deleted;
 }
