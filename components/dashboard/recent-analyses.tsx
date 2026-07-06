@@ -57,6 +57,14 @@ export function RecentAnalyses() {
                   In progress...
                 </Link>
               )}
+              {item.status === "failed" && (
+                <Link
+                  href={`/mission-control/analysis/${item.id}`}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Failed — retry
+                </Link>
+              )}
             </CardContent>
           </Card>
         ))}

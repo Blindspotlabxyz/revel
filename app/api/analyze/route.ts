@@ -1,12 +1,14 @@
+import { after } from "next/server";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { getCurrentUserId } from "@/lib/auth";
 import { logEvent } from "@/lib/logger";
 import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
 import { normalizeUrl } from "@/lib/validation";
-import { extractWebsiteContent } from "@/services/content-extractor";
-import { generateAnalysis } from "@/lib/openrouter";
-import { getAnalysis, saveAnalysis } from "@/services/store";
+import { markAnalysisFailed, runAnalysis } from "@/services/analysis-runner";
+import { saveAnalysis } from "@/services/store";
+
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
@@ -36,18 +38,11 @@ export async function POST(request: Request) {
     await saveAnalysis(analysis);
     logEvent("analysis_started", { id, website, userId });
 
-    processAnalysis(id, website).catch(async (error) => {
-      const failed = await getAnalysis(id);
-      if (failed) {
-        await saveAnalysis({
-          ...failed,
-          status: "failed",
-          error:
-            error instanceof Error
-              ? error.message
-              : "Analysis failed unexpectedly",
-        });
-        logEvent("analysis_failed", { id, website, userId });
+    after(async () => {
+      try {
+        await runAnalysis(id, website, userId);
+      } catch (error) {
+        await markAnalysisFailed(id, error, { website, userId });
       }
     });
 
@@ -60,21 +55,4 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ error: message }, { status: 400 });
   }
-}
-
-async function processAnalysis(id: string, website: string) {
-  const content = await extractWebsiteContent(website);
-  const report = await generateAnalysis(website, content);
-
-  const analysis = await getAnalysis(id);
-  if (!analysis) return;
-
-  await saveAnalysis({
-    ...analysis,
-    status: "completed",
-    score: report.score,
-    report,
-  });
-
-  logEvent("analysis_completed", { id, website, score: report.score });
 }

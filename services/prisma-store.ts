@@ -70,7 +70,9 @@ export async function saveAnalysisToPrisma(
   analysis: Analysis
 ): Promise<void> {
   const prisma = getPrisma();
-  if (!prisma) return;
+  if (!prisma) {
+    throw new Error("Database is not configured for analysis storage");
+  }
 
   if (analysis.userId) {
     await prisma.user.upsert({

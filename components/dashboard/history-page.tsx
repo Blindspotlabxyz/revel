@@ -80,6 +80,22 @@ export function HistoryPage() {
                     View Report
                   </Link>
                 )}
+                {item.status === "processing" && (
+                  <Link
+                    href={`/mission-control/analysis/${item.id}`}
+                    className="text-sm font-medium text-muted hover:underline"
+                  >
+                    In progress
+                  </Link>
+                )}
+                {item.status === "failed" && (
+                  <Link
+                    href={`/mission-control/analysis/${item.id}`}
+                    className="text-sm font-medium text-primary hover:underline"
+                  >
+                    Failed
+                  </Link>
+                )}
                 <button
                   onClick={() => handleDelete(item.id)}
                   className="text-sm text-muted hover:text-primary"

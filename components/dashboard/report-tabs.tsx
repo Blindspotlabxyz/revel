@@ -6,6 +6,7 @@ import { ReportOverview } from "./report-overview";
 import { BlindspotMap } from "./blindspot-map";
 import { Blueprint } from "./blueprint";
 import { ActionQueue } from "./action-queue";
+import { ExportPanel } from "./export-panel";
 import type { AnalysisReport } from "@/types/analysis";
 
 const tabs = [
@@ -50,15 +51,21 @@ export function ReportTabs({ report, analysisId, website }: ReportTabsProps) {
         ))}
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div>
         {activeTab === "overview" && <ReportOverview report={report} />}
         {activeTab === "blindspots" && (
           <BlindspotMap blindspots={report.blindspots} />
         )}
         {activeTab === "blueprint" && <Blueprint steps={report.blueprint} />}
         {activeTab === "actions" && (
-          <ActionQueue actions={report.actions} analysisId={analysisId} />
+          <ActionQueue actions={report.actions} />
         )}
+        </div>
+
+        <aside className="lg:sticky lg:top-8 lg:self-start">
+          <ExportPanel analysisId={analysisId} />
+        </aside>
       </div>
     </div>
   );

@@ -43,18 +43,24 @@ export async function generateAnalysis(
   });
 
   if (!response.ok) {
-    throw new Error("Analysis service unavailable");
+    const detail = await response.text().catch(() => "");
+    throw new Error(
+      `Analysis service unavailable (${response.status})${detail ? `: ${detail.slice(0, 200)}` : ""}`
+    );
   }
 
   const data = await response.json();
   const raw = data.choices?.[0]?.message?.content;
 
   if (!raw) {
-    throw new Error("Empty analysis response");
+    throw new Error("Empty analysis response from AI service");
   }
 
-  const parsed = JSON.parse(raw) as AnalysisReport;
-  return parsed;
+  try {
+    return JSON.parse(raw) as AnalysisReport;
+  } catch {
+    throw new Error("AI returned invalid JSON — try again or switch OPENROUTER_MODEL");
+  }
 }
 
 function generateDemoReport(website: string): AnalysisReport {

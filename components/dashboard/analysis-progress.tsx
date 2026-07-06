@@ -23,6 +23,7 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
   const [status, setStatus] = useState<"processing" | "completed" | "failed">(
     "processing"
   );
+  const [failureReason, setFailureReason] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -48,6 +49,11 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
           }, 600);
         } else if (data.status === "failed") {
           setStatus("failed");
+          setFailureReason(
+            typeof data.error === "string"
+              ? data.error
+              : "Analysis failed unexpectedly"
+          );
           clearInterval(stageInterval);
           clearInterval(pollInterval);
         }
@@ -71,6 +77,11 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
         <p className="mt-2 text-muted">
           Please try again in a moment.
         </p>
+        {failureReason ? (
+          <p className="mt-4 rounded-lg bg-background px-4 py-3 text-left text-sm text-muted">
+            {failureReason}
+          </p>
+        ) : null}
         <a
           href="/mission-control"
           className="mt-6 inline-block text-sm font-medium text-primary hover:underline"
