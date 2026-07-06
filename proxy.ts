@@ -1,6 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { authSignInRedirectUrl, isAuthConfigured } from "@/lib/auth-config";
+import {
+  authSignInRedirectUrl,
+  getAuthSecret,
+  isAuthConfigured,
+} from "@/lib/auth-config";
 import { shouldPinCanonicalAuthUrl } from "@/lib/auth-url";
 import { blockScannerRequest } from "@/lib/security/scanner-block";
 import { getSubdomainRedirect } from "@/lib/subdomain-redirects";
@@ -57,7 +61,7 @@ export async function proxy(req: NextRequest) {
   if (isAuthConfigured()) {
     const token = await getToken({
       req,
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: getAuthSecret(),
       secureCookie: useSecureCookies,
     });
 

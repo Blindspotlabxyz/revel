@@ -10,8 +10,10 @@ import {
   isLocalAuthHost,
   pinCanonicalAuthEnv,
 } from "@/lib/auth-url";
+import { Prisma } from "@/lib/generated/prisma/client";
 import { getPrisma } from "@/lib/prisma";
 import { oauthFetch } from "@/lib/oauth-fetch";
+import { getAuthSecret } from "@/lib/auth-config";
 
 const canonicalAuthUrl = pinCanonicalAuthEnv();
 const useProductionCookies =
@@ -58,17 +60,25 @@ const credentialsProvider = Credentials({
   },
 });
 
+const googleEnabled = !!(
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: getAuthSecret(),
   trustHost: true,
   debug: process.env.AUTH_DEBUG === "true",
   session: { strategy: "jwt" },
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      [customFetch]: oauthFetch,
-    }),
+    ...(googleEnabled
+      ? [
+          Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            [customFetch]: oauthFetch,
+          }),
+        ]
+      : []),
     credentialsProvider,
   ],
   pages: {
@@ -100,15 +110,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             let dbUser = await prisma.user.findUnique({ where: { email } });
 
             if (!dbUser) {
-              dbUser = await prisma.user.create({
-                data: {
-                  id: randomUUID(),
-                  email,
-                },
-              });
+              try {
+                dbUser = await prisma.user.create({
+                  data: {
+                    id: randomUUID(),
+                    email,
+                  },
+                });
+              } catch (error) {
+                if (
+                  error instanceof Prisma.PrismaClientKnownRequestError &&
+                  error.code === "P2002"
+                ) {
+                  dbUser = await prisma.user.findUnique({ where: { email } });
+                } else {
+                  throw error;
+                }
+              }
             }
 
-            token.sub = dbUser.id;
+            token.sub = dbUser?.id ?? user.id;
           } else {
             token.sub = user.id;
           }

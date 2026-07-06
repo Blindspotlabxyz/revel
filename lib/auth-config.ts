@@ -30,9 +30,13 @@ export function authSignInRedirectUrl(returnBackUrl: string): string {
   return signIn.toString();
 }
 
+export function getAuthSecret(): string | undefined {
+  return process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+}
+
 export function isAuthConfigured(): boolean {
   return !!(
-    (process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET) &&
+    getAuthSecret() &&
     process.env.GOOGLE_CLIENT_ID &&
     process.env.GOOGLE_CLIENT_SECRET
   );
