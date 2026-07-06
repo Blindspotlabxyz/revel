@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isLocalAuthHost } from "@/lib/auth-url";
 import { siteConfig, subdomainRedirectsEnabled } from "@/lib/site-config";
 
 const PRODUCT_SUBDOMAINS = new Set(["docs", "auth", "legal"]);
@@ -185,7 +186,7 @@ function outboundApexRedirect(
 export function getSubdomainRedirect(
   request: NextRequest
 ): NextResponse | null {
-  if (!subdomainRedirectsEnabled()) return null;
+  if (!subdomainRedirectsEnabled() || isLocalAuthHost()) return null;
 
   const host = hostname(request);
   const subdomain = resolveSubdomain(host);

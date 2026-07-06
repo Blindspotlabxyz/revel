@@ -27,6 +27,17 @@ export async function getCurrentUserEmail(): Promise<string | null> {
   }
 }
 
+export async function getCurrentUserName(): Promise<string | null> {
+  if (!isAuthEnabled()) return null;
+
+  try {
+    const session = await nextAuth();
+    return session?.user?.name ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function requireUserId(): Promise<string> {
   const userId = await getCurrentUserId();
   if (!userId) {

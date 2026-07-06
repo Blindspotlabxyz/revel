@@ -1,9 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { authSignInRedirectUrl, isAuthConfigured } from "@/lib/auth-config";
+import { shouldPinCanonicalAuthUrl } from "@/lib/auth-url";
 import { blockScannerRequest } from "@/lib/security/scanner-block";
 import { getSubdomainRedirect } from "@/lib/subdomain-redirects";
 import { subdomainRedirectsEnabled } from "@/lib/site-config";
-import { auth } from "@/auth";
 
 const PROTECTED_PREFIXES = [
   "/mission-control",
@@ -12,6 +13,9 @@ const PROTECTED_PREFIXES = [
   "/api/history",
   "/api/stripe/checkout",
 ];
+
+const useSecureCookies =
+  process.env.NODE_ENV === "production" && shouldPinCanonicalAuthUrl();
 
 function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_PREFIXES.some(
@@ -42,20 +46,28 @@ function redirectUnauthenticatedToSignIn(req: NextRequest): NextResponse {
   return NextResponse.redirect(authSignInRedirectUrl(returnBackUrl));
 }
 
-export const proxy = auth((req) => {
+export async function proxy(req: NextRequest) {
   const shared = runSharedMiddleware(req);
   if (shared) return shared;
 
-  if (
-    isAuthConfigured() &&
-    !req.auth &&
-    isProtectedRoute(req.nextUrl.pathname)
-  ) {
-    return redirectUnauthenticatedToSignIn(req);
+  if (req.nextUrl.pathname.startsWith("/api/auth/")) {
+    return NextResponse.next();
+  }
+
+  if (isAuthConfigured()) {
+    const token = await getToken({
+      req,
+      secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: useSecureCookies,
+    });
+
+    if (!token && isProtectedRoute(req.nextUrl.pathname)) {
+      return redirectUnauthenticatedToSignIn(req);
+    }
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [

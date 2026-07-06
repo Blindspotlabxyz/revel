@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
+import { Prisma } from "@/lib/generated/prisma/client";
 import { getPrisma, isPrismaEnabled } from "@/lib/prisma";
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
 
 export async function POST(request: Request) {
   try {
@@ -44,26 +50,53 @@ export async function POST(request: Request) {
 
     if (existing) {
       return NextResponse.json(
-        { error: "An account with this email already exists." },
+        { error: "Email already in use" },
         { status: 409 }
       );
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    await prisma.user.create({
-      data: {
-        id: randomUUID(),
-        email,
-        passwordHash,
-      },
-    });
+    try {
+      await prisma.user.create({
+        data: {
+          id: randomUUID(),
+          email,
+          passwordHash,
+        },
+      });
+    } catch (createError) {
+      if (
+        createError instanceof Prisma.PrismaClientKnownRequestError &&
+        createError.code === "P2002"
+      ) {
+        return NextResponse.json(
+          { error: "Email already in use" },
+          { status: 409 }
+        );
+      }
+      throw createError;
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("signup_error", error);
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2022"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Database schema is out of date (missing password_hash). Run: npx prisma db push",
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Could not create account. Please try again." },
+      { error: errorMessage(error) },
       { status: 500 }
     );
   }

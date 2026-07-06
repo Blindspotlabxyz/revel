@@ -3,22 +3,22 @@
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { siteConfig } from "@/lib/site-config";
+import { authErrorMessage } from "@/lib/auth-errors";
+import { resolveAuthCallbackUrl } from "@/lib/auth-redirect";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function SignUpPage() {
   const searchParams = useSearchParams();
-  const redirectUrl =
-    searchParams.get("redirect_url") ??
-    searchParams.get("callbackUrl") ??
-    siteConfig.url;
+  const redirectUrl = resolveAuthCallbackUrl(searchParams);
+  const oauthError = authErrorMessage(searchParams.get("error"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(oauthError);
   const [loading, setLoading] = useState(false);
 
   async function handleCredentialsSubmit(event: FormEvent<HTMLFormElement>) {
@@ -126,14 +126,7 @@ export function SignUpPage() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <Button
-          type="button"
-          variant="secondary"
-          className="w-full"
-          onClick={() => signIn("google", { callbackUrl: redirectUrl })}
-        >
-          Continue with Google
-        </Button>
+        <GoogleSignInButton callbackUrl={redirectUrl} />
       </div>
     </div>
   );

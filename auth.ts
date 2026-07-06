@@ -1,21 +1,22 @@
 import NextAuth from "next-auth";
+import { customFetch } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 import { siteConfig } from "@/lib/site-config";
-import { getCanonicalAuthUrl, pinCanonicalAuthEnv } from "@/lib/auth-url";
+import {
+  getCanonicalAuthUrl,
+  isLocalAuthHost,
+  pinCanonicalAuthEnv,
+} from "@/lib/auth-url";
 import { getPrisma } from "@/lib/prisma";
+import { oauthFetch } from "@/lib/oauth-fetch";
 
 const canonicalAuthUrl = pinCanonicalAuthEnv();
-const useSecureCookies = canonicalAuthUrl.startsWith("https://");
-
-const googleProvider =
-  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-    ? Google({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      })
-    : null;
+const useProductionCookies =
+  process.env.NODE_ENV === "production" &&
+  canonicalAuthUrl.startsWith("https://");
 
 const credentialsProvider = Credentials({
   name: "Email and password",
@@ -52,44 +53,91 @@ const credentialsProvider = Credentials({
     return {
       id: user.id,
       email: user.email ?? email,
+      name: user.email ?? email,
     };
   },
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   trustHost: true,
+  debug: process.env.AUTH_DEBUG === "true",
+  session: { strategy: "jwt" },
   providers: [
-    ...(googleProvider ? [googleProvider] : []),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      [customFetch]: oauthFetch,
+    }),
     credentialsProvider,
   ],
   pages: {
     signIn: "/log-in",
+    error: "/log-in",
   },
   cookies: {
     sessionToken: {
-      name: useSecureCookies
+      name: useProductionCookies
         ? "__Secure-next-auth.session-token"
         : "next-auth.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: useSecureCookies,
-        ...(useSecureCookies ? { domain: ".tryrevel.xyz" } : {}),
+        secure: useProductionCookies,
+        ...(useProductionCookies ? { domain: ".tryrevel.xyz" } : {}),
       },
     },
   },
   callbacks: {
-    jwt({ token, user }) {
-      if (user?.id) {
-        token.sub = user.id;
+    async jwt({ token, user, account, profile }) {
+      if (user) {
+        if (account?.provider === "google" && user.email) {
+          const prisma = getPrisma();
+          const email = user.email.toLowerCase();
+
+          if (prisma) {
+            let dbUser = await prisma.user.findUnique({ where: { email } });
+
+            if (!dbUser) {
+              dbUser = await prisma.user.create({
+                data: {
+                  id: randomUUID(),
+                  email,
+                },
+              });
+            }
+
+            token.sub = dbUser.id;
+          } else {
+            token.sub = user.id;
+          }
+
+          const googleProfile = profile as {
+            name?: string;
+            picture?: string;
+          } | null;
+
+          token.name = user.name ?? googleProfile?.name ?? token.name;
+          token.email = email;
+          token.picture =
+            user.image ?? googleProfile?.picture ?? token.picture;
+        } else {
+          token.sub = user.id;
+          token.name = user.name ?? token.name;
+          token.email = user.email ?? token.email;
+          token.picture = user.image ?? token.picture;
+        }
       }
+
       return token;
     },
     session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
+      if (session.user) {
+        if (token.sub) session.user.id = token.sub;
+        session.user.name = token.name ?? session.user.name;
+        session.user.email = token.email ?? session.user.email;
+        session.user.image = token.picture ?? session.user.image;
       }
       return session;
     },
@@ -110,6 +158,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           authOrigin,
         ]);
 
+        if (isLocalAuthHost()) {
+          allowedOrigins.add("http://localhost:3000");
+          allowedOrigins.add("http://127.0.0.1:3000");
+        }
+
         if (allowedOrigins.has(target.origin)) {
           return target.toString();
         }
@@ -117,7 +170,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Fall through to default.
       }
 
-      return new URL(siteConfig.url).toString();
+      return isLocalAuthHost()
+        ? canonicalAuthUrl
+        : new URL(siteConfig.url).toString();
     },
   },
 });

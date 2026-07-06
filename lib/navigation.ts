@@ -1,3 +1,4 @@
+import { isLocalAuthHost } from "@/lib/auth-url";
 import { siteConfig, subdomainRedirectsEnabled } from "@/lib/site-config";
 
 function joinUrl(base: string, path: string): string {
@@ -74,7 +75,7 @@ export function resolveNavHref(href: string): {
   href: string;
   useAnchor: boolean;
 } {
-  if (!subdomainRedirectsEnabled()) {
+  if (!subdomainRedirectsEnabled() || isLocalAuthHost()) {
     return { href, useAnchor: false };
   }
 
