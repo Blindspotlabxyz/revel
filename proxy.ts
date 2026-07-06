@@ -3,9 +3,10 @@ import { getToken } from "next-auth/jwt";
 import {
   authSignInRedirectUrl,
   getAuthSecret,
+  getSessionTokenCookieName,
   isAuthConfigured,
+  useSecureAuthCookies,
 } from "@/lib/auth-config";
-import { shouldPinCanonicalAuthUrl } from "@/lib/auth-url";
 import { blockScannerRequest } from "@/lib/security/scanner-block";
 import { getSubdomainRedirect } from "@/lib/subdomain-redirects";
 import { subdomainRedirectsEnabled } from "@/lib/site-config";
@@ -17,9 +18,6 @@ const PROTECTED_PREFIXES = [
   "/api/history",
   "/api/stripe/checkout",
 ];
-
-const useSecureCookies =
-  process.env.NODE_ENV === "production" && shouldPinCanonicalAuthUrl();
 
 function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_PREFIXES.some(
@@ -59,10 +57,13 @@ export async function proxy(req: NextRequest) {
   }
 
   if (isAuthConfigured()) {
+    const sessionCookieName = getSessionTokenCookieName();
     const token = await getToken({
       req,
       secret: getAuthSecret(),
-      secureCookie: useSecureCookies,
+      secureCookie: useSecureAuthCookies(),
+      cookieName: sessionCookieName,
+      salt: sessionCookieName,
     });
 
     if (!token && isProtectedRoute(req.nextUrl.pathname)) {

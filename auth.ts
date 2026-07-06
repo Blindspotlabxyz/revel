@@ -13,12 +13,9 @@ import {
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getPrisma } from "@/lib/prisma";
 import { oauthFetch } from "@/lib/oauth-fetch";
-import { getAuthSecret } from "@/lib/auth-config";
+import { buildAuthCookiesConfig, getAuthSecret } from "@/lib/auth-config";
 
 const canonicalAuthUrl = pinCanonicalAuthEnv();
-const useProductionCookies =
-  process.env.NODE_ENV === "production" &&
-  canonicalAuthUrl.startsWith("https://");
 
 const credentialsProvider = Credentials({
   name: "Email and password",
@@ -85,20 +82,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/log-in",
     error: "/log-in",
   },
-  cookies: {
-    sessionToken: {
-      name: useProductionCookies
-        ? "__Secure-next-auth.session-token"
-        : "next-auth.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: useProductionCookies,
-        ...(useProductionCookies ? { domain: ".tryrevel.xyz" } : {}),
-      },
-    },
-  },
+  cookies: buildAuthCookiesConfig(),
   callbacks: {
     async jwt({ token, user, account, profile }) {
       if (user) {
