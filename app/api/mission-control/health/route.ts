@@ -47,8 +47,8 @@ export async function GET() {
     schemaReady,
     tables,
     openrouter: Boolean(process.env.OPENROUTER_API_KEY),
-    openrouter_model:
-      process.env.OPENROUTER_MODEL ?? "openai/gpt-oss-120b:free",
+    openrouter_model: process.env.OPENROUTER_MODEL ?? "google/gemini-2.5-flash",
+    openrouter_fallbacks: process.env.OPENROUTER_MODEL_FALLBACK ?? null,
     database: isPrismaEnabled(),
     supabase: isSupabaseEnabled(),
     vercel: process.env.VERCEL === "1",

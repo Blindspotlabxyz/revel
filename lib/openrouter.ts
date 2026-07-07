@@ -2,13 +2,74 @@ import { buildAnalysisPrompt } from "./prompt-builder";
 import { siteConfig } from "./site-config";
 import type { AnalysisReport } from "@/types/analysis";
 
-/** Override via OPENROUTER_MODEL. Free tier picks below work with JSON analysis. */
-const DEFAULT_MODEL =
-  process.env.OPENROUTER_MODEL || "openai/gpt-oss-120b:free";
+/**
+ * Primary: OPENROUTER_MODEL
+ * Fallbacks: OPENROUTER_MODEL_FALLBACK (comma-separated), then built-in free alternates
+ *
+ * Production recommendation: google/gemini-2.5-flash (~$0.01/analysis, reliable JSON)
+ * Free fallback when rate-limited: qwen/qwen3-next-80b-a3b-instruct:free
+ */
+const BUILTIN_FALLBACK_MODELS = [
+  "qwen/qwen3-next-80b-a3b-instruct:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "google/gemma-4-31b-it:free",
+];
+
+const DEFAULT_MODEL = "google/gemini-2.5-flash";
 
 interface OpenRouterMessage {
   role: "user" | "assistant" | "system";
   content: string;
+}
+
+function analysisModels(): string[] {
+  const primary = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+  const extra = (process.env.OPENROUTER_MODEL_FALLBACK ?? "")
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
+
+  return [...new Set([primary, ...extra, ...BUILTIN_FALLBACK_MODELS])];
+}
+
+function isRetryableStatus(status: number): boolean {
+  return status === 429 || status === 502 || status === 503 || status === 529;
+}
+
+async function requestAnalysis(
+  apiKey: string,
+  model: string,
+  prompt: string
+): Promise<{ ok: true; raw: string } | { ok: false; status: number; detail: string }> {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": siteConfig.url,
+      "X-Title": "Revel",
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "user", content: prompt }] as OpenRouterMessage[],
+      response_format: { type: "json_object" },
+      temperature: 0.4,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    return { ok: false, status: response.status, detail };
+  }
+
+  const data = await response.json();
+  const raw = data.choices?.[0]?.message?.content;
+
+  if (!raw) {
+    return { ok: false, status: 502, detail: "Empty analysis response from AI service" };
+  }
+
+  return { ok: true, raw };
 }
 
 export async function generateAnalysis(
@@ -21,46 +82,36 @@ export async function generateAnalysis(
     return generateDemoReport(website);
   }
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": siteConfig.url,
-      "X-Title": "Revel",
-    },
-    body: JSON.stringify({
-      model: DEFAULT_MODEL,
-      messages: [
-        {
-          role: "user",
-          content: buildAnalysisPrompt(website, content),
-        },
-      ] as OpenRouterMessage[],
-      response_format: { type: "json_object" },
-      temperature: 0.4,
-    }),
-  });
+  const prompt = buildAnalysisPrompt(website, content);
+  const models = analysisModels();
+  const errors: string[] = [];
 
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    throw new Error(
-      `Analysis service unavailable (${response.status})${detail ? `: ${detail.slice(0, 200)}` : ""}`
-    );
+  for (const model of models) {
+    const result = await requestAnalysis(apiKey, model, prompt);
+
+    if (!result.ok) {
+      errors.push(`${model} (${result.status}): ${result.detail.slice(0, 120)}`);
+      if (isRetryableStatus(result.status)) {
+        continue;
+      }
+      break;
+    }
+
+    try {
+      return JSON.parse(result.raw) as AnalysisReport;
+    } catch {
+      errors.push(`${model}: invalid JSON`);
+    }
   }
 
-  const data = await response.json();
-  const raw = data.choices?.[0]?.message?.content;
+  const hint =
+    process.env.OPENROUTER_MODEL?.endsWith(":free") || !process.env.OPENROUTER_MODEL
+      ? " Try OPENROUTER_MODEL=google/gemini-2.5-flash with $5+ OpenRouter credits for production."
+      : "";
 
-  if (!raw) {
-    throw new Error("Empty analysis response from AI service");
-  }
-
-  try {
-    return JSON.parse(raw) as AnalysisReport;
-  } catch {
-    throw new Error("AI returned invalid JSON — try again or switch OPENROUTER_MODEL");
-  }
+  throw new Error(
+    `All analysis models failed.${hint} Last errors: ${errors.slice(-2).join(" | ")}`
+  );
 }
 
 function generateDemoReport(website: string): AnalysisReport {
