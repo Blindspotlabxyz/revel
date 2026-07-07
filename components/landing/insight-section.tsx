@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { IllustrationSlot } from "@/components/landing/illustration-slot";
 import { SectionIllustration } from "@/components/landing/section-illustration";
+import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
 
 export function InsightSection() {
   return (
@@ -40,7 +41,7 @@ export function InsightSection() {
             the insights that matter most.
           </p>
           <Button asChild className="mt-8">
-            <Link href="/mission-control/sample">See Example Analysis</Link>
+            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>See Example Analysis</Link>
           </Button>
         </motion.div>
       </div>

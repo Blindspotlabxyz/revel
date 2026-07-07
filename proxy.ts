@@ -7,6 +7,7 @@ import {
   isAuthConfigured,
   useSecureAuthCookies,
 } from "@/lib/auth-config";
+import { isPublicSampleReportPath } from "@/lib/public-sample-report";
 import { blockScannerRequest } from "@/lib/security/scanner-block";
 import { getSubdomainRedirect } from "@/lib/subdomain-redirects";
 import { subdomainRedirectsEnabled } from "@/lib/site-config";
@@ -20,6 +21,10 @@ const PROTECTED_PREFIXES = [
 ];
 
 function isProtectedRoute(pathname: string): boolean {
+  if (isPublicSampleReportPath(pathname)) {
+    return false;
+  }
+
   return PROTECTED_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );

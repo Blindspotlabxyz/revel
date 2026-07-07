@@ -62,7 +62,7 @@ ${revelFaqs.map((f) => `### ${f.question}\n${f.answer}`).join("\n\n")}
 - Docs: ${absoluteUrl("/docs")}
 - API docs: ${absoluteUrl("/docs/api")}
 - Sample reports: ${absoluteUrl("/docs/sample-reports")}
-- Sample report (app): ${absoluteUrl("/mission-control/sample")}
+- Sample report (app): ${absoluteUrl("/mission-control/report/89a99571-be09-4aa1-a8aa-17ff1cb5bdf3")}
 - About: ${absoluteUrl("/about")}
 - Contact: ${absoluteUrl("/contact")}
 

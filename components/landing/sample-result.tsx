@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
 
 const stats = [
   { label: "Reveal Index", value: "91" },
@@ -45,7 +46,7 @@ export function SampleResult() {
 
           <div className="mt-8 text-center">
             <Button asChild variant="secondary">
-              <Link href="/mission-control/sample">View Full Report</Link>
+              <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View Full Report</Link>
             </Button>
           </div>
         </motion.div>

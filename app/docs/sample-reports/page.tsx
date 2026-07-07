@@ -6,6 +6,7 @@ import { PageSeo } from "@/components/seo/page-seo";
 import { Button } from "@/components/ui/button";
 import { pageKeywords } from "@/lib/seo/keywords";
 import { createPageMetadata } from "@/lib/seo/metadata";
+import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
 import { siteConfig } from "@/lib/site-config";
 
 const title = "Sample Reports";
@@ -36,7 +37,7 @@ export default function DocsSampleReportsPage() {
       <SampleResult />
       <div className="mx-auto max-w-6xl px-6 pb-24 text-center">
         <Button asChild size="lg">
-          <Link href="/mission-control/sample">View full sample report</Link>
+          <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View full sample report</Link>
         </Button>
         <p className="mt-4 text-sm text-muted">
           Run {siteConfig.name} on your own product from Mission Control.

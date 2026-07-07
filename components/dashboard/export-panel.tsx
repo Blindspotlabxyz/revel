@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Braces, ExternalLink, FileText, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,7 +23,7 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
   );
   const [exporting, setExporting] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [link, setLink] = useState<string | null>(null);
+  const [links, setLinks] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,7 +39,7 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
   ) {
     setExporting(format);
     setSuccess(null);
-    setLink(null);
+    setLinks([]);
     setError(null);
 
     try {
@@ -68,8 +67,12 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
         URL.revokeObjectURL(url);
       }
 
-      if (data.url) {
-        setLink(data.url);
+      const exportLinks = [
+        ...(Array.isArray(data.urls) ? data.urls : []),
+        ...(data.url && !data.urls?.includes(data.url) ? [data.url] : []),
+      ];
+      if (exportLinks.length > 0) {
+        setLinks(exportLinks);
       }
 
       setSuccess(data.message ?? "Export completed.");
@@ -176,9 +179,9 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
       {success ? (
         <p className="mt-3 text-sm text-primary">{success}</p>
       ) : null}
-      {link ? (
+      {links.length === 1 ? (
         <a
-          href={link}
+          href={links[0]}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-2 inline-flex items-center gap-1 text-sm text-primary hover:underline"
@@ -186,17 +189,23 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
           Open export <ExternalLink className="h-3.5 w-3.5" />
         </a>
       ) : null}
+      {links.length > 1 ? (
+        <ul className="mt-3 space-y-1.5">
+          {links.map((href, index) => (
+            <li key={href}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+              >
+                Open issue {index + 1} <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
-
-      <p className="mt-6 border-t border-border pt-4 text-sm text-muted">
-        Need API keys?{" "}
-        <Link
-          href="/mission-control/integrations"
-          className="font-medium text-primary hover:underline"
-        >
-          Step-by-step setup guide
-        </Link>
-      </p>
     </div>
   );
 }

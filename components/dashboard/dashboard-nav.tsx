@@ -10,7 +10,6 @@ import { UserMenu } from "@/components/dashboard/user-menu";
 const navItems = [
   { label: "Mission Control", href: "/mission-control" },
   { label: "History", href: "/mission-control/history" },
-  { label: "Integrations", href: "/mission-control/integrations" },
   { label: "Pricing", href: "/pricing" },
   { label: "Account", href: "/mission-control/account" },
   { label: "Settings", href: "/mission-control/settings" },

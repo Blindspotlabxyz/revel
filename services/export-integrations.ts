@@ -71,7 +71,11 @@ export async function pushToLinear(
               description: $description
             }) {
               success
-              issue { url }
+              issue {
+                url
+                identifier
+                team { key }
+              }
             }
           }
         `,
@@ -98,7 +102,20 @@ export async function pushToLinear(
     }
 
     const payload = await response.json();
-    const url = payload?.data?.issueCreate?.issue?.url as string | undefined;
+
+    if (payload.errors?.length) {
+      throw new Error(payload.errors[0]?.message ?? "Linear GraphQL error");
+    }
+
+    const issue = payload?.data?.issueCreate?.issue as
+      | { url?: string; identifier?: string; team?: { key?: string } }
+      | undefined;
+
+    const url =
+      issue?.url ??
+      (issue?.team?.key && issue?.identifier
+        ? `https://linear.app/${issue.team.key}/issue/${issue.identifier}`
+        : undefined);
 
     if (url) {
       urls.push(url);

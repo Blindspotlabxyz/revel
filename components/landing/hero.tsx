@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { IllustrationSlot } from "@/components/landing/illustration-slot";
 import { SectionIllustration } from "@/components/landing/section-illustration";
+import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
 
 export function Hero() {
   return (
@@ -40,7 +41,7 @@ export function Hero() {
             <Link href="/mission-control">Run Revel</Link>
           </Button>
           <Button asChild variant="secondary" size="lg">
-            <Link href="/mission-control/sample">View Sample Report</Link>
+            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View Sample Report</Link>
           </Button>
         </motion.div>
 

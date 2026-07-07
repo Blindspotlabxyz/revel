@@ -107,6 +107,7 @@ export async function POST(request: Request) {
         success: true,
         mode: "link",
         created: result.created,
+        url: result.urls[0] ?? null,
         urls: result.urls,
         message: `Created ${result.created} Linear issues from your Action Queue.`,
       });

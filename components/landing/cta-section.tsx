@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
 
 export function CtaSection() {
   return (
@@ -25,7 +26,7 @@ export function CtaSection() {
             <Link href="/mission-control">Run Revel</Link>
           </Button>
           <Button asChild variant="secondary" size="lg">
-            <Link href="/mission-control/sample">View Demo</Link>
+            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View Demo</Link>
           </Button>
         </div>
       </motion.div>
