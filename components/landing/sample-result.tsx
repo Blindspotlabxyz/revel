@@ -46,7 +46,7 @@ export function SampleResult() {
 
           <div className="mt-8 text-center">
             <Button asChild variant="secondary">
-              <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View Full Report</Link>
+              <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View Live Report</Link>
             </Button>
           </div>
         </motion.div>

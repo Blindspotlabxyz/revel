@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { GenesisReportBanner } from "@/components/dashboard/genesis-report-banner";
 import { PUBLIC_SAMPLE_REPORT_ID } from "@/lib/public-sample-report";
 import { getAnalysis } from "@/services/store";
 import { sampleAnalysis } from "@/lib/sample-report";
@@ -20,19 +21,15 @@ export default async function ReportPage({
     notFound();
   }
 
-  const isPublicSample = id === PUBLIC_SAMPLE_REPORT_ID;
+  const isGenesisReport = id === PUBLIC_SAMPLE_REPORT_ID;
 
   return (
     <div>
-      <h1 className="font-heading text-3xl font-semibold">
-        {isPublicSample ? "Sample Report" : "Analysis Report"}
-      </h1>
-      {isPublicSample ? (
-        <p className="mt-2 text-sm text-muted">
-          A real Revel analysis — no sign-in required.
-        </p>
+      <h1 className="font-heading text-3xl font-semibold">Analysis Report</h1>
+      {isGenesisReport ? (
+        <GenesisReportBanner website={analysis.website} />
       ) : null}
-      <div className="mt-8">
+      <div className={isGenesisReport ? "mt-6" : "mt-8"}>
         <ReportTabs
           report={analysis.report}
           analysisId={analysis.id}

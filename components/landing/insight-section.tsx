@@ -41,7 +41,7 @@ export function InsightSection() {
             the insights that matter most.
           </p>
           <Button asChild className="mt-8">
-            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>See Example Analysis</Link>
+            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>See a Live Analysis</Link>
           </Button>
         </motion.div>
       </div>

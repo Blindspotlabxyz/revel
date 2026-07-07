@@ -41,7 +41,7 @@ export function Hero() {
             <Link href="/mission-control">Run Revel</Link>
           </Button>
           <Button asChild variant="secondary" size="lg">
-            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View Sample Report</Link>
+            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>See a Live Report</Link>
           </Button>
         </motion.div>
 

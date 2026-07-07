@@ -37,7 +37,7 @@ export default function DocsSampleReportsPage() {
       <SampleResult />
       <div className="mx-auto max-w-6xl px-6 pb-24 text-center">
         <Button asChild size="lg">
-          <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View full sample report</Link>
+          <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View genesis report (live)</Link>
         </Button>
         <p className="mt-4 text-sm text-muted">
           Run {siteConfig.name} on your own product from Mission Control.

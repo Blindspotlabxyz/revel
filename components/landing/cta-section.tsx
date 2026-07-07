@@ -26,7 +26,7 @@ export function CtaSection() {
             <Link href="/mission-control">Run Revel</Link>
           </Button>
           <Button asChild variant="secondary" size="lg">
-            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>View Demo</Link>
+            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>See Genesis Report</Link>
           </Button>
         </div>
       </motion.div>
