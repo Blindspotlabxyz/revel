@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Braces, ExternalLink, FileText, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -186,6 +187,16 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
         </a>
       ) : null}
       {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+
+      <p className="mt-6 border-t border-border pt-4 text-sm text-muted">
+        Need API keys?{" "}
+        <Link
+          href="/mission-control/integrations"
+          className="font-medium text-primary hover:underline"
+        >
+          Step-by-step setup guide
+        </Link>
+      </p>
     </div>
   );
 }

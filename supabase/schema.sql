@@ -33,6 +33,14 @@ CREATE INDEX IF NOT EXISTS idx_reports_analysis_id ON reports(analysis_id);
 ALTER TABLE analyses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
 
+-- Idempotent: safe to re-run if policies already exist
+DROP POLICY IF EXISTS "Users can view own analyses" ON analyses;
+DROP POLICY IF EXISTS "Users can insert own analyses" ON analyses;
+DROP POLICY IF EXISTS "Users can update own analyses" ON analyses;
+DROP POLICY IF EXISTS "Users can delete own analyses" ON analyses;
+DROP POLICY IF EXISTS "Users can view own reports" ON reports;
+DROP POLICY IF EXISTS "Users can insert own reports" ON reports;
+
 CREATE POLICY "Users can view own analyses" ON analyses
   FOR SELECT USING (user_id = auth.uid()::text OR user_id IS NULL);
 
