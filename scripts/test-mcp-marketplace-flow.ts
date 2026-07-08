@@ -86,16 +86,26 @@ async function main() {
   const analysisId = startData.analysisId as string;
   if (!analysisId) throw new Error("No analysisId returned");
 
-  console.log("\nWaiting for analysis (up to 240s)...");
-  const completed = await timed("revel_wait_for_analysis", () =>
-    client.callTool({
-      name: "revel_wait_for_analysis",
-      arguments: { analysisId, timeoutSeconds: 240 },
-    })
-  );
-  mcpToolCalls++;
+  // HTTP MCP clients often timeout around 60s on a single long request.
+  // Marketplace agents should poll revel_get_analysis instead of blocking wait.
+  console.log("\nPolling revel_get_analysis (5s interval, max 5 min)...");
+  let report: Record<string, unknown> = { status: "processing" };
+  for (let i = 0; i < 60; i++) {
+    await new Promise((r) => setTimeout(r, 5000));
+    const poll = await timed(`revel_get_analysis #${i + 1}`, () =>
+      client.callTool({
+        name: "revel_get_analysis",
+        arguments: { analysisId },
+      })
+    );
+    mcpToolCalls++;
+    report = parseJsonToolResult(poll);
+    if (report.status === "completed" || report.status === "failed") break;
+  }
 
-  const report = parseJsonToolResult(completed);
+  if (report.status !== "completed") {
+    throw new Error(`Analysis did not complete: ${String(report.status)}`);
+  }
   console.log("  score:", report.score);
   console.log("  status:", report.status);
 
@@ -112,7 +122,7 @@ async function main() {
   console.log("\n--- Marketplace flow summary ---");
   console.log("MCP tool calls (client-side):", mcpToolCalls);
   console.log("Billable audits:", 1);
-  console.log("Tools used: revel_health → revel_analyze_website → revel_wait_for_analysis → revel_export_blueprint");
+  console.log("Tools used: revel_health → revel_analyze_website → revel_get_analysis (poll) → revel_export_blueprint");
   console.log("\nPrice per completed audit (not per MCP call):");
   console.log("  $0.10/audit × 1 = $0.10");
   console.log("  $0.20/audit × 1 = $0.20");

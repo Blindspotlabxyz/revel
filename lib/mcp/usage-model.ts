@@ -52,10 +52,10 @@ export const REVEL_MCP_USAGE = {
       ],
     },
     pollInsteadOfWait: {
-      label: "analyze → get_analysis (poll) → export",
+      label: "analyze → get_analysis (poll) → export [recommended for HTTP]",
       mcpToolCalls: {
         minimum: 4,
-        typical: "5–15",
+        typical: "15–20",
         tools: [
           "revel_analyze_website",
           "revel_get_analysis × N",
@@ -65,6 +65,7 @@ export const REVEL_MCP_USAGE = {
       llmCostDrivers: [
         "revel_get_analysis polls are DB-only (no LLM)",
         "1× agentic analysis",
+        "Avoid revel_wait_for_analysis over HTTP — single requests often timeout ~60s",
       ],
     },
   },
