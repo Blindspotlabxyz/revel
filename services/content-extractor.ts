@@ -1,28 +1,34 @@
 import * as cheerio from "cheerio";
+import { formatFetchError, resilientFetch } from "@/lib/resilient-fetch";
+
+const INTERESTING_PATH =
+  /pricing|price|plans|about|features|product|solutions|customers|demo|signup|sign-up|contact/i;
+
+const FETCH_HEADERS = {
+  "User-Agent": "Mozilla/5.0 (compatible; RevelBot/1.0; +https://tryrevel.xyz)",
+  Accept: "text/html,application/xhtml+xml",
+};
 
 export async function extractWebsiteContent(url: string): Promise<string> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-
   try {
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (compatible; RevelBot/1.0; +https://revel.app)",
-        Accept: "text/html,application/xhtml+xml",
-      },
+    const response = await resilientFetch(url, {
+      context: `Fetch website ${url}`,
+      retries: 2,
+      headers: FETCH_HEADERS,
       redirect: "follow",
     });
 
     if (!response.ok) {
-      throw new Error("Could not access website");
+      throw new Error(`Could not access website (HTTP ${response.status})`);
     }
 
     const html = await response.text();
     return cleanHtml(html);
-  } finally {
-    clearTimeout(timeout);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("Fetch website")) {
+      throw error;
+    }
+    throw new Error(formatFetchError(error, `Fetch website ${url}`));
   }
 }
 
@@ -69,4 +75,55 @@ function cleanHtml(html: string): string {
   if (bodyText) parts.push(`Content: ${bodyText}`);
 
   return parts.join("\n\n");
+}
+
+export async function discoverInternalLinks(
+  baseUrl: string,
+  limit = 12
+): Promise<string[]> {
+  try {
+    const response = await resilientFetch(baseUrl, {
+      context: `Discover links on ${baseUrl}`,
+      retries: 2,
+      headers: FETCH_HEADERS,
+      redirect: "follow",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Could not access website (HTTP ${response.status})`);
+    }
+
+    const html = await response.text();
+    const $ = cheerio.load(html);
+    const origin = new URL(baseUrl).origin;
+    const seen = new Set<string>();
+    const links: string[] = [];
+
+    $("a[href]").each((_, el) => {
+      const href = $(el).attr("href")?.trim();
+      if (!href || href.startsWith("#") || href.startsWith("mailto:")) return;
+
+      try {
+        const absolute = new URL(href, baseUrl);
+        if (absolute.origin !== origin) return;
+        const path = absolute.pathname;
+        if (path === "/" || path.length < 2) return;
+        const normalized = `${origin}${path}`.replace(/\/$/, "") || origin;
+        if (seen.has(normalized)) return;
+        seen.add(normalized);
+        links.push(normalized);
+      } catch {
+        // skip invalid href
+      }
+    });
+
+    const prioritized = [
+      ...links.filter((url) => INTERESTING_PATH.test(new URL(url).pathname)),
+      ...links.filter((url) => !INTERESTING_PATH.test(new URL(url).pathname)),
+    ];
+
+    return prioritized.slice(0, limit);
+  } catch (error) {
+    throw new Error(formatFetchError(error, `Discover links on ${baseUrl}`));
+  }
 }

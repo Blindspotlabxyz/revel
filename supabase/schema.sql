@@ -40,6 +40,7 @@ DROP POLICY IF EXISTS "Users can update own analyses" ON analyses;
 DROP POLICY IF EXISTS "Users can delete own analyses" ON analyses;
 DROP POLICY IF EXISTS "Users can view own reports" ON reports;
 DROP POLICY IF EXISTS "Users can insert own reports" ON reports;
+DROP POLICY IF EXISTS "Users can update own reports" ON reports;
 
 CREATE POLICY "Users can view own analyses" ON analyses
   FOR SELECT USING (user_id = auth.uid()::text OR user_id IS NULL);
@@ -62,6 +63,13 @@ CREATE POLICY "Users can view own reports" ON reports
 
 CREATE POLICY "Users can insert own reports" ON reports
   FOR INSERT WITH CHECK (
+    analysis_id IN (
+      SELECT id FROM analyses WHERE user_id = auth.uid()::text OR user_id IS NULL
+    )
+  );
+
+CREATE POLICY "Users can update own reports" ON reports
+  FOR UPDATE USING (
     analysis_id IN (
       SELECT id FROM analyses WHERE user_id = auth.uid()::text OR user_id IS NULL
     )

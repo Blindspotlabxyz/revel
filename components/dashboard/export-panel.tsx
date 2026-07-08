@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Braces, ExternalLink, FileText, Github } from "lucide-react";
+import {
+  GitHubGistIcon,
+  IntegrationIconBadge,
+  LinearIcon,
+  NotionIcon,
+} from "@/components/brand/integration-icons";
 import { Button } from "@/components/ui/button";
 
 type ExportCapabilities = {
@@ -142,10 +148,15 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
             title={
               gistEnabled
                 ? "Create a private GitHub Gist"
-                : "Set GITHUB_TOKEN on Vercel to enable"
+                : "Add GITHUB_TOKEN to .env.local or Vercel to enable"
             }
           >
-            GitHub Gist
+            <IntegrationIconBadge tint="bg-foreground/8">
+              <GitHubGistIcon className="h-3.5 w-3.5" />
+            </IntegrationIconBadge>
+            {exporting === "github" && gistEnabled
+              ? "Exporting..."
+              : "GitHub Gist"}
           </Button>
           <Button
             onClick={() => handleExport("linear")}
@@ -155,10 +166,13 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
             title={
               linearEnabled
                 ? "Create Linear issues from Action Queue"
-                : "Set LINEAR_API_KEY + LINEAR_TEAM_ID on Vercel"
+                : "Add LINEAR_API_KEY + LINEAR_TEAM_ID to .env.local or Vercel"
             }
           >
-            Linear
+            <IntegrationIconBadge tint="bg-[#5E6AD2]/15">
+              <LinearIcon className="h-3.5 w-3.5 text-[#5E6AD2]" />
+            </IntegrationIconBadge>
+            {exporting === "linear" ? "Exporting..." : "Linear"}
           </Button>
           <Button
             onClick={() => handleExport("notion")}
@@ -168,10 +182,13 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
             title={
               notionEnabled
                 ? "Create a Notion page"
-                : "Set NOTION_API_KEY + NOTION_DATABASE_ID on Vercel"
+                : "Add NOTION_API_KEY + NOTION_DATABASE_ID to .env.local or Vercel"
             }
           >
-            Notion
+            <IntegrationIconBadge tint="bg-foreground/8">
+              <NotionIcon className="h-3.5 w-3.5" />
+            </IntegrationIconBadge>
+            {exporting === "notion" ? "Exporting..." : "Notion"}
           </Button>
         </div>
       </div>

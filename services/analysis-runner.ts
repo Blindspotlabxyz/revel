@@ -1,10 +1,18 @@
+import { getAnalysisMode } from "@/lib/analysis-provider";
 import { logEvent } from "@/lib/logger";
 import { generateAnalysis } from "@/lib/openrouter";
+import { generateAgenticAnalysis } from "@/services/agentic-analysis";
 import { extractWebsiteContent } from "@/services/content-extractor";
 import { getAnalysis, saveAnalysis } from "@/services/store";
 
 function errorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
+  if (error instanceof Error) {
+    const cause = error.cause;
+    if (cause instanceof Error && cause.message && cause.message !== error.message) {
+      return `${error.message} (${cause.message})`;
+    }
+    return error.message;
+  }
   return "Analysis failed unexpectedly";
 }
 
@@ -37,8 +45,14 @@ export async function runAnalysis(
   website: string,
   userId?: string | null
 ): Promise<void> {
-  const content = await extractWebsiteContent(website);
-  const report = await generateAnalysis(website, content);
+  const mode = getAnalysisMode();
+  const report =
+    mode === "agentic"
+      ? await generateAgenticAnalysis(website)
+      : await generateAnalysis(
+          website,
+          await extractWebsiteContent(website)
+        );
 
   const analysis = await getAnalysis(id);
   if (!analysis) {

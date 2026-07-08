@@ -1,5 +1,16 @@
 import { NextResponse } from "next/server";
 import {
+  getAgentProvider,
+  getAnalysisMode,
+  getAgentMaxSteps,
+  getGeminiModel,
+  getGeminiModels,
+  getGroqModel,
+  getGroqModels,
+  isGeminiAgentEnabled,
+  isGroqAgentEnabled,
+} from "@/lib/analysis-provider";
+import {
   getActiveStorageBackend,
   getExportCapabilities,
 } from "@/lib/mission-control-config";
@@ -46,6 +57,17 @@ export async function GET() {
     storage,
     schemaReady,
     tables,
+    analysis_mode: getAnalysisMode(),
+    analysis_provider: getAgentProvider(),
+    groq: isGroqAgentEnabled(),
+    groq_model: getGroqModel(),
+    groq_models: getGroqModels(),
+    groq_model_fallback: process.env.GROQ_MODEL_FALLBACK ?? null,
+    gemini: isGeminiAgentEnabled(),
+    gemini_model: getGeminiModel(),
+    gemini_models: getGeminiModels(),
+    gemini_model_fallback: process.env.GEMINI_MODEL_FALLBACK ?? null,
+    agent_max_steps: getAgentMaxSteps(),
     openrouter: Boolean(process.env.OPENROUTER_API_KEY),
     openrouter_model: process.env.OPENROUTER_MODEL ?? "google/gemini-2.5-flash",
     openrouter_fallbacks: process.env.OPENROUTER_MODEL_FALLBACK ?? null,

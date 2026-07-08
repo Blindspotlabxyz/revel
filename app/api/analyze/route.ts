@@ -8,7 +8,8 @@ import { normalizeUrl } from "@/lib/validation";
 import { markAnalysisFailed, runAnalysis } from "@/services/analysis-runner";
 import { saveAnalysis } from "@/services/store";
 
-export const maxDuration = 60;
+/** Agentic runs (Groq + fallback) often need 2–3 min on slow networks. */
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   try {

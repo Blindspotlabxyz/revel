@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node --dns-result-order=ipv4first node_modules/next/dist/bin/next dev --webpack",
     "test:google-oauth": "node scripts/test-google-oauth-connectivity.mjs",
+    "test:agentic": "npx tsx scripts/test-agentic-analysis.ts",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "postbuild": "node scripts/indexnow-ping.mjs",

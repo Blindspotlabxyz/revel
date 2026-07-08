@@ -3,16 +3,29 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Check, Loader2 } from "lucide-react";
+import {
+  Check,
+  Loader2,
+  Map,
+  MessageSquare,
+  MousePointerClick,
+  Package,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const stages = [
-  { id: "product", label: "Product Analysis" },
-  { id: "ux", label: "UX Review" },
-  { id: "messaging", label: "Messaging Review" },
-  { id: "competitors", label: "Competitor Review" },
-  { id: "blueprint", label: "Generating Blueprint" },
+const stages: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: "product", label: "Product Analysis", icon: Package },
+  { id: "ux", label: "UX Review", icon: MousePointerClick },
+  { id: "messaging", label: "Messaging Review", icon: MessageSquare },
+  { id: "competitors", label: "Competitor Review", icon: Users },
+  { id: "blueprint", label: "Generating Blueprint", icon: Map },
 ];
+
+/** Reach blueprint stage ~60s in — real runs often take 1–3 min on slow networks. */
+const STAGE_INTERVAL_MS = 15_000;
+const LONG_WAIT_HINT_MS = 90_000;
 
 interface AnalysisProgressProps {
   analysisId: string;
@@ -24,29 +37,48 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
     "processing"
   );
   const [failureReason, setFailureReason] = useState<string | null>(null);
+  const [elapsedMs, setElapsedMs] = useState(0);
   const router = useRouter();
 
+  const onBlueprint =
+    completedStages === stages.length - 1 && status === "processing";
+  const showLongWaitHint = onBlueprint && elapsedMs >= LONG_WAIT_HINT_MS;
+
   useEffect(() => {
+    const startedAt = Date.now();
+    const elapsedInterval = setInterval(() => {
+      setElapsedMs(Date.now() - startedAt);
+    }, 1000);
+
     const stageInterval = setInterval(() => {
       setCompletedStages((prev) => {
         if (prev < stages.length - 1) return prev + 1;
         return prev;
       });
-    }, 8000);
+    }, STAGE_INTERVAL_MS);
 
     const pollInterval = setInterval(async () => {
       try {
         const res = await fetch(`/api/report/${analysisId}`);
         const data = await res.json();
 
-        if (data.status === "completed") {
+        if (data.status === "completed" && data.report) {
           setCompletedStages(stages.length);
           setStatus("completed");
+          clearInterval(elapsedInterval);
           clearInterval(stageInterval);
           clearInterval(pollInterval);
           setTimeout(() => {
             router.push(`/mission-control/report/${analysisId}`);
           }, 600);
+        } else if (data.status === "completed" && !data.report) {
+          setStatus("failed");
+          setFailureReason(
+            "Analysis finished but the report could not be loaded. Please try again."
+          );
+          clearInterval(elapsedInterval);
+          clearInterval(stageInterval);
+          clearInterval(pollInterval);
         } else if (data.status === "failed") {
           setStatus("failed");
           setFailureReason(
@@ -54,6 +86,7 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
               ? data.error
               : "Analysis failed unexpectedly"
           );
+          clearInterval(elapsedInterval);
           clearInterval(stageInterval);
           clearInterval(pollInterval);
         }
@@ -63,6 +96,7 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
     }, 2000);
 
     return () => {
+      clearInterval(elapsedInterval);
       clearInterval(stageInterval);
       clearInterval(pollInterval);
     };
@@ -96,13 +130,14 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
     <div className="rounded-xl border border-border bg-surface p-8">
       <h2 className="font-heading text-xl font-semibold">Analyzing...</h2>
       <p className="mt-2 text-sm text-muted">
-        Estimated time: 30–60 seconds
+        Estimated time: 1–3 minutes
       </p>
 
-      <div className="mt-8 space-y-4">
+      <div className="mt-8 space-y-3">
         {stages.map((stage, i) => {
           const isCompleted = i < completedStages;
           const isActive = i === completedStages && status === "processing";
+          const StageIcon = stage.icon;
 
           return (
             <motion.div
@@ -110,14 +145,17 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2, delay: i * 0.05 }}
-              className="flex items-center gap-3"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-2 py-2 transition-colors",
+                isActive && "bg-primary/5"
+              )}
             >
               <div
                 className={cn(
-                  "flex h-6 w-6 items-center justify-center rounded-full",
-                  isCompleted && "bg-primary/10 text-primary",
-                  isActive && "text-primary",
-                  !isCompleted && !isActive && "text-muted"
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
+                  isCompleted && "border-primary/20 bg-primary/10 text-primary",
+                  isActive && "border-primary/30 bg-primary/10 text-primary",
+                  !isCompleted && !isActive && "border-border bg-background text-muted"
                 )}
               >
                 {isCompleted ? (
@@ -125,7 +163,7 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
                 ) : isActive ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <span className="h-2 w-2 rounded-full bg-border" />
+                  <StageIcon className="h-4 w-4" />
                 )}
               </div>
               <span
@@ -142,6 +180,13 @@ export function AnalysisProgress({ analysisId }: AnalysisProgressProps) {
           );
         })}
       </div>
+
+      {showLongWaitHint ? (
+        <p className="mt-6 rounded-lg border border-border bg-background px-4 py-3 text-sm text-muted">
+          Still working — slow network or site fetch retries can extend this step.
+          Your blueprint will appear automatically when ready.
+        </p>
+      ) : null}
     </div>
   );
 }

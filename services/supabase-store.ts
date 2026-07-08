@@ -26,6 +26,15 @@ function toAnalysis(row: DbAnalysis): Analysis {
   };
 }
 
+function throwIfSupabaseError(
+  label: string,
+  error: { message: string } | null
+): void {
+  if (error) {
+    throw new Error(`${label}: ${error.message}`);
+  }
+}
+
 export async function getAnalysisFromSupabase(
   id: string
 ): Promise<Analysis | null> {
@@ -78,13 +87,14 @@ export async function saveAnalysisToSupabase(
   if (!supabase) return;
 
   if (analysis.userId) {
-    await supabase.from("users").upsert({
+    const { error } = await supabase.from("users").upsert({
       id: analysis.userId,
       email: null,
     });
+    throwIfSupabaseError("Failed to save user", error);
   }
 
-  await supabase.from("analyses").upsert({
+  const { error: analysisError } = await supabase.from("analyses").upsert({
     id: analysis.id,
     user_id: analysis.userId ?? null,
     website: analysis.website,
@@ -93,15 +103,17 @@ export async function saveAnalysisToSupabase(
     error: analysis.error ?? null,
     created_at: analysis.createdAt,
   });
+  throwIfSupabaseError("Failed to save analysis", analysisError);
 
   if (analysis.report) {
-    await supabase.from("reports").upsert(
+    const { error: reportError } = await supabase.from("reports").upsert(
       {
         analysis_id: analysis.id,
         json_result: analysis.report,
       },
       { onConflict: "analysis_id" }
     );
+    throwIfSupabaseError("Failed to save report", reportError);
   }
 }
 

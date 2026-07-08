@@ -1,3 +1,4 @@
+import { resilientFetch } from "@/lib/resilient-fetch";
 import { buildAnalysisPrompt } from "./prompt-builder";
 import { siteConfig } from "./site-config";
 import type { AnalysisReport } from "@/types/analysis";
@@ -41,35 +42,50 @@ async function requestAnalysis(
   model: string,
   prompt: string
 ): Promise<{ ok: true; raw: string } | { ok: false; status: number; detail: string }> {
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": siteConfig.url,
-      "X-Title": "Revel",
-    },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }] as OpenRouterMessage[],
-      response_format: { type: "json_object" },
-      temperature: 0.4,
-    }),
-  });
+  try {
+    const response = await resilientFetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        context: "OpenRouter API",
+        retries: 2,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": siteConfig.url,
+          "X-Title": "Revel",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: prompt }] as OpenRouterMessage[],
+          response_format: { type: "json_object" },
+          temperature: 0.4,
+        }),
+      }
+    );
 
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    return { ok: false, status: response.status, detail };
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      return { ok: false, status: response.status, detail };
+    }
+
+    const data = await response.json();
+    const raw = data.choices?.[0]?.message?.content;
+
+    if (!raw) {
+      return {
+        ok: false,
+        status: 502,
+        detail: "Empty analysis response from AI service",
+      };
+    }
+
+    return { ok: true, raw };
+  } catch (error) {
+    const detail =
+      error instanceof Error ? error.message : "OpenRouter API unreachable";
+    return { ok: false, status: 503, detail };
   }
-
-  const data = await response.json();
-  const raw = data.choices?.[0]?.message?.content;
-
-  if (!raw) {
-    return { ok: false, status: 502, detail: "Empty analysis response from AI service" };
-  }
-
-  return { ok: true, raw };
 }
 
 export async function generateAnalysis(
