@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "revel": {
+      "command": "npx",
+      "args": ["tsx", "scripts/revel-mcp.ts"],
+      "env": {
+        "GROQ_API_KEY": "your-groq-key",
+        "ANALYSIS_PROVIDER": "groq"
+      }
+    },
+    "revel-remote": {
+      "url": "https://tryrevel.xyz/api/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_MCP_API_KEY"
+      }
+    }
+  }
+}

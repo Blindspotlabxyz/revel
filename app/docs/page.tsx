@@ -46,6 +46,11 @@ export default function DocsPage() {
 
         <nav className="mt-10 grid gap-3 sm:grid-cols-2">
           {[
+            {
+              href: "/docs/mcp",
+              label: "MCP / A2MCP",
+              desc: "Agent-to-MCP tools for OKX.AI",
+            },
             { href: "/docs/api", label: "API Reference", desc: "REST endpoints" },
             { href: "/docs/faq", label: "FAQ", desc: "Common questions" },
             {

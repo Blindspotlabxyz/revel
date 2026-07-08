@@ -61,6 +61,13 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
+  if (
+    req.nextUrl.pathname === "/api/mcp" ||
+    req.nextUrl.pathname === "/api/mcp/manifest"
+  ) {
+    return NextResponse.next();
+  }
+
   if (isAuthConfigured()) {
     const sessionCookieName = getSessionTokenCookieName();
     const token = await getToken({

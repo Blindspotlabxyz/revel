@@ -8,6 +8,8 @@
     "dev": "node --dns-result-order=ipv4first node_modules/next/dist/bin/next dev --webpack",
     "test:google-oauth": "node scripts/test-google-oauth-connectivity.mjs",
     "test:agentic": "npx tsx scripts/test-agentic-analysis.ts",
+    "mcp": "npx tsx scripts/revel-mcp.ts",
+    "test:mcp": "npx tsx scripts/test-mcp.ts",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "postbuild": "node scripts/indexnow-ping.mjs",
@@ -27,6 +29,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@radix-ui/react-accordion": "^1.2.3",
