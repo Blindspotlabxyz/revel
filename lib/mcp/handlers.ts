@@ -1,5 +1,6 @@
 import { after } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import { getOkxBillingManifest } from "@/lib/billing/okx-x402";
 import { getMcpUsageSummary } from "@/lib/mcp/usage-model";
 import { getExportCapabilities } from "@/lib/mission-control-config";
 import { normalizeUrl } from "@/lib/validation";
@@ -45,6 +46,7 @@ export function getRevelMcpHealth() {
       "Revel discovers product blindspots, scores the Reveal Index, and returns a prioritized Blueprint and Action Queue.",
     exports: getExportCapabilities(),
     usage: getMcpUsageSummary(),
+    billing: getOkxBillingManifest(),
   };
 }
 

@@ -7,6 +7,9 @@
     },
     "app/api/mcp/route.ts": {
       "maxDuration": 300
+    },
+    "app/api/audit/route.ts": {
+      "maxDuration": 300
     }
   },
   "crons": [

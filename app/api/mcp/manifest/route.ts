@@ -1,3 +1,4 @@
+import { getOkxBillingManifest } from "@/lib/billing/okx-x402";
 import { isMcpHttpEnabled } from "@/lib/mcp/auth";
 import { REVEL_MCP_USAGE } from "@/lib/mcp/usage-model";
 import {
@@ -37,6 +38,7 @@ export async function GET() {
     },
     protocolVersion: "2024-11-05",
     billingUnit: REVEL_MCP_USAGE.billableUnit,
+    billing: getOkxBillingManifest(),
     usage: REVEL_MCP_USAGE,
     recommendedFlow: REVEL_MCP_RECOMMENDED_FLOW,
     tools: REVEL_MCP_TOOL_CATALOG.map((tool) => ({

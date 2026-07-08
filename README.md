@@ -19,11 +19,11 @@
 | Export | Markdown, JSON |
 | Auth | NextAuth + Google (`/log-in`, `/sign-up`) |
 | Website usage | 3 free audits/day per user (Mission Control) |
-| MCP / OKX | Streamable HTTP at `/api/mcp` (OKX billing TBD) |
+| MCP / OKX | Streamable HTTP at `/api/mcp`; x402 paid audits at `/api/audit` |
 | Database | Supabase + Prisma (production), Supabase JS fallback locally |
 | SEO / AEO | Sitemap, robots, JSON-LD, `llms.txt`, `ai.txt`, IndexNow |
 
-**Coming soon:** OKX marketplace billing, additional input types (Figma, Notion, repos).
+**Coming soon:** additional input types (Figma, Notion, repos).
 
 ---
 
@@ -88,6 +88,7 @@ Copy `.env.example` to `.env.local` and fill in values. For **Vercel production*
 | SEO | `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`, `INDEXNOW_KEY`, `CRON_SECRET` |
 | Usage | `DAILY_AUDIT_LIMIT` (default 3) |
 | MCP | `MCP_API_KEY` |
+| OKX billing | `OKX_API_KEY`, `OKX_SECRET_KEY`, `OKX_PASSPHRASE`, `OKX_PAY_TO`, `OKX_AUDIT_PRICE_USD` |
 
 Generate IndexNow / cron secrets locally:
 

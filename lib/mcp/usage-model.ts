@@ -82,12 +82,13 @@ export const REVEL_MCP_USAGE = {
     notPer: "mcp_tool_call",
     rationale:
       "Poll and health tools are cheap; one audit always runs the full agentic pipeline.",
+    launchPriceUsd: 0.35,
     suggestedRangeUsd: {
-      low: 0.15,
-      mid: 0.25,
+      low: 0.2,
+      mid: 0.35,
       high: 0.5,
     },
-    note: "Validate on OKX marketplace before locking price. $0.10–0.20 per audit is viable if Groq free tier holds; OpenRouter fallback adds ~$0.01–0.03/run.",
+    note: "$0.35/audit default (env OKX_AUDIT_PRICE_USD). Covers Groq/OpenRouter (~$0.02–0.08), Vercel compute, and maintenance. $0.20 is viable only on Groq free tier; $0.50 is safer long-term margin.",
   },
 } as const;
 

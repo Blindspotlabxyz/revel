@@ -1,0 +1,103 @@
+import { OKXFacilitatorClient } from "@okxweb3/app-x402-core/facilitator";
+import {
+  x402ResourceServer,
+  type RouteConfig,
+} from "@okxweb3/app-x402-core/server";
+import { ExactEvmScheme } from "@okxweb3/app-x402-evm/exact/server";
+import { siteConfig } from "@/lib/site-config";
+
+/** X Layer mainnet — OKX Onchain OS payments */
+export const OKX_X402_NETWORK = "eip155:196" as const;
+
+/** USDT0 on X Layer (6 decimals) */
+export const OKX_USDT0_ADDRESS =
+  "0x779ded0c9e1022225f8e0630b35a9b54be713736";
+
+/** Default launch price — covers LLM fallback + Vercel + maintenance margin */
+export const DEFAULT_OKX_AUDIT_PRICE_USD = 0.35;
+
+let resourceServer: x402ResourceServer | null = null;
+let initialized = false;
+
+export function isOkxBillingEnabled(): boolean {
+  return Boolean(
+    process.env.OKX_API_KEY?.trim() &&
+      process.env.OKX_SECRET_KEY?.trim() &&
+      process.env.OKX_PASSPHRASE?.trim() &&
+      process.env.OKX_PAY_TO?.trim()
+  );
+}
+
+export function getOkxAuditPriceUsd(): number {
+  const raw = Number(process.env.OKX_AUDIT_PRICE_USD ?? DEFAULT_OKX_AUDIT_PRICE_USD);
+  if (!Number.isFinite(raw) || raw <= 0) return DEFAULT_OKX_AUDIT_PRICE_USD;
+  return Math.min(raw, 10);
+}
+
+export function getOkxAuditPriceLabel(): string {
+  const usd = getOkxAuditPriceUsd();
+  return `$${usd.toFixed(2)}`;
+}
+
+export function getOkxPayTo(): string | undefined {
+  return process.env.OKX_PAY_TO?.trim() || undefined;
+}
+
+export function getOkxBillingManifest() {
+  const priceUsd = getOkxAuditPriceUsd();
+  return {
+    protocol: "x402",
+    network: OKX_X402_NETWORK,
+    unit: "completed_audit",
+    priceUsd,
+    priceDisplay: `$${priceUsd.toFixed(2)}`,
+    currency: "USDT0",
+    tokenAddress: OKX_USDT0_ADDRESS,
+    endpoint: `${siteConfig.url}/api/audit`,
+    enabled: isOkxBillingEnabled(),
+    note: "One charge per started audit. Poll /api/report/:id or use MCP revel_get_analysis after payment.",
+  };
+}
+
+export function getOkxResourceServer(): x402ResourceServer {
+  if (!isOkxBillingEnabled()) {
+    throw new Error("OKX billing is not configured");
+  }
+
+  if (!resourceServer) {
+    const facilitator = new OKXFacilitatorClient({
+      apiKey: process.env.OKX_API_KEY!,
+      secretKey: process.env.OKX_SECRET_KEY!,
+      passphrase: process.env.OKX_PASSPHRASE!,
+      syncSettle: true,
+    });
+
+    resourceServer = new x402ResourceServer(facilitator).register(
+      OKX_X402_NETWORK,
+      new ExactEvmScheme()
+    );
+  }
+
+  return resourceServer;
+}
+
+export async function ensureOkxResourceServerReady(): Promise<void> {
+  if (!isOkxBillingEnabled() || initialized) return;
+  await getOkxResourceServer().initialize();
+  initialized = true;
+}
+
+export function getAuditRouteConfig(): RouteConfig {
+  return {
+    accepts: {
+      scheme: "exact",
+      network: OKX_X402_NETWORK,
+      payTo: process.env.OKX_PAY_TO!,
+      price: getOkxAuditPriceLabel(),
+      maxTimeoutSeconds: 300,
+    },
+    description:
+      "Revel product audit — Reveal Index, Blindspot Map, Blueprint, and Action Queue",
+    mimeType: "application/json",
+  };
+}

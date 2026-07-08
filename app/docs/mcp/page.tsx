@@ -108,6 +108,17 @@ export default function McpDocsPage() {
           </pre>
         </section>
 
+        <section className="mt-10 space-y-3">
+          <h2 className="font-heading text-2xl font-semibold">Billing (OKX x402)</h2>
+          <p className="text-muted">
+            Paid agent access uses OKX Onchain OS x402 on{" "}
+            <code>POST /api/audit</code> — one charge per completed audit
+            (default $0.35 USDT0 on X Layer). Set price via{" "}
+            <code>OKX_AUDIT_PRICE_USD</code>. MCP tools remain available with{" "}
+            <code>MCP_API_KEY</code> for marketplace proxy access.
+          </p>
+        </section>
+
         <section className="mt-10">
           <h2 className="font-heading text-2xl font-semibold">
             Typical agent flow
@@ -117,8 +128,8 @@ export default function McpDocsPage() {
               Call <code>revel_analyze_website</code> with a public URL
             </li>
             <li>
-              Poll with <code>revel_wait_for_analysis</code> (1–3 min on slow
-              networks)
+              Poll with <code>revel_get_analysis</code> every 5s (prefer over{" "}
+              <code>revel_wait_for_analysis</code> on HTTP — avoids 60s timeouts)
             </li>
             <li>
               Export via <code>revel_export_blueprint</code> or read{" "}
