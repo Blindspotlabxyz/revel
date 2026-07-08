@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { getMcpUsageSummary } from "@/lib/mcp/usage-model";
 import { getExportCapabilities } from "@/lib/mission-control-config";
@@ -16,6 +17,23 @@ const POLL_INTERVAL_MS = 3_000;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Vercel-safe background work (stdio falls back to fire-and-forget). */
+function scheduleAnalysis(id: string, website: string): void {
+  const task = async () => {
+    try {
+      await runAnalysis(id, website);
+    } catch (error) {
+      await markAnalysisFailed(id, error, { website });
+    }
+  };
+
+  try {
+    after(task);
+  } catch {
+    void task();
+  }
 }
 
 export function getRevelMcpHealth() {
@@ -41,13 +59,7 @@ export async function startWebsiteAnalysis(url: string) {
     createdAt: new Date().toISOString(),
   });
 
-  void (async () => {
-    try {
-      await runAnalysis(id, website);
-    } catch (error) {
-      await markAnalysisFailed(id, error, { website });
-    }
-  })();
+  scheduleAnalysis(id, website);
 
   return {
     analysisId: id,
