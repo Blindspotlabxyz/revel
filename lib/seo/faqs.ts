@@ -45,8 +45,8 @@ export const revelFaqs = [
       "Revel runs a structured product investigation workflow and returns scored blindspots, a roadmap, and exportable tasks, not open-ended chat replies.",
   },
   {
-    question: "Is there a free plan?",
+    question: "How many analyses can I run?",
     answer:
-      "Yes. The Starter plan includes free analyses each month so you can evaluate Revel before upgrading.",
+      "Mission Control includes a limited number of free audits per day while Revel is in early access. Agent access via OKX.AI marketplace is coming soon.",
   },
 ] as const;

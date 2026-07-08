@@ -12,6 +12,7 @@
     "test:mcp": "npx tsx scripts/test-mcp.ts",
     "test:mcp:http": "npx tsx scripts/test-mcp-http.ts",
     "test:mcp:prod": "npx tsx scripts/test-mcp-http.ts https://tryrevel.xyz/api/mcp",
+    "test:mcp:marketplace": "npx tsx scripts/test-mcp-marketplace-flow.ts",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "postbuild": "node scripts/indexnow-ping.mjs",
@@ -51,7 +52,6 @@
     "pg": "^8.22.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "stripe": "^22.3.0",
     "tailwind-merge": "^3.0.2",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"

@@ -32,10 +32,9 @@ who need strategic product feedback without hiring consultants.
 - Blueprint: prioritized improvement sequence
 - Action Queue: concrete tasks with export
 
-## Pricing (USD)
-- Starter: Free (limited analyses per month)
-- Developer: $19/month, unlimited analyses, exports, priority processing
-- Business: $49/month, team features, shared history, API access
+## Access
+- Mission Control: free early access with a limited number of audits per day
+- OKX.AI marketplace (MCP): paid per completed audit (pricing TBD)
 
 ## API endpoints (application)
 - POST /api/analyze: start analysis with { url }
@@ -57,7 +56,7 @@ ${revelFaqs.map((f) => `### ${f.question}\n${f.answer}`).join("\n\n")}
 - Home: ${absoluteUrl("/")}
 - How it works: ${absoluteUrl("/docs/how-it-works")}
 - Features: ${absoluteUrl("/features")}
-- Pricing: ${absoluteUrl("/pricing")}
+- MCP docs: ${absoluteUrl("/docs/mcp")}
 - FAQ: ${absoluteUrl("/docs/faq")}
 - Docs: ${absoluteUrl("/docs")}
 - API docs: ${absoluteUrl("/docs/api")}

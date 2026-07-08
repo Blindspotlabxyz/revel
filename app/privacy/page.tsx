@@ -55,9 +55,8 @@ export default function PrivacyPage() {
             </h2>
             <p className="mt-3 leading-relaxed">
               Revel uses Google sign-in via NextAuth (authentication), Supabase
-              (data storage), OpenRouter
-              (AI analysis), Stripe (payments), and Vercel (hosting). Each service
-              operates under its own privacy policy.
+              (data storage), Groq and OpenRouter (AI analysis), and Vercel
+              (hosting). Each service operates under its own privacy policy.
             </p>
           </section>
 

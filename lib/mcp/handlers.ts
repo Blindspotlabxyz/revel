@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { getMcpUsageSummary } from "@/lib/mcp/usage-model";
 import { getExportCapabilities } from "@/lib/mission-control-config";
 import { normalizeUrl } from "@/lib/validation";
 import { markAnalysisFailed, runAnalysis } from "@/services/analysis-runner";
@@ -25,6 +26,7 @@ export function getRevelMcpHealth() {
     description:
       "Revel discovers product blindspots, scores the Reveal Index, and returns a prioritized Blueprint and Action Queue.",
     exports: getExportCapabilities(),
+    usage: getMcpUsageSummary(),
   };
 }
 

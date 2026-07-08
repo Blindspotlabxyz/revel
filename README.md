@@ -18,11 +18,12 @@
 | Outputs | Blindspot Map, Reveal Index, Blueprint, Action Queue |
 | Export | Markdown, JSON |
 | Auth | NextAuth + Google (`/log-in`, `/sign-up`) |
-| Billing | Stripe scaffold (503 until configured) |
+| Website usage | 3 free audits/day per user (Mission Control) |
+| MCP / OKX | Streamable HTTP at `/api/mcp` (OKX billing TBD) |
 | Database | Supabase + Prisma (production), Supabase JS fallback locally |
 | SEO / AEO | Sitemap, robots, JSON-LD, `llms.txt`, `ai.txt`, IndexNow |
 
-**Coming soon:** Linear/Notion export, OKX billing, additional input types (Figma, Notion, repos).
+**Coming soon:** OKX marketplace billing, additional input types (Figma, Notion, repos).
 
 ---
 
@@ -85,7 +86,8 @@ Copy `.env.example` to `.env.local` and fill in values. For **Vercel production*
 | Auth | `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | Database | `SUPABASE_*`, `DATABASE_URL`, `DIRECT_URL` |
 | SEO | `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`, `INDEXNOW_KEY`, `CRON_SECRET` |
-| Billing | `STRIPE_*` (optional) |
+| Usage | `DAILY_AUDIT_LIMIT` (default 3) |
+| MCP | `MCP_API_KEY` |
 
 Generate IndexNow / cron secrets locally:
 
@@ -113,7 +115,7 @@ types/            # Shared TypeScript types
 
 ## Routes
 
-**Marketing:** `/`, `/features`, `/pricing`, `/about`, `/contact`
+**Marketing:** `/`, `/features`, `/about`, `/contact`
 
 **Docs:** `/docs`, `/docs/api`, `/docs/how-it-works`, `/docs/faq`, `/docs/sample-reports` (also `docs.tryrevel.xyz/*`)
 

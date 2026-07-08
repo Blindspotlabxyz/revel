@@ -50,11 +50,12 @@ export default function TermsPage() {
 
           <section>
             <h2 className="font-heading text-xl font-semibold text-foreground">
-              Subscriptions and billing
+              Usage limits
             </h2>
             <p className="mt-3 leading-relaxed">
-              Paid plans are billed monthly through Stripe. You may cancel at any
-              time. Refunds are handled on a case-by-case basis.
+              Mission Control includes a limited number of free audits per day
+              during early access. Paid agent access via OKX.AI marketplace may be
+              offered separately when available.
             </p>
           </section>
 

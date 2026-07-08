@@ -1,33 +1,19 @@
-import Link from "next/link";
 import { NavLink } from "@/components/nav-link";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { getCurrentUserEmail, isAuthEnabled } from "@/lib/auth";
-import { isStripeEnabled } from "@/lib/stripe";
-import { SettingsBilling } from "@/components/dashboard/settings-billing";
+import { getDailyAuditLimit } from "@/lib/daily-audit-limit";
 
 export const dynamic = "force-dynamic";
 
-export default async function SettingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ upgraded?: string }>;
-}) {
-  const params = await searchParams;
+export default async function SettingsPage() {
   const email = await getCurrentUserEmail();
   const authEnabled = isAuthEnabled();
-  const stripeEnabled = isStripeEnabled();
+  const dailyLimit = getDailyAuditLimit();
 
   return (
     <div className="max-w-xl">
       <h1 className="font-heading text-3xl font-semibold">Settings</h1>
       <p className="mt-2 text-muted">Manage your account and preferences.</p>
-
-      {params.upgraded === "true" && (
-        <div className="mt-6 rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm text-primary">
-          Your plan has been upgraded successfully.
-        </div>
-      )}
 
       <div className="mt-8 space-y-4">
         <Card>
@@ -62,20 +48,12 @@ export default async function SettingsPage({
 
         <Card>
           <CardContent className="pt-0">
-            <CardTitle>Billing</CardTitle>
-            {stripeEnabled ? (
-              <SettingsBilling />
-            ) : (
-              <>
-                <p className="mt-2 text-sm text-muted">
-                  You&apos;re on the Starter plan. Stripe billing is not
-                  configured yet.
-                </p>
-                <Button asChild variant="secondary" size="sm" className="mt-4">
-                  <Link href="/pricing">View Plans</Link>
-                </Button>
-              </>
-            )}
+            <CardTitle>Usage</CardTitle>
+            <p className="mt-2 text-sm text-muted">
+              Mission Control includes {dailyLimit} free product audits per day
+              (resets midnight UTC). Paid access via OKX.AI marketplace is coming
+              soon.
+            </p>
           </CardContent>
         </Card>
       </div>

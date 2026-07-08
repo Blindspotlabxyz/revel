@@ -17,7 +17,6 @@ const PROTECTED_PREFIXES = [
   "/api/analyze",
   "/api/export",
   "/api/history",
-  "/api/stripe/checkout",
 ];
 
 function isProtectedRoute(pathname: string): boolean {

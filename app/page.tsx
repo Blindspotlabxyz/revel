@@ -9,7 +9,6 @@ import { FeaturesSection } from "@/components/landing/features-section";
 import { SampleResult } from "@/components/landing/sample-result";
 import { MapSection } from "@/components/landing/map-section";
 import { ExportSection } from "@/components/landing/export-section";
-import { PricingSection } from "@/components/landing/pricing-section";
 import { FaqSection } from "@/components/landing/faq-section";
 import { CtaSection } from "@/components/landing/cta-section";
 import { Footer } from "@/components/landing/footer";
@@ -58,7 +57,6 @@ export default function HomePage() {
         <SampleResult />
         <MapSection />
         <ExportSection />
-        <PricingSection />
         <FaqSection />
         <CtaSection />
       </main>

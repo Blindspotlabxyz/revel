@@ -65,6 +65,10 @@ export function AnalysisForm() {
       <Button type="submit" size="lg" disabled={loading || !url.trim()}>
         {loading ? "Starting..." : "Analyze Product"}
       </Button>
+
+      <p className="text-xs text-muted">
+        Free early access: up to 3 audits per day (resets midnight UTC).
+      </p>
     </form>
   );
 }

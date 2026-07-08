@@ -104,32 +104,14 @@ export function productOffersJsonLd() {
     description: siteConfig.description,
     brand: { "@type": "Brand", name: siteConfig.name },
     manufacturer: { "@id": `${siteConfig.url}/#organization` },
-    offers: [
-      {
-        "@type": "Offer",
-        name: "Starter",
-        price: "0",
-        priceCurrency: "USD",
-        availability: "https://schema.org/InStock",
-        url: absoluteUrl("/pricing"),
-      },
-      {
-        "@type": "Offer",
-        name: "Developer",
-        price: "19",
-        priceCurrency: "USD",
-        availability: "https://schema.org/InStock",
-        url: absoluteUrl("/pricing"),
-      },
-      {
-        "@type": "Offer",
-        name: "Business",
-        price: "49",
-        priceCurrency: "USD",
-        availability: "https://schema.org/InStock",
-        url: absoluteUrl("/pricing"),
-      },
-    ],
+    offers: {
+      "@type": "Offer",
+      name: "Early access",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: absoluteUrl("/mission-control"),
+    },
   };
 }
 
@@ -180,12 +162,10 @@ export function softwareApplicationJsonLd() {
     featureList: [...productFeatures],
     screenshot: absoluteUrl("/images/hero-peel-desktop-16x9.jpg"),
     offers: {
-      "@type": "AggregateOffer",
-      lowPrice: "0",
-      highPrice: "49",
+      "@type": "Offer",
+      price: "0",
       priceCurrency: "USD",
-      offerCount: 3,
-      url: absoluteUrl("/pricing"),
+      url: absoluteUrl("/mission-control"),
     },
     creator: { "@id": `${siteConfig.url}/#organization` },
     publisher: { "@id": `${siteConfig.url}/#organization` },

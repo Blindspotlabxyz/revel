@@ -2,6 +2,7 @@ import { after } from "next/server";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { getCurrentUserId } from "@/lib/auth";
+import { checkDailyAuditLimit } from "@/lib/daily-audit-limit";
 import { logEvent } from "@/lib/logger";
 import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
 import { normalizeUrl } from "@/lib/validation";
@@ -15,11 +16,24 @@ export async function POST(request: Request) {
   try {
     const userId = await getCurrentUserId();
     const rateLimitKey = getRateLimitKey(request, userId);
-    const { success } = rateLimit(rateLimitKey);
+    const { success } = rateLimit(rateLimitKey, 5, 60_000);
 
     if (!success) {
       return NextResponse.json(
         { error: "Too many requests. Please wait a moment and try again." },
+        { status: 429 }
+      );
+    }
+
+    const daily = await checkDailyAuditLimit(userId);
+    if (!daily.allowed) {
+      return NextResponse.json(
+        {
+          error: `Daily limit reached (${daily.limit} audits per day). Resets at midnight UTC.`,
+          used: daily.used,
+          limit: daily.limit,
+          resetsAt: daily.resetsAt,
+        },
         { status: 429 }
       );
     }

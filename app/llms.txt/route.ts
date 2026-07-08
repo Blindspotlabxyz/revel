@@ -15,7 +15,7 @@ export function GET() {
     `- [Home](${absoluteUrl("/")})`,
     `- [How it works](${absoluteUrl("/docs/how-it-works")})`,
     `- [Features](${absoluteUrl("/features")})`,
-    `- [Pricing](${absoluteUrl("/pricing")})`,
+    `- [MCP / OKX](${absoluteUrl("/docs/mcp")})`,
     `- [Sample reports](${absoluteUrl("/docs/sample-reports")})`,
     `- [FAQ](${absoluteUrl("/docs/faq")})`,
     `- [About](${absoluteUrl("/about")})`,

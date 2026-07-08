@@ -2,7 +2,6 @@
 export const publicSitemapPaths = [
   "/",
   "/features",
-  "/pricing",
   "/about",
   "/contact",
   "/docs",
@@ -25,7 +24,6 @@ export const sitemapPriorities: Record<
 > = {
   "/": { changeFrequency: "weekly", priority: 1 },
   "/features": { changeFrequency: "monthly", priority: 0.9 },
-  "/pricing": { changeFrequency: "weekly", priority: 0.9 },
   "/about": { changeFrequency: "monthly", priority: 0.8 },
   "/contact": { changeFrequency: "yearly", priority: 0.6 },
   "/docs": { changeFrequency: "monthly", priority: 0.85 },
