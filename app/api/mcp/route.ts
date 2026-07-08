@@ -8,6 +8,17 @@ import { handleMcpHttpRequest } from "@/lib/mcp/http-transport";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "Content-Type, Authorization, X-Revel-MCP-Key, Mcp-Session-Id",
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: corsHeaders });
+}
+
 export async function GET() {
   if (!isMcpHttpEnabled()) {
     return Response.json(
@@ -16,13 +27,16 @@ export async function GET() {
     );
   }
 
-  return Response.json({
-    service: "revel-mcp",
-    transport: "streamable-http",
-    methods: ["POST", "DELETE", "GET"],
-    manifest: "/api/mcp/manifest",
-    docs: "/docs/mcp",
-  });
+  return Response.json(
+    {
+      service: "revel-mcp",
+      transport: "streamable-http",
+      methods: ["POST", "DELETE", "GET", "OPTIONS"],
+      manifest: "/api/mcp/manifest",
+      docs: "/docs/mcp",
+    },
+    { headers: corsHeaders }
+  );
 }
 
 export async function POST(request: Request) {

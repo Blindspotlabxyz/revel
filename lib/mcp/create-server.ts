@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { REVEL_MCP_TOOL_CATALOG } from "@/lib/mcp/tool-catalog";
 import { siteConfig } from "@/lib/site-config";
 import {
   analyzeWebsiteAndWait,
@@ -46,7 +47,12 @@ export function createRevelMcpServer(): McpServer {
   server.tool(
     "revel_analyze_website",
     "Start an async product audit for a public website URL. Returns an analysisId to poll.",
-    { url: z.string().url().describe("Public website URL to analyze") },
+    {
+      url: z
+        .string()
+        .min(1)
+        .describe("Public website URL (https://example.com or example.com)"),
+    },
     async ({ url }) => textResult(await startWebsiteAnalysis(url))
   );
 
@@ -85,7 +91,7 @@ export function createRevelMcpServer(): McpServer {
     "revel_analyze_website_and_wait",
     "Run a full product audit and block until the Blueprint is ready. May take 1–3 minutes on slow networks.",
     {
-      url: z.string().url(),
+      url: z.string().min(1),
       timeoutSeconds: z.number().int().min(60).max(300).optional(),
     },
     async ({ url, timeoutSeconds }) =>
@@ -108,19 +114,11 @@ export function createRevelMcpServer(): McpServer {
   server.tool(
     "revel_fetch_url",
     "Fetch and extract readable text from a public webpage (homepage, pricing, about).",
-    { url: z.string().url() },
+    { url: z.string().min(1) },
     async ({ url }) => textResult(await fetchUrlContent(url))
   );
 
   return server;
 }
 
-export const REVEL_MCP_TOOLS = [
-  "revel_health",
-  "revel_analyze_website",
-  "revel_get_analysis",
-  "revel_wait_for_analysis",
-  "revel_analyze_website_and_wait",
-  "revel_export_blueprint",
-  "revel_fetch_url",
-] as const;
+export const REVEL_MCP_TOOLS = REVEL_MCP_TOOL_CATALOG.map((tool) => tool.name);

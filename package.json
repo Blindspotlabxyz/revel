@@ -10,6 +10,8 @@
     "test:agentic": "npx tsx scripts/test-agentic-analysis.ts",
     "mcp": "npx tsx scripts/revel-mcp.ts",
     "test:mcp": "npx tsx scripts/test-mcp.ts",
+    "test:mcp:http": "npx tsx scripts/test-mcp-http.ts",
+    "test:mcp:prod": "npx tsx scripts/test-mcp-http.ts https://tryrevel.xyz/api/mcp",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "postbuild": "node scripts/indexnow-ping.mjs",
