@@ -86,7 +86,7 @@ Copy `.env.example` to `.env.local` and fill in values. For **Vercel production*
 | Auth | `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | Database | `SUPABASE_*`, `DATABASE_URL`, `DIRECT_URL` |
 | SEO | `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`, `INDEXNOW_KEY`, `CRON_SECRET` |
-| Usage | `DAILY_AUDIT_LIMIT` (default 3) |
+| Usage | `WEEKLY_AUDIT_LIMIT` (default 3 per week) |
 | MCP | `MCP_API_KEY` |
 | OKX billing | `OKX_API_KEY`, `OKX_SECRET_KEY`, `OKX_PASSPHRASE`, `OKX_PAY_TO`, `OKX_AUDIT_PRICE_USD` |
 

@@ -1,14 +1,14 @@
 import { NavLink } from "@/components/nav-link";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { getCurrentUserEmail, isAuthEnabled } from "@/lib/auth";
-import { getDailyAuditLimit } from "@/lib/daily-audit-limit";
+import { getWeeklyAuditLimit } from "@/lib/weekly-audit-limit";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const email = await getCurrentUserEmail();
   const authEnabled = isAuthEnabled();
-  const dailyLimit = getDailyAuditLimit();
+  const weeklyLimit = getWeeklyAuditLimit();
 
   return (
     <div className="max-w-xl">
@@ -50,9 +50,10 @@ export default async function SettingsPage() {
           <CardContent className="pt-0">
             <CardTitle>Usage</CardTitle>
             <p className="mt-2 text-sm text-muted">
-              Mission Control includes {dailyLimit} free product audits per day
-              (resets midnight UTC). Paid access via OKX.AI marketplace is coming
-              soon.
+              Mission Control includes {weeklyLimit} free product audits per week
+              (resets Monday 00:00 UTC). OKX.AI is live for anyone who needs more
+              than {weeklyLimit} per week: $0.35 per successful audit on the OKX.AI
+              marketplace via the Revel MCP endpoint.
             </p>
           </CardContent>
         </Card>

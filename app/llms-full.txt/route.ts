@@ -33,8 +33,8 @@ who need strategic product feedback without hiring consultants.
 - Action Queue: concrete tasks with export
 
 ## Access
-- Mission Control: free early access with a limited number of audits per day
-- OKX.AI marketplace (MCP): paid per completed audit (pricing TBD)
+- Mission Control: 3 free audits per week (resets Monday 00:00 UTC)
+- OKX.AI marketplace (MCP): $0.35 per successful audit for additional volume
 
 ## API endpoints (application)
 - POST /api/analyze: start analysis with { url }

@@ -2,7 +2,7 @@ import { after } from "next/server";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { getCurrentUserId } from "@/lib/auth";
-import { checkDailyAuditLimit } from "@/lib/daily-audit-limit";
+import { checkWeeklyAuditLimit } from "@/lib/weekly-audit-limit";
 import { logEvent } from "@/lib/logger";
 import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
 import { normalizeUrl } from "@/lib/validation";
@@ -25,14 +25,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const daily = await checkDailyAuditLimit(userId);
-    if (!daily.allowed) {
+    const weekly = await checkWeeklyAuditLimit(userId);
+    if (!weekly.allowed) {
       return NextResponse.json(
         {
-          error: `Daily limit reached (${daily.limit} audits per day). Resets at midnight UTC.`,
-          used: daily.used,
-          limit: daily.limit,
-          resetsAt: daily.resetsAt,
+          error: `Weekly limit reached (${weekly.limit} audits per week). Resets Monday 00:00 UTC. Need more? Use Revel on OKX.AI marketplace ($0.35 per successful audit).`,
+          used: weekly.used,
+          limit: weekly.limit,
+          resetsAt: weekly.resetsAt,
         },
         { status: 429 }
       );

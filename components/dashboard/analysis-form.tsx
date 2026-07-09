@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function AnalysisForm() {
+type AnalysisFormProps = {
+  weeklyLimit?: number;
+};
+
+export function AnalysisForm({ weeklyLimit = 3 }: AnalysisFormProps) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -67,7 +71,8 @@ export function AnalysisForm() {
       </Button>
 
       <p className="text-xs text-muted">
-        Free early access: up to 3 audits per day (resets midnight UTC).
+        Free early access: up to {weeklyLimit} audits per week (resets Monday 00:00
+        UTC). Need more? OKX.AI marketplace — $0.35 per successful audit.
       </p>
     </form>
   );

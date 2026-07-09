@@ -53,9 +53,9 @@ export default function TermsPage() {
               Usage limits
             </h2>
             <p className="mt-3 leading-relaxed">
-              Mission Control includes a limited number of free audits per day
-              during early access. Paid agent access via OKX.AI marketplace may be
-              offered separately when available.
+              Mission Control includes 3 free audits per week (resets Monday
+              00:00 UTC) during early access. Additional audits are available on
+              the OKX.AI marketplace at $0.35 per successful audit.
             </p>
           </section>
 

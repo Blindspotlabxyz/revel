@@ -47,6 +47,6 @@ export const revelFaqs = [
   {
     question: "How many analyses can I run?",
     answer:
-      "Mission Control includes a limited number of free audits per day while Revel is in early access. Agent access via OKX.AI marketplace is coming soon.",
+      "Mission Control includes 3 free audits per week (resets Monday 00:00 UTC). OKX.AI is live for more volume: $0.35 per successful audit via the Revel MCP endpoint on the OKX.AI marketplace.",
   },
 ] as const;
