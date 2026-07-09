@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { trackActivity } from "@/lib/activity";
 import { REVEL_MCP_TOOL_CATALOG } from "@/lib/mcp/tool-catalog";
 import { siteConfig } from "@/lib/site-config";
 import {
@@ -23,6 +24,39 @@ function textResult(data: unknown) {
   };
 }
 
+function trackMcpTool<T extends Record<string, unknown>>(
+  toolName: string,
+  handler: (args: T) => Promise<ReturnType<typeof textResult>>
+) {
+  return async (args: T) => {
+    trackActivity({
+      eventType: "mcp_tool_call",
+      toolName,
+      status: "started",
+    });
+
+    try {
+      const result = await handler(args);
+      trackActivity({
+        eventType: "mcp_tool_call",
+        toolName,
+        status: "completed",
+      });
+      return result;
+    } catch (error) {
+      trackActivity({
+        eventType: "mcp_tool_call",
+        toolName,
+        status: "failed",
+        metadata: {
+          error: error instanceof Error ? error.message : "Tool failed",
+        },
+      });
+      throw error;
+    }
+  };
+}
+
 export function createRevelMcpServer(): McpServer {
   const server = new McpServer(
     {
@@ -41,7 +75,7 @@ export function createRevelMcpServer(): McpServer {
   server.tool(
     "revel_health",
     "Check Revel MCP availability, version, and export integration capabilities.",
-    async () => textResult(getRevelMcpHealth())
+    trackMcpTool("revel_health", async () => textResult(getRevelMcpHealth()))
   );
 
   server.tool(
@@ -53,7 +87,9 @@ export function createRevelMcpServer(): McpServer {
         .min(1)
         .describe("Public website URL (https://example.com or example.com)"),
     },
-    async ({ url }) => textResult(await startWebsiteAnalysis(url))
+    trackMcpTool("revel_analyze_website", async ({ url }) =>
+      textResult(await startWebsiteAnalysis(url))
+    )
   );
 
   server.tool(
@@ -65,7 +101,9 @@ export function createRevelMcpServer(): McpServer {
         .uuid()
         .describe("Analysis ID from revel_analyze_website"),
     },
-    async ({ analysisId }) => textResult(await getAnalysisStatus(analysisId))
+    trackMcpTool("revel_get_analysis", async ({ analysisId }) =>
+      textResult(await getAnalysisStatus(analysisId))
+    )
   );
 
   server.tool(
@@ -81,10 +119,11 @@ export function createRevelMcpServer(): McpServer {
         .optional()
         .describe("Max wait time in seconds (default 180)"),
     },
-    async ({ analysisId, timeoutSeconds }) =>
+    trackMcpTool("revel_wait_for_analysis", async ({ analysisId, timeoutSeconds }) =>
       textResult(
         await waitForAnalysis(analysisId, (timeoutSeconds ?? 180) * 1000)
       )
+    )
   );
 
   server.tool(
@@ -94,10 +133,13 @@ export function createRevelMcpServer(): McpServer {
       url: z.string().min(1),
       timeoutSeconds: z.number().int().min(60).max(300).optional(),
     },
-    async ({ url, timeoutSeconds }) =>
-      textResult(
-        await analyzeWebsiteAndWait(url, (timeoutSeconds ?? 180) * 1000)
-      )
+    trackMcpTool(
+      "revel_analyze_website_and_wait",
+      async ({ url, timeoutSeconds }) =>
+        textResult(
+          await analyzeWebsiteAndWait(url, (timeoutSeconds ?? 180) * 1000)
+        )
+    )
   );
 
   server.tool(
@@ -107,15 +149,18 @@ export function createRevelMcpServer(): McpServer {
       analysisId: z.string().uuid(),
       format: z.enum(["markdown", "json"]).optional(),
     },
-    async ({ analysisId, format }) =>
+    trackMcpTool("revel_export_blueprint", async ({ analysisId, format }) =>
       textResult(await exportBlueprint(analysisId, format ?? "markdown"))
+    )
   );
 
   server.tool(
     "revel_fetch_url",
     "Fetch and extract readable text from a public webpage (homepage, pricing, about).",
     { url: z.string().min(1) },
-    async ({ url }) => textResult(await fetchUrlContent(url))
+    trackMcpTool("revel_fetch_url", async ({ url }) =>
+      textResult(await fetchUrlContent(url))
+    )
   );
 
   return server;

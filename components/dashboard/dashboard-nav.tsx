@@ -7,15 +7,31 @@ import { RevelLogo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/dashboard/user-menu";
 
-const navItems = [
+const baseNavItems = [
   { label: "Mission Control", href: "/mission-control" },
   { label: "History", href: "/mission-control/history" },
-
   { label: "Account", href: "/mission-control/account" },
   { label: "Settings", href: "/mission-control/settings" },
 ];
 
-export function DashboardNav() {
+const adminNavItem = {
+  label: "Analytics",
+  href: "/mission-control/analytics",
+};
+
+type DashboardNavProps = {
+  isAdmin?: boolean;
+};
+
+export function DashboardNav({ isAdmin = false }: DashboardNavProps) {
+  const navItems = isAdmin
+    ? [
+        baseNavItems[0],
+        baseNavItems[1],
+        adminNavItem,
+        ...baseNavItems.slice(2),
+      ]
+    : baseNavItems;
   const pathname = usePathname();
 
   return (

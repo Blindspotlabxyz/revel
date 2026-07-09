@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { trackActivity } from "@/lib/activity";
+import { getCurrentUserId } from "@/lib/auth";
 import { logEvent } from "@/lib/logger";
 import type { ExportFormat } from "@/lib/mission-control-config";
 import { getExportCapabilities } from "@/lib/mission-control-config";
@@ -18,8 +20,26 @@ export async function GET() {
   return NextResponse.json({ exports: getExportCapabilities() });
 }
 
+function recordExport(
+  id: string,
+  format: string,
+  userId: string | null,
+  extra?: Record<string, unknown>
+) {
+  logEvent("export_completed", { id, format, ...extra });
+  trackActivity({
+    eventType: "export_completed",
+    source: "website",
+    analysisId: id,
+    userId,
+    status: "completed",
+    metadata: { format, ...extra },
+  });
+}
+
 export async function POST(request: Request) {
   try {
+    const userId = await getCurrentUserId();
     const { id, format, destination } = await request.json();
 
     if (!id || !format) {
@@ -43,7 +63,7 @@ export async function POST(request: Request) {
 
     if (format === "markdown") {
       const content = exportToMarkdown(report, website);
-      logEvent("export_completed", { id, format: "markdown" });
+      recordExport(id, "markdown", userId);
       return NextResponse.json({
         success: true,
         mode: "download",
@@ -54,7 +74,7 @@ export async function POST(request: Request) {
 
     if (format === "json") {
       const content = exportToJson(report, website);
-      logEvent("export_completed", { id, format: "json" });
+      recordExport(id, "json", userId);
       return NextResponse.json({
         success: true,
         mode: "download",
@@ -68,7 +88,7 @@ export async function POST(request: Request) {
 
       if (destination === "gist" && capabilities.githubGist) {
         const gist = await pushToGitHubGist(report, website, analysis.id);
-        logEvent("export_completed", { id, format: "github-gist" });
+        recordExport(id, "github-gist", userId);
         return NextResponse.json({
           success: true,
           mode: "link",
@@ -77,7 +97,7 @@ export async function POST(request: Request) {
         });
       }
 
-      logEvent("export_completed", { id, format: "github" });
+      recordExport(id, "github", userId);
       return NextResponse.json({
         success: true,
         mode: "download",
@@ -98,11 +118,7 @@ export async function POST(request: Request) {
       }
 
       const result = await pushToLinear(report, website);
-      logEvent("export_completed", {
-        id,
-        format: "linear",
-        created: result.created,
-      });
+      recordExport(id, "linear", userId, { created: result.created });
       return NextResponse.json({
         success: true,
         mode: "link",
@@ -125,7 +141,7 @@ export async function POST(request: Request) {
       }
 
       const result = await pushToNotion(report, website, analysis.id);
-      logEvent("export_completed", { id, format: "notion" });
+      recordExport(id, "notion", userId);
       return NextResponse.json({
         success: true,
         mode: "link",

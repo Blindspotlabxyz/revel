@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE,
   password_hash TEXT,
+  is_admin BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -29,6 +30,24 @@ CREATE TABLE IF NOT EXISTS reports (
 CREATE INDEX IF NOT EXISTS idx_analyses_user_id ON analyses(user_id);
 CREATE INDEX IF NOT EXISTS idx_analyses_created_at ON analyses(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_reports_analysis_id ON reports(analysis_id);
+
+CREATE TABLE IF NOT EXISTS activity_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_type TEXT NOT NULL,
+  source TEXT NOT NULL,
+  user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  tool_name TEXT,
+  analysis_id UUID,
+  website TEXT,
+  status TEXT,
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_events_created_at ON activity_events(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activity_events_event_type ON activity_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_activity_events_source ON activity_events(source);
+CREATE INDEX IF NOT EXISTS idx_activity_events_user_id ON activity_events(user_id);
 
 ALTER TABLE analyses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reports ENABLE ROW LEVEL SECURITY;

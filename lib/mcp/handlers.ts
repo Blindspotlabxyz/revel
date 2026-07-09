@@ -1,5 +1,6 @@
 import { after } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import { trackActivity } from "@/lib/activity";
 import { getOkxBillingManifest } from "@/lib/billing/okx-x402";
 import { getMcpUsageSummary } from "@/lib/mcp/usage-model";
 import { getExportCapabilities } from "@/lib/mission-control-config";
@@ -62,6 +63,12 @@ export async function startWebsiteAnalysis(url: string) {
   });
 
   scheduleAnalysis(id, website);
+  trackActivity({
+    eventType: "analysis_started",
+    analysisId: id,
+    website,
+    status: "started",
+  });
 
   return {
     analysisId: id,

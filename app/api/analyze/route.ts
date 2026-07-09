@@ -1,6 +1,8 @@
 import { after } from "next/server";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import { runWithActivityContext } from "@/lib/activity-context";
+import { trackActivity } from "@/lib/activity";
 import { getCurrentUserId } from "@/lib/auth";
 import { checkWeeklyAuditLimit } from "@/lib/weekly-audit-limit";
 import { logEvent } from "@/lib/logger";
@@ -13,8 +15,10 @@ import { saveAnalysis } from "@/services/store";
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
+  const userId = await getCurrentUserId();
+
+  return runWithActivityContext({ source: "website", userId }, async () => {
   try {
-    const userId = await getCurrentUserId();
     const rateLimitKey = getRateLimitKey(request, userId);
     const { success } = rateLimit(rateLimitKey, 5, 60_000);
 
@@ -52,6 +56,13 @@ export async function POST(request: Request) {
 
     await saveAnalysis(analysis);
     logEvent("analysis_started", { id, website, userId });
+    trackActivity({
+      eventType: "analysis_started",
+      analysisId: id,
+      website,
+      userId,
+      status: "started",
+    });
 
     after(async () => {
       try {
@@ -70,4 +81,5 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ error: message }, { status: 400 });
   }
+  });
 }

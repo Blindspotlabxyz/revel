@@ -1,3 +1,4 @@
+import { isUserAdmin } from "@/lib/admin";
 import { getAllAnalyses } from "@/services/store";
 
 export const DEFAULT_WEEKLY_AUDIT_LIMIT = 3;
@@ -33,12 +34,17 @@ export async function checkWeeklyAuditLimit(userId: string | null | undefined): 
   used: number;
   limit: number;
   resetsAt: string;
+  isAdmin?: boolean;
 }> {
   const limit = getWeeklyAuditLimit();
   const resetsAt = new Date(startOfUtcWeek().getTime() + 7 * 86_400_000).toISOString();
 
   if (!userId) {
     return { allowed: true, used: 0, limit, resetsAt };
+  }
+
+  if (await isUserAdmin(userId)) {
+    return { allowed: true, used: 0, limit, resetsAt, isAdmin: true };
   }
 
   const used = await countWeekAudits(userId);

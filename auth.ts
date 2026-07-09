@@ -135,6 +135,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
+      if (token.sub) {
+        const prisma = getPrisma();
+        if (prisma) {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: { isAdmin: true },
+          });
+          token.isAdmin = dbUser?.isAdmin === true;
+        }
+      }
+
       return token;
     },
     session({ session, token }) {
@@ -143,6 +154,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.name = token.name ?? session.user.name;
         session.user.email = token.email ?? session.user.email;
         session.user.image = token.picture ?? session.user.image;
+        session.user.isAdmin = token.isAdmin === true;
       }
       return session;
     },

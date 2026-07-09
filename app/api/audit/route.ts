@@ -7,6 +7,8 @@ import {
   getOkxResourceServer,
   isOkxBillingEnabled,
 } from "@/lib/billing/okx-x402";
+import { runWithActivityContext } from "@/lib/activity-context";
+import { trackActivity } from "@/lib/activity";
 import { startWebsiteAnalysis } from "@/lib/mcp/handlers";
 import { normalizeUrl } from "@/lib/validation";
 
@@ -30,7 +32,18 @@ async function auditHandler(request: NextRequest): Promise<NextResponse> {
 
   try {
     const website = normalizeUrl(url);
-    const result = await startWebsiteAnalysis(website);
+    const result = await runWithActivityContext(
+      { source: "api_audit", paid: true },
+      () => startWebsiteAnalysis(website)
+    );
+    trackActivity({
+      eventType: "analysis_started",
+      source: "api_audit",
+      analysisId: result.analysisId,
+      website: result.website,
+      status: "started",
+      metadata: { paid: true },
+    });
     return NextResponse.json({
       ...result,
       billing: {

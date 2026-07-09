@@ -38,7 +38,9 @@ function applyCors(response: Response): NextResponse {
 }
 
 async function mcpPostHandler(request: NextRequest): Promise<NextResponse> {
-  return applyCors(await handleMcpHttpRequest(request));
+  return applyCors(
+    await handleMcpHttpRequest(request, { source: "mcp_okx", paid: true })
+  );
 }
 
 export async function OPTIONS() {
@@ -88,7 +90,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (validateMcpRequest(request)) {
-    return applyCors(await handleMcpHttpRequest(request));
+    return applyCors(
+      await handleMcpHttpRequest(request, { source: "mcp_dev", paid: false })
+    );
   }
 
   if (isOkxBillingEnabled()) {
@@ -110,5 +114,7 @@ export async function DELETE(request: Request) {
     return applyCors(mcpUnauthorizedResponse());
   }
 
-  return applyCors(await handleMcpHttpRequest(request));
+  return applyCors(
+    await handleMcpHttpRequest(request, { source: "mcp_dev", paid: false })
+  );
 }

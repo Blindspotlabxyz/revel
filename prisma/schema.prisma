@@ -8,11 +8,13 @@ datasource db {
 }
 
 model User {
-  id           String     @id
-  email        String?    @unique
-  passwordHash String?    @map("password_hash")
-  createdAt    DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
-  analyses     Analysis[]
+  id             String          @id
+  email          String?         @unique
+  passwordHash   String?         @map("password_hash")
+  isAdmin        Boolean         @default(false) @map("is_admin")
+  createdAt      DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  analyses       Analysis[]
+  activityEvents ActivityEvent[]
 
   @@map("users")
 }
@@ -42,4 +44,24 @@ model Report {
 
   @@index([analysisId], map: "idx_reports_analysis_id")
   @@map("reports")
+}
+
+model ActivityEvent {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventType  String    @map("event_type")
+  source     String
+  userId     String?   @map("user_id")
+  toolName   String?   @map("tool_name")
+  analysisId String?   @map("analysis_id") @db.Uuid
+  website    String?
+  status     String?
+  metadata   Json?     @db.JsonB
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)], map: "idx_activity_events_created_at")
+  @@index([eventType], map: "idx_activity_events_event_type")
+  @@index([source], map: "idx_activity_events_source")
+  @@index([userId], map: "idx_activity_events_user_id")
+  @@map("activity_events")
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DashboardNav } from "@/components/dashboard/dashboard-nav";
+import { MissionControlNav } from "@/components/dashboard/mission-control-nav";
 import { MissionControlBackHome } from "@/components/dashboard/mission-control-back-home";
 import { createPageMetadata } from "@/lib/seo/metadata";
 
@@ -19,7 +19,7 @@ export default function MissionControlLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <DashboardNav />
+      <MissionControlNav />
       <MissionControlBackHome />
       <main className="mx-auto max-w-6xl px-6 py-12">{children}</main>
     </div>
