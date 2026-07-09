@@ -20,15 +20,16 @@ model User {
 }
 
 model Analysis {
-  id        String    @id @db.Uuid
-  userId    String?   @map("user_id")
-  website   String
-  status    String    @default("processing")
-  score     Int?
-  error     String?
-  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  report    Report?
+  id              String           @id @db.Uuid
+  userId          String?          @map("user_id")
+  website         String
+  status          String           @default("processing")
+  score           Int?
+  error           String?
+  createdAt       DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
+  user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  report          Report?
+  partnerAnalysis PartnerAnalysis?
 
   @@index([userId], map: "idx_analyses_user_id")
   @@index([createdAt(sort: Desc)], map: "idx_analyses_created_at")
@@ -64,4 +65,52 @@ model ActivityEvent {
   @@index([source], map: "idx_activity_events_source")
   @@index([userId], map: "idx_activity_events_user_id")
   @@map("activity_events")
+}
+
+model Partner {
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  domain        String?          @unique
+  contactEmail  String?          @map("contact_email")
+  status        String           @default("pending")
+  accessType    String           @default("paid") @map("access_type")
+  creditsBalance Int             @default(0) @map("credits_balance")
+  monthlyQuota  Int?             @map("monthly_quota")
+  notes         String?
+  createdAt     DateTime?        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime?        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  apiKeys       PartnerApiKey[]
+  analyses      PartnerAnalysis[]
+
+  @@index([status], map: "idx_partners_status")
+  @@index([accessType], map: "idx_partners_access_type")
+  @@map("partners")
+}
+
+model PartnerApiKey {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partnerId  String    @map("partner_id") @db.Uuid
+  keyPrefix  String    @map("key_prefix")
+  keyHash    String    @map("key_hash")
+  label      String?
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz(6)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(6)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  partner    Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@index([keyPrefix], map: "idx_partner_api_keys_prefix")
+  @@index([partnerId], map: "idx_partner_api_keys_partner_id")
+  @@map("partner_api_keys")
+}
+
+model PartnerAnalysis {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partnerId  String    @map("partner_id") @db.Uuid
+  analysisId String    @unique @map("analysis_id") @db.Uuid
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  partner    Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  analysis   Analysis  @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId], map: "idx_partner_analyses_partner_id")
+  @@map("partner_analyses")
 }

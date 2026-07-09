@@ -1,0 +1,144 @@
+import { after } from "next/server";
+import { NextResponse } from "next/server";
+import { runWithActivityContext } from "@/lib/activity-context";
+import { trackActivity } from "@/lib/activity";
+import {
+  authenticatePartnerRequest,
+  partnerUnauthorizedResponse,
+} from "@/lib/partner-auth";
+import {
+  checkPartnerBilling,
+  consumePartnerCredit,
+} from "@/lib/partner-billing";
+import { partnerRateLimit } from "@/lib/partner-rate-limit";
+import { linkPartnerAnalysis } from "@/lib/partners";
+import { startWebsiteAnalysis } from "@/lib/mcp/handlers";
+import { normalizeUrl } from "@/lib/validation";
+import { markAnalysisFailed, runAnalysis } from "@/services/analysis-runner";
+
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "Content-Type, Authorization, X-Revel-Partner-Key",
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: corsHeaders });
+}
+
+export async function POST(request: Request) {
+  const partner = await authenticatePartnerRequest(request);
+  if (!partner) {
+    return applyCors(partnerUnauthorizedResponse());
+  }
+
+  const billing = checkPartnerBilling(partner);
+  if (!billing.allowed) {
+    return applyCors(
+      NextResponse.json(
+        {
+          error: billing.error,
+          hint: billing.hint,
+          priceUsd: billing.priceUsd,
+        },
+        { status: billing.status }
+      )
+    );
+  }
+
+  const { success } = partnerRateLimit(partner.id);
+  if (!success) {
+    return applyCors(
+      NextResponse.json(
+        { error: "Rate limit exceeded. Try again in a minute." },
+        { status: 429 }
+      )
+    );
+  }
+
+  let body: { url?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return applyCors(
+      NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
+    );
+  }
+
+  const url = body.url?.trim();
+  if (!url) {
+    return applyCors(
+      NextResponse.json({ error: "url is required" }, { status: 400 })
+    );
+  }
+
+  try {
+    const website = normalizeUrl(url);
+
+    return runWithActivityContext(
+      { source: "partner_api", paid: billing.mode === "credits" },
+      async () => {
+        const started = await startWebsiteAnalysis(website);
+        await linkPartnerAnalysis(partner.id, started.analysisId);
+
+        if (billing.mode === "credits") {
+          await consumePartnerCredit(partner.id);
+        }
+
+        trackActivity({
+          eventType: "analysis_started",
+          source: "partner_api",
+          analysisId: started.analysisId,
+          website,
+          status: "started",
+          metadata: {
+            partnerId: partner.id,
+            partnerName: partner.name,
+            billingMode: billing.mode,
+          },
+        });
+
+        after(async () => {
+          await runWithActivityContext({ source: "partner_api" }, async () => {
+            try {
+              await runAnalysis(started.analysisId, website);
+            } catch (error) {
+              await markAnalysisFailed(started.analysisId, error, { website });
+            }
+          });
+        });
+
+        return applyCors(
+          NextResponse.json({
+            analysisId: started.analysisId,
+            website: started.website,
+            status: started.status,
+            message: started.message,
+            poll: `/api/partner/v1/report/${started.analysisId}`,
+            partner: { name: partner.name, billingMode: billing.mode },
+          })
+        );
+      }
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Could not start analysis";
+    return applyCors(NextResponse.json({ error: message }, { status: 400 }));
+  }
+}
+
+function applyCors(response: Response): NextResponse {
+  const next = new NextResponse(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+  for (const [key, value] of Object.entries(corsHeaders)) {
+    next.headers.set(key, value);
+  }
+  return next;
+}

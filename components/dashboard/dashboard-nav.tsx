@@ -14,10 +14,10 @@ const baseNavItems = [
   { label: "Settings", href: "/mission-control/settings" },
 ];
 
-const adminNavItem = {
-  label: "Analytics",
-  href: "/mission-control/analytics",
-};
+const adminNavItems = [
+  { label: "Analytics", href: "/mission-control/analytics" },
+  { label: "Partners", href: "/mission-control/partners" },
+];
 
 type DashboardNavProps = {
   isAdmin?: boolean;
@@ -28,7 +28,7 @@ export function DashboardNav({ isAdmin = false }: DashboardNavProps) {
     ? [
         baseNavItems[0],
         baseNavItems[1],
-        adminNavItem,
+        ...adminNavItems,
         ...baseNavItems.slice(2),
       ]
     : baseNavItems;

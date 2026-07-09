@@ -45,6 +45,7 @@ export type AnalyticsDashboard = {
     mcpOkx: number;
     mcpDev: number;
     apiAudit: number;
+    partnerApi: number;
   }>;
 };
 
@@ -182,7 +183,13 @@ export async function getAnalyticsDashboard(): Promise<AnalyticsDashboard | null
 
   const dailyVolumeMap = new Map<
     string,
-    { website: number; mcpOkx: number; mcpDev: number; apiAudit: number }
+    {
+      website: number;
+      mcpOkx: number;
+      mcpDev: number;
+      apiAudit: number;
+      partnerApi: number;
+    }
   >();
 
   for (let i = 6; i >= 0; i -= 1) {
@@ -192,6 +199,7 @@ export async function getAnalyticsDashboard(): Promise<AnalyticsDashboard | null
       mcpOkx: 0,
       mcpDev: 0,
       apiAudit: 0,
+      partnerApi: 0,
     });
   }
 
@@ -205,6 +213,7 @@ export async function getAnalyticsDashboard(): Promise<AnalyticsDashboard | null
     else if (event.source === "mcp_okx") bucket.mcpOkx += 1;
     else if (event.source === "mcp_dev") bucket.mcpDev += 1;
     else if (event.source === "api_audit") bucket.apiAudit += 1;
+    else if (event.source === "partner_api") bucket.partnerApi += 1;
   }
 
   const exportTotal = exportEvents.reduce(

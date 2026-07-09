@@ -31,6 +31,7 @@ function formatSource(source: string): string {
     mcp_okx: "OKX MCP",
     mcp_dev: "MCP (dev key)",
     api_audit: "Paid API",
+    partner_api: "Partner API",
   };
   return labels[source] ?? source;
 }
@@ -127,7 +128,8 @@ export function AnalyticsDashboardView({ data }: { data: AnalyticsDashboard }) {
                     <th className="py-2 pr-3">Web</th>
                     <th className="py-2 pr-3">OKX</th>
                     <th className="py-2 pr-3">Dev</th>
-                    <th className="py-2">API</th>
+                    <th className="py-2 pr-3">API</th>
+                    <th className="py-2">Partner</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -137,7 +139,8 @@ export function AnalyticsDashboardView({ data }: { data: AnalyticsDashboard }) {
                       <td className="py-2 pr-3 tabular-nums">{row.website}</td>
                       <td className="py-2 pr-3 tabular-nums">{row.mcpOkx}</td>
                       <td className="py-2 pr-3 tabular-nums">{row.mcpDev}</td>
-                      <td className="py-2 tabular-nums">{row.apiAudit}</td>
+                      <td className="py-2 pr-3 tabular-nums">{row.apiAudit}</td>
+                      <td className="py-2 tabular-nums">{row.partnerApi}</td>
                     </tr>
                   ))}
                 </tbody>

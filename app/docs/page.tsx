@@ -52,6 +52,11 @@ export default function DocsPage() {
               desc: "Agent-to-MCP tools for OKX.AI",
             },
             { href: "/docs/api", label: "API Reference", desc: "REST endpoints" },
+            {
+              href: "/partners",
+              label: "Partner API",
+              desc: "Integrate Revel into your platform",
+            },
             { href: "/docs/faq", label: "FAQ", desc: "Common questions" },
             {
               href: "/docs/sample-reports",

@@ -42,6 +42,12 @@ who need strategic product feedback without hiring consultants.
 - POST /api/export: export { id, format: markdown|json }
 - GET /api/history: list user analyses
 
+## Partner API (platform integrations)
+- GET /api/partner/v1/health
+- POST /api/partner/v1/analyze: { url } with Authorization Bearer rvl_pk_...
+- GET /api/partner/v1/report/:id
+- Docs: /partners
+
 ## FAQ
 ${revelFaqs.map((f) => `### ${f.question}\n${f.answer}`).join("\n\n")}
 

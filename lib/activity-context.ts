@@ -4,7 +4,8 @@ export type ActivitySource =
   | "website"
   | "mcp_okx"
   | "mcp_dev"
-  | "api_audit";
+  | "api_audit"
+  | "partner_api";
 
 export type ActivityContext = {
   source: ActivitySource;
