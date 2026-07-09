@@ -39,7 +39,7 @@ export function DashboardNav({ isAdmin = false }: DashboardNavProps) {
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <RevelLogo size="md" />
 
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="flex max-w-[min(100%,42rem)] items-center gap-4 overflow-x-auto md:max-w-none md:gap-6">
           {navItems.map((item) => (
             <Link
               key={item.href}

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { LogOut, Settings, User } from "lucide-react";
+import { BarChart3, Handshake, LogOut, Settings, User } from "lucide-react";
 import { appUrl } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -120,6 +120,28 @@ export function AccountMenu({
               <User className="h-4 w-4 text-muted" />
               Mission Control
             </Link>
+            {user.isAdmin ? (
+              <>
+                <Link
+                  href="/mission-control/analytics"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-foreground transition-colors hover:bg-background"
+                >
+                  <BarChart3 className="h-4 w-4 text-muted" />
+                  Analytics
+                </Link>
+                <Link
+                  href="/mission-control/partners"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-foreground transition-colors hover:bg-background"
+                >
+                  <Handshake className="h-4 w-4 text-muted" />
+                  Partners
+                </Link>
+              </>
+            ) : null}
             <button
               type="button"
               role="menuitem"

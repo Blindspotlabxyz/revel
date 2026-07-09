@@ -49,7 +49,8 @@ export async function requireUserId(): Promise<string> {
 
 export async function getCurrentUserIsAdmin(): Promise<boolean> {
   const userId = await getCurrentUserId();
-  return isUserAdmin(userId);
+  const email = await getCurrentUserEmail();
+  return isUserAdmin(userId, email);
 }
 
 export async function requireAdminUserId(): Promise<string> {

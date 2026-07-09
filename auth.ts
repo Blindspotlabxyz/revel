@@ -10,6 +10,7 @@ import {
   isLocalAuthHost,
   pinCanonicalAuthEnv,
 } from "@/lib/auth-url";
+import { isEmailInAdminAllowlist } from "@/lib/admin";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getPrisma } from "@/lib/prisma";
 import { oauthFetch } from "@/lib/oauth-fetch";
@@ -136,14 +137,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (token.sub) {
-        const prisma = getPrisma();
-        if (prisma) {
-          const dbUser = await prisma.user.findUnique({
-            where: { id: token.sub },
-            select: { isAdmin: true },
-          });
-          token.isAdmin = dbUser?.isAdmin === true;
+        let isAdmin = false;
+
+        if (token.email && isEmailInAdminAllowlist(token.email)) {
+          isAdmin = true;
+        } else {
+          const prisma = getPrisma();
+          if (prisma) {
+            try {
+              const dbUser = await prisma.user.findUnique({
+                where: { id: token.sub },
+                select: { isAdmin: true, email: true },
+              });
+              isAdmin =
+                dbUser?.isAdmin === true ||
+                isEmailInAdminAllowlist(dbUser?.email ?? token.email);
+            } catch {
+              isAdmin = isEmailInAdminAllowlist(token.email);
+            }
+          }
         }
+
+        token.isAdmin = isAdmin;
       }
 
       return token;
