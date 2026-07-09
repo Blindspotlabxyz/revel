@@ -35,6 +35,12 @@ export async function GET() {
         alternateHeader: "X-Revel-MCP-Key",
         envVar: "MCP_API_KEY",
       },
+      payments: {
+        protocol: "x402",
+        agentPaymentsProtocol: "okx-agent-payments-protocol",
+        method: "POST",
+        headers: ["PAYMENT-SIGNATURE", "X-PAYMENT"],
+      },
     },
     protocolVersion: "2024-11-05",
     billingUnit: REVEL_MCP_USAGE.billableUnit,

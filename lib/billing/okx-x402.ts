@@ -45,17 +45,42 @@ export function getOkxPayTo(): string | undefined {
 
 export function getOkxBillingManifest() {
   const priceUsd = getOkxAuditPriceUsd();
+  const mcpEndpoint = `${siteConfig.url}/api/mcp`;
   return {
     protocol: "x402",
+    agentPaymentsProtocol: "okx-agent-payments-protocol",
     network: OKX_X402_NETWORK,
     unit: "completed_audit",
     priceUsd,
     priceDisplay: `$${priceUsd.toFixed(2)}`,
     currency: "USDT0",
     tokenAddress: OKX_USDT0_ADDRESS,
-    endpoint: `${siteConfig.url}/api/audit`,
+    endpoint: mcpEndpoint,
+    alternateEndpoint: `${siteConfig.url}/api/audit`,
     enabled: isOkxBillingEnabled(),
-    note: "One charge per started audit. Poll /api/report/:id or use MCP revel_get_analysis after payment.",
+    note: "POST the A2MCP endpoint with x402 payment headers. One charge per started audit.",
+  };
+}
+
+export function getOkxPaywallConfig() {
+  return {
+    appName: "Revel",
+    appLogo: `${siteConfig.url}/icon.png`,
+  };
+}
+
+export function getMcpRouteConfig(): RouteConfig {
+  return {
+    accepts: {
+      scheme: "exact",
+      network: OKX_X402_NETWORK,
+      payTo: process.env.OKX_PAY_TO!,
+      price: getOkxAuditPriceLabel(),
+      maxTimeoutSeconds: 300,
+    },
+    description:
+      "Revel A2MCP — one charge per completed website audit (Reveal Index, Blueprint, Action Queue)",
+    mimeType: "application/json",
   };
 }
 

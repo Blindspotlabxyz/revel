@@ -111,11 +111,12 @@ export default function McpDocsPage() {
         <section className="mt-10 space-y-3">
           <h2 className="font-heading text-2xl font-semibold">Billing (OKX x402)</h2>
           <p className="text-muted">
-            Paid agent access uses OKX Onchain OS x402 on{" "}
-            <code>POST /api/audit</code> — one charge per completed audit
+            OKX marketplace billing uses the Agent Payments Protocol (x402) on{" "}
+            <code>POST /api/mcp</code> — one charge per completed audit
             (default $0.35 USDT0 on X Layer). Set price via{" "}
-            <code>OKX_AUDIT_PRICE_USD</code>. MCP tools remain available with{" "}
-            <code>MCP_API_KEY</code> for marketplace proxy access.
+            <code>OKX_AUDIT_PRICE_USD</code>. Alternate paid HTTP route:{" "}
+            <code>POST /api/audit</code>. Dev access may use{" "}
+            <code>MCP_API_KEY</code>.
           </p>
         </section>
 

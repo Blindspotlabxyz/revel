@@ -1,9 +1,15 @@
+import { isOkxBillingEnabled } from "@/lib/billing/okx-x402";
+
 export function getMcpApiKey(): string | undefined {
   return process.env.MCP_API_KEY?.trim() || undefined;
 }
 
 export function isMcpHttpEnabled(): boolean {
-  return Boolean(getMcpApiKey()) || process.env.NODE_ENV === "development";
+  return (
+    Boolean(getMcpApiKey()) ||
+    isOkxBillingEnabled() ||
+    process.env.NODE_ENV === "development"
+  );
 }
 
 export function validateMcpRequest(request: Request): boolean {
