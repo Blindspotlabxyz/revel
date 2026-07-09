@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { GenesisStatCards } from "@/components/landing/genesis-stat-cards";
 import { IllustrationSlot } from "@/components/landing/illustration-slot";
 import { SectionIllustration } from "@/components/landing/section-illustration";
 import { genesisReportStatCards } from "@/lib/genesis-report-stats";
