@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { GenesisStatCards } from "@/components/landing/genesis-stat-cards";
 import { IllustrationSlot } from "@/components/landing/illustration-slot";
 import { SectionIllustration } from "@/components/landing/section-illustration";
-import { genesisReportStatCards } from "@/lib/genesis-report-stats";
 import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
 
 export function InsightSection() {
@@ -64,18 +63,7 @@ export function InsightSection() {
             output from Revel&apos;s audit of Arcapush.
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {genesisReportStatCards.map((stat) => (
-              <Card key={stat.label} className="text-center">
-                <CardContent className="pt-0">
-                  <p className="text-sm text-muted">{stat.label}</p>
-                  <p className="mt-2 font-heading text-4xl font-semibold text-primary tabular-nums">
-                    {stat.value}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <GenesisStatCards className="mt-8" />
         </motion.div>
       </div>
     </section>
