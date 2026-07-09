@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
+import { notifyUserWelcome } from "@/lib/email/notifications";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getPrisma, isPrismaEnabled } from "@/lib/prisma";
 
@@ -77,6 +78,8 @@ export async function POST(request: Request) {
       }
       throw createError;
     }
+
+    notifyUserWelcome({ email });
 
     return NextResponse.json({ ok: true });
   } catch (error) {

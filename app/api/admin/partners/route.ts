@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCurrentUserIsAdmin } from "@/lib/auth";
 import {
+  notifyPartnerApiKeyIssued,
+  notifyPartnerApproved,
+} from "@/lib/email/notifications";
+import {
   createPartnerAsAdmin,
   issuePartnerApiKey,
   listPartners,
@@ -46,13 +50,33 @@ export async function POST(request: Request) {
 
     const created = await createPartnerAsAdmin(partner);
 
+    if (
+      partner.contactEmail &&
+      (partner.status ?? "active") === "active"
+    ) {
+      notifyPartnerApproved({
+        name: partner.name,
+        contactEmail: partner.contactEmail,
+        accessType: partner.accessType,
+      });
+    }
+
     if (body.issueKey) {
       const key = await issuePartnerApiKey(created.id, "initial");
+      if (partner.contactEmail) {
+        notifyPartnerApiKeyIssued({
+          name: partner.name,
+          contactEmail: partner.contactEmail,
+          apiKey: key.key,
+          keyPrefix: key.prefix,
+        });
+      }
       return NextResponse.json({
         partnerId: created.id,
         apiKey: key.key,
         apiKeyPrefix: key.prefix,
         warning: "Store this key now. It will not be shown again.",
+        emailed: Boolean(partner.contactEmail),
       });
     }
 

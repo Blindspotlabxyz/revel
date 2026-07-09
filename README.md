@@ -89,6 +89,7 @@ Copy `.env.example` to `.env.local` and fill in values. For **Vercel production*
 | Usage | `WEEKLY_AUDIT_LIMIT` (default 3 per week) |
 | MCP | `MCP_API_KEY` |
 | OKX billing | `OKX_API_KEY`, `OKX_SECRET_KEY`, `OKX_PASSPHRASE`, `OKX_PAY_TO`, `OKX_AUDIT_PRICE_USD` |
+| Email (Resend) | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `REVEL_ADMIN_NOTIFY_EMAIL` |
 
 Generate IndexNow / cron secrets locally:
 

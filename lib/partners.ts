@@ -26,6 +26,34 @@ function normalizeDomain(domain: string): string {
     .replace(/^www\./, "");
 }
 
+export async function getPartnerById(id: string): Promise<PartnerRecord | null> {
+  const prisma = getPrisma();
+  if (!prisma) return null;
+
+  const row = await prisma.partner.findUnique({
+    where: { id },
+    include: { _count: { select: { apiKeys: true, analyses: true } } },
+  });
+
+  if (!row) return null;
+
+  return {
+    id: row.id,
+    name: row.name,
+    domain: row.domain,
+    contactEmail: row.contactEmail,
+    status: row.status,
+    accessType: row.accessType,
+    creditsBalance: row.creditsBalance,
+    monthlyQuota: row.monthlyQuota,
+    notes: row.notes,
+    createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(),
+    updatedAt: row.updatedAt?.toISOString() ?? new Date().toISOString(),
+    apiKeyCount: row._count.apiKeys,
+    analysisCount: row._count.analyses,
+  };
+}
+
 export async function listPartners(): Promise<PartnerRecord[]> {
   const prisma = getPrisma();
   if (!prisma) return [];

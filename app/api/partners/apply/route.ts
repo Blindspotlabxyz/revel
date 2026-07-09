@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notifyPartnerApplicationReceived } from "@/lib/email/notifications";
 import { createPartnerApplication } from "@/lib/partners";
 
 export async function POST(request: Request) {
@@ -21,6 +22,12 @@ export async function POST(request: Request) {
       contactEmail,
       domain,
       notes,
+    });
+
+    notifyPartnerApplicationReceived({
+      name,
+      contactEmail,
+      domain: domain || null,
     });
 
     return NextResponse.json({
