@@ -6,7 +6,7 @@ import { ProblemSection } from "@/components/landing/problem-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { InsightSection } from "@/components/landing/insight-section";
 import { FeaturesSection } from "@/components/landing/features-section";
-import { SampleResult } from "@/components/landing/sample-result";
+
 import { MapSection } from "@/components/landing/map-section";
 import { ExportSection } from "@/components/landing/export-section";
 import { FaqSection } from "@/components/landing/faq-section";
@@ -54,7 +54,6 @@ export default function HomePage() {
         <HowItWorks />
         <InsightSection />
         <FeaturesSection />
-        <SampleResult />
         <MapSection />
         <ExportSection />
         <FaqSection />
