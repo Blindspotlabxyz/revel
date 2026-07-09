@@ -30,7 +30,10 @@ export default function FeaturesPage() {
         ]}
         extraSchemas={[featuresItemListJsonLd()]}
       />
-      <FeaturesSection />
+      {/* Offset fixed marketing navbar */}
+      <div className="pt-16">
+        <FeaturesSection />
+      </div>
     </MarketingPage>
   );
 }

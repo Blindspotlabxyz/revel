@@ -34,11 +34,9 @@ export default function AboutPage() {
         ]}
         extraSchemas={[aboutPageJsonLd()]}
       />
-      <article className="mx-auto max-w-3xl px-6 py-32">
-        <p className="text-sm font-medium uppercase tracking-wider text-primary">
-          {organization.name}
-        </p>
-        <h1 className="mt-3 font-heading text-4xl font-semibold md:text-5xl">
+      <article className="mx-auto max-w-3xl px-6 pb-24 pt-32">
+        <p className="section-eyebrow">{organization.name}</p>
+        <h1 className="mt-4 font-heading text-4xl font-bold tracking-tight md:text-5xl">
           We built {name} to reveal what others miss.
         </h1>
         <p className="mt-6 text-xl leading-relaxed text-muted">{tagline}</p>
@@ -64,26 +62,29 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <section className="mt-16 rounded-2xl border border-border bg-surface p-8">
-          <h2 className="font-heading text-2xl font-semibold">The mission</h2>
+        <section className="mt-16 rounded-2xl border border-border bg-surface p-8 shadow-[var(--shadow-card)]">
+          <h2 className="font-heading text-2xl font-bold tracking-tight">
+            The mission
+          </h2>
           <p className="mt-4 leading-relaxed text-muted">
-            Make world-class product strategy accessible to every builder.
+            Make world-class product strategy accessible to every builder.{" "}
             {organization.name} exists so teams ship with clarity, not guesswork.
           </p>
         </section>
 
         <section className="mt-12">
-          <h2 className="font-heading text-2xl font-semibold">Built by</h2>
+          <h2 className="font-heading text-2xl font-bold tracking-tight">
+            Built by
+          </h2>
           <p className="mt-4 text-muted">
-            <strong className="text-foreground">{organization.name}</strong>.
-            {" "}
+            <strong className="text-foreground">{organization.name}</strong>.{" "}
             {organization.slogan}
           </p>
           <p className="mt-4 text-muted">
             Founded by{" "}
             <a
               href={siteConfig.founder.url}
-              className="font-medium text-foreground hover:text-primary"
+              className="font-medium text-foreground transition-colors hover:text-primary"
               rel="me"
             >
               {siteConfig.founder.name}
@@ -101,7 +102,7 @@ export default function AboutPage() {
           </p>
         </section>
 
-        <div className="mt-12 flex flex-wrap gap-4">
+        <div className="mt-12 flex flex-wrap gap-3">
           <Button asChild>
             <Link href="/mission-control">Run Revel</Link>
           </Button>

@@ -29,16 +29,16 @@ function RevelIcon({ size, className }: { size: number; className?: string }) {
       className={cn("shrink-0", className)}
       aria-hidden
     >
-      <rect x="10" y="14" width="38" height="38" rx="9" fill="#111111" />
-      <path d="M38 14h14v14c-6-4-10-6-14-8V14z" fill="#F7F2EB" />
-      <path d="M38 14h14v14l-9-5.5C41 20.5 39 17.5 38 14z" fill="#E07A5F" />
+      <rect x="10" y="14" width="38" height="38" rx="9" fill="#0A0F1C" />
+      <path d="M38 14h14v14c-6-4-10-6-14-8V14z" fill="#F3F5F8" />
+      <path d="M38 14h14v14l-9-5.5C41 20.5 39 17.5 38 14z" fill="#3559E0" />
       <path
         d="M38 14l14 14"
-        stroke="#C96A52"
+        stroke="#2A47C4"
         strokeWidth="2"
         strokeLinecap="round"
       />
-      <circle cx="30" cy="36" r="3" fill="#E07A5F" opacity="0.9" />
+      <circle cx="30" cy="36" r="3" fill="#3559E0" opacity="0.95" />
     </svg>
   );
 }
@@ -58,7 +58,7 @@ export function RevelLogo({
   ) : (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <RevelIcon size={px} />
-      <span className="font-heading text-lg font-semibold tracking-tight text-foreground">
+      <span className="font-heading text-lg font-bold tracking-tight text-foreground">
         Revel
       </span>
     </span>
@@ -72,7 +72,7 @@ export function RevelLogo({
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center transition-opacity hover:opacity-90",
+        "inline-flex items-center transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-md",
         className
       )}
       aria-label="Revel home"

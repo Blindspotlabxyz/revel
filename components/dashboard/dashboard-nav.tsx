@@ -35,30 +35,36 @@ export function DashboardNav({ isAdmin = false }: DashboardNavProps) {
   const pathname = usePathname();
 
   return (
-    <header className="border-b border-border bg-surface">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-surface/90 backdrop-blur-md">
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
         <RevelLogo size="md" />
 
-        <div className="flex max-w-[min(100%,42rem)] items-center gap-4 overflow-x-auto md:max-w-none md:gap-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "text-sm transition-colors",
-                pathname === item.href
-                  ? "font-medium text-foreground"
-                  : "text-muted hover:text-foreground"
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+        <div className="flex max-w-[min(100%,42rem)] items-center gap-1 overflow-x-auto md:max-w-none md:gap-1">
+          {navItems.map((item) => {
+            const active =
+              pathname === item.href ||
+              (item.href !== "/mission-control" &&
+                pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                  active
+                    ? "bg-primary-soft text-primary"
+                    : "text-muted hover:bg-primary-soft/50 hover:text-foreground"
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link href="/mission-control">New Analysis</Link>
+            <Link href="/mission-control">New analysis</Link>
           </Button>
           <UserMenu />
         </div>

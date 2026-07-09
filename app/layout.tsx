@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, DM_Sans } from "next/font/google";
+import { Syne, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { AuthSessionProvider } from "@/components/session-provider";
 import { isAuthConfigured } from "@/lib/auth-config";
 import { Analytics } from "@/components/analytics";
@@ -10,16 +10,23 @@ import { searchVerificationMetadata } from "@/lib/seo/verification";
 
 import "@/styles/globals.css";
 
-const fraunces = Fraunces({
+const syne = Syne({
   subsets: ["latin"],
-  variable: "--font-fraunces",
-  weight: ["600", "700"],
+  variable: "--font-syne",
+  weight: ["600", "700", "800"],
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-plus-jakarta",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
   weight: ["400", "500"],
   display: "swap",
 });
@@ -98,7 +105,10 @@ export default function RootLayout({
   const authEnabled = isAuthConfigured();
 
   const content = (
-    <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`}>
+    <html
+      lang="en"
+      className={`${syne.variable} ${plusJakarta.variable} ${jetbrainsMono.variable}`}
+    >
       <body className="min-h-screen antialiased">
         <GlobalJsonLd />
         {children}
