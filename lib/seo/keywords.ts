@@ -48,7 +48,15 @@ export const pageKeywords: Record<string, string[]> = {
   pricing: ["Revel pricing", "free product audit", "SaaS pricing"],
   faq: ["Revel FAQ", "AI audit questions", "product analysis help"],
   about: ["BlindspotLab", "Mojeeb Titilayo", "about Revel"],
-  docs: ["Revel documentation", "API reference", "getting started"],
+  docs: [
+    "Revel documentation",
+    "API reference",
+    "getting started",
+    "Partner API",
+    "MCP A2MCP",
+    "OKX ecosystem",
+    "Arcapush integration",
+  ],
   "sample-reports": ["sample product audit", "example Revel report"],
   contact: ["contact Revel", "BlindspotLab support"],
 };

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { partner, apiKey } = body as {
+    const { partner } = body as {
       partner: {
         name: string;
         domain?: string;

@@ -7,9 +7,14 @@ const PRODUCT_SUBDOMAINS = new Set(["docs", "auth", "legal"]);
 const DOCS_SURFACE_PATHS = new Set([
   "/",
   "/api",
+  "/getting-started",
   "/how-it-works",
   "/sample-reports",
   "/faq",
+  "/partners",
+  "/integrations",
+  "/mcp",
+  "/ecosystem",
 ]);
 
 function external(path: string, base: string): string {

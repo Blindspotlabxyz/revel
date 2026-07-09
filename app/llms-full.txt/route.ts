@@ -58,15 +58,22 @@ ${revelFaqs.map((f) => `### ${f.question}\n${f.answer}`).join("\n\n")}
 - Founder: ${siteConfig.founder.name} (${siteConfig.founder.jobTitle})
 - Credentials: ${siteConfig.founder.credentials.map((c) => c.name).join("; ")}
 
+## Documentation
+- Docs hub: ${absoluteUrl("/docs")}
+- Getting started: ${absoluteUrl("/docs/getting-started")}
+- How it works: ${absoluteUrl("/docs/how-it-works")}
+- Mission Control API: ${absoluteUrl("/docs/api")}
+- Partner API: ${absoluteUrl("/docs/partners")}
+- Integration guide (Arcapush): ${absoluteUrl("/docs/integrations")}
+- MCP / A2MCP: ${absoluteUrl("/docs/mcp")}
+- OKX ecosystem: ${absoluteUrl("/docs/ecosystem")}
+- FAQ: ${absoluteUrl("/docs/faq")}
+- Sample reports: ${absoluteUrl("/docs/sample-reports")}
+- Partner apply: ${absoluteUrl("/partners")}
+
 ## Canonical URLs
 - Home: ${absoluteUrl("/")}
-- How it works: ${absoluteUrl("/docs/how-it-works")}
 - Features: ${absoluteUrl("/features")}
-- MCP docs: ${absoluteUrl("/docs/mcp")}
-- FAQ: ${absoluteUrl("/docs/faq")}
-- Docs: ${absoluteUrl("/docs")}
-- API docs: ${absoluteUrl("/docs/api")}
-- Sample reports: ${absoluteUrl("/docs/sample-reports")}
 - Sample report (app): ${absoluteUrl("/mission-control/report/89a99571-be09-4aa1-a8aa-17ff1cb5bdf3")}
 - About: ${absoluteUrl("/about")}
 - Contact: ${absoluteUrl("/contact")}

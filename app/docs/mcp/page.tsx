@@ -1,84 +1,83 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  DocCode,
+  DocSection,
+  DocsArticle,
+} from "@/components/docs/docs-article";
 import { MarketingPage } from "@/components/landing/marketing-page";
 import { PageSeo } from "@/components/seo/page-seo";
-import { createPageMetadata } from "@/lib/seo/metadata";
+import { getOkxAuditPriceUsd } from "@/lib/billing/okx-x402";
 import { REVEL_MCP_TOOLS } from "@/lib/mcp/create-server";
+import { createPageMetadata } from "@/lib/seo/metadata";
 import { siteConfig } from "@/lib/site-config";
 
 const title = "MCP / A2MCP";
 const description =
   "Connect AI agents to Revel via Model Context Protocol — analyze websites, get Blueprints, and export roadmaps.";
+const path = "/docs/mcp";
 
 export const metadata: Metadata = createPageMetadata({
   title,
   description,
-  path: "/docs/mcp",
+  path,
   keywords: ["Revel MCP", "A2MCP", "agent to MCP", "OKX AI agent"],
 });
 
 export default function McpDocsPage() {
   const endpoint = `${siteConfig.url}/api/mcp`;
   const manifest = `${siteConfig.url}/api/mcp/manifest`;
+  const price = getOkxAuditPriceUsd();
 
   return (
     <MarketingPage>
       <PageSeo
         title={title}
         description={description}
-        path="/docs/mcp"
+        path={path}
         breadcrumbs={[
           { name: "Home", path: "/" },
           { name: "Docs", path: "/docs" },
-          { name: "MCP", path: "/docs/mcp" },
+          { name: "MCP", path },
         ]}
       />
-      <div className="mx-auto max-w-2xl px-6 py-32">
-        <p className="text-sm text-muted">
-          <Link href="/docs" className="hover:text-foreground">
-            ← Documentation
-          </Link>
-        </p>
-        <h1 className="mt-4 font-heading text-4xl font-semibold">
-          Revel MCP (A2MCP)
-        </h1>
-        <p className="mt-4 text-lg text-muted">
-          Revel exposes product intelligence as MCP tools so agents can audit
-          websites, score the Reveal Index, and return a prioritized Blueprint
-          without leaving the chat.
-        </p>
+      <DocsArticle
+        title="Revel MCP (A2MCP)"
+        description={description}
+        path={path}
+        related={[
+          { href: "/docs/ecosystem", label: "OKX ecosystem" },
+          { href: "/docs/partners", label: "Partner API" },
+          { href: "/docs/api", label: "Mission Control API" },
+        ]}
+      >
+        <DocSection title="Overview">
+          <p>
+            Revel exposes product intelligence as MCP tools so agents can audit
+            websites, score the Reveal Index, and return a prioritized Blueprint
+            without leaving the chat. Listed on OKX.AI as ASP #4750.
+          </p>
+        </DocSection>
 
-        <section className="mt-12 space-y-4">
-          <h2 className="font-heading text-2xl font-semibold">Endpoints</h2>
-          <div className="rounded-lg border border-border bg-surface p-4 text-sm">
-            <p>
-              <span className="text-primary">HTTP</span> {endpoint}
-            </p>
-            <p className="mt-2">
-              <span className="text-primary">Manifest</span> {manifest}
-            </p>
-            <p className="mt-2">
-              <span className="text-primary">Auth</span>{" "}
-              <code>Authorization: Bearer MCP_API_KEY</code>
-            </p>
-          </div>
-        </section>
+        <DocSection title="Endpoints">
+          <DocCode>{`HTTP      ${endpoint}
+Manifest  ${manifest}
+Auth      Authorization: Bearer MCP_API_KEY  (dev bypass)
+          x402 payment on POST /api/mcp (production marketplace)`}</DocCode>
+        </DocSection>
 
-        <section className="mt-10 space-y-3">
-          <h2 className="font-heading text-2xl font-semibold">Tools</h2>
-          <ul className="list-disc space-y-1 pl-5 text-muted">
+        <DocSection title="Tools">
+          <ul className="list-disc space-y-1 pl-5">
             {REVEL_MCP_TOOLS.map((tool) => (
               <li key={tool}>
                 <code className="text-foreground">{tool}</code>
               </li>
             ))}
           </ul>
-        </section>
+        </DocSection>
 
-        <section className="mt-10 space-y-4">
-          <h2 className="font-heading text-2xl font-semibold">Cursor (stdio)</h2>
-          <pre className="overflow-x-auto rounded-lg border border-border bg-surface p-4 text-sm">
-{`{
+        <DocSection title="Cursor (stdio)">
+          <DocCode>{`{
   "mcpServers": {
     "revel": {
       "command": "npx",
@@ -86,16 +85,11 @@ export default function McpDocsPage() {
       "cwd": "/path/to/revel"
     }
   }
-}`}
-          </pre>
-        </section>
+}`}</DocCode>
+        </DocSection>
 
-        <section className="mt-10 space-y-4">
-          <h2 className="font-heading text-2xl font-semibold">
-            Remote (OKX.AI / HTTP)
-          </h2>
-          <pre className="overflow-x-auto rounded-lg border border-border bg-surface p-4 text-sm">
-{`{
+        <DocSection title="Remote (OKX.AI / HTTP)">
+          <DocCode>{`{
   "mcpServers": {
     "revel": {
       "url": "${endpoint}",
@@ -104,27 +98,29 @@ export default function McpDocsPage() {
       }
     }
   }
-}`}
-          </pre>
-        </section>
+}`}</DocCode>
+        </DocSection>
 
-        <section className="mt-10 space-y-3">
-          <h2 className="font-heading text-2xl font-semibold">Billing (OKX x402)</h2>
-          <p className="text-muted">
+        <DocSection title="Billing (OKX x402)">
+          <p>
             OKX marketplace billing uses the Agent Payments Protocol (x402) on{" "}
-            <code>POST /api/mcp</code> — one charge per completed audit
-            (default $0.35 USDT0 on X Layer). Set price via{" "}
-            <code>OKX_AUDIT_PRICE_USD</code>. Alternate paid HTTP route:{" "}
-            <code>POST /api/audit</code>. Dev access may use{" "}
-            <code>MCP_API_KEY</code>.
+            <code>POST /api/mcp</code> — ${price.toFixed(2)} USDT0 per completed
+            audit on X Layer. Unpaid requests return{" "}
+            <strong className="text-foreground">402</strong> with payment
+            instructions. Set price via <code>OKX_AUDIT_PRICE_USD</code>.
+            Alternate paid HTTP route: <code>POST /api/audit</code>.
           </p>
-        </section>
+          <p>
+            Full operator checklist:{" "}
+            <Link href="/docs/ecosystem" className="text-primary hover:underline">
+              OKX ecosystem docs
+            </Link>
+            .
+          </p>
+        </DocSection>
 
-        <section className="mt-10">
-          <h2 className="font-heading text-2xl font-semibold">
-            Typical agent flow
-          </h2>
-          <ol className="mt-4 list-decimal space-y-2 pl-5 text-muted">
+        <DocSection title="Typical agent flow">
+          <ol className="list-decimal space-y-2 pl-5">
             <li>
               Call <code>revel_analyze_website</code> with a public URL
             </li>
@@ -137,8 +133,32 @@ export default function McpDocsPage() {
               <code>report</code> from the JSON response
             </li>
           </ol>
-        </section>
-      </div>
+        </DocSection>
+
+        <DocSection title="MCP vs Partner API">
+          <p>
+            <strong className="text-foreground">MCP</strong> — AI agents discover
+            Revel on OKX.AI and pay per audit via x402. Best for agent
+            marketplaces and Cursor workflows.
+          </p>
+          <p>
+            <strong className="text-foreground">Partner API</strong> — your web
+            app embeds Revel with <code>rvl_pk_</code> keys. Best for Arcapush-style
+            platform integrations. See{" "}
+            <Link href="/docs/partners" className="text-primary hover:underline">
+              Partner API
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/docs/integrations"
+              className="text-primary hover:underline"
+            >
+              integration guide
+            </Link>
+            .
+          </p>
+        </DocSection>
+      </DocsArticle>
     </MarketingPage>
   );
 }
