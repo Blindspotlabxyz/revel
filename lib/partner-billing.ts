@@ -49,12 +49,15 @@ export function checkPartnerBilling(
   };
 }
 
-export async function consumePartnerCredit(partnerId: string): Promise<void> {
+/** Atomically reserve one credit. Returns false if balance is zero. */
+export async function reservePartnerCredit(partnerId: string): Promise<boolean> {
   const prisma = getPrisma();
-  if (!prisma) return;
+  if (!prisma) return false;
 
-  await prisma.partner.update({
-    where: { id: partnerId },
+  const result = await prisma.partner.updateMany({
+    where: { id: partnerId, creditsBalance: { gt: 0 } },
     data: { creditsBalance: { decrement: 1 } },
   });
+
+  return result.count > 0;
 }

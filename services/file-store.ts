@@ -36,7 +36,7 @@ export async function getAllAnalysesFromFile(
 ): Promise<Analysis[]> {
   const analyses = await readAnalyses();
   const filtered = userId
-    ? analyses.filter((a) => !a.userId || a.userId === userId)
+    ? analyses.filter((a) => a.userId === userId)
     : analyses;
 
   return filtered.sort(

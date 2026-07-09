@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getCurrentUserIsAdmin } from "@/lib/auth";
 import {
   getAgentProvider,
   getAnalysisMode,
@@ -51,6 +52,13 @@ export async function GET() {
   const schemaReady =
     storage !== "prisma" ||
     (tables.analyses === true && tables.reports === true);
+
+  const isAdmin = await getCurrentUserIsAdmin();
+  if (process.env.NODE_ENV === "production" && !isAdmin) {
+    return NextResponse.json({
+      ok: storage !== "none" && schemaReady,
+    });
+  }
 
   return NextResponse.json({
     ok: storage !== "none" && schemaReady,

@@ -1,4 +1,5 @@
 import { Agent, type Dispatcher } from "undici";
+import { assertPublicHttpUrl } from "@/lib/security/ssrf";
 
 const defaultAgent: Dispatcher = new Agent({
   connect: { timeout: 20_000 },
@@ -60,6 +61,55 @@ export interface ResilientFetchOptions extends RequestInit {
   retries?: number;
   retryDelayMs?: number;
   context?: string;
+  /** Validate URL and each redirect target against SSRF blocklist. */
+  ssrfGuard?: boolean;
+  maxRedirects?: number;
+}
+
+async function fetchWithOptionalSsrGuard(
+  url: string,
+  init: RequestInit,
+  options: {
+    ssrfGuard: boolean;
+    maxRedirects: number;
+    context: string;
+  }
+): Promise<Response> {
+  const { ssrfGuard, maxRedirects, context } = options;
+
+  if (!ssrfGuard) {
+    return fetch(url, {
+      ...init,
+      // @ts-expect-error undici dispatcher
+      dispatcher: defaultAgent,
+    });
+  }
+
+  let currentUrl = url;
+
+  for (let hop = 0; hop <= maxRedirects; hop++) {
+    await assertPublicHttpUrl(currentUrl);
+
+    const response = await fetch(currentUrl, {
+      ...init,
+      redirect: "manual",
+      // @ts-expect-error undici dispatcher
+      dispatcher: defaultAgent,
+    });
+
+    if (response.status < 300 || response.status >= 400) {
+      return response;
+    }
+
+    const location = response.headers.get("location");
+    if (!location) {
+      return response;
+    }
+
+    currentUrl = new URL(location, currentUrl).href;
+  }
+
+  throw new Error(`${context}: too many redirects`);
 }
 
 export async function resilientFetch(
@@ -70,6 +120,8 @@ export async function resilientFetch(
     retries = 2,
     retryDelayMs = 1500,
     context = "HTTP request",
+    ssrfGuard = false,
+    maxRedirects = 5,
     ...init
   } = options;
 
@@ -77,10 +129,10 @@ export async function resilientFetch(
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      return await fetch(url, {
-        ...init,
-        // @ts-expect-error undici dispatcher
-        dispatcher: defaultAgent,
+      return await fetchWithOptionalSsrGuard(url, init, {
+        ssrfGuard,
+        maxRedirects,
+        context,
       });
     } catch (error) {
       lastError = error;

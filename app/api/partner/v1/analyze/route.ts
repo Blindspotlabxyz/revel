@@ -6,14 +6,15 @@ import {
   authenticatePartnerRequest,
   partnerUnauthorizedResponse,
 } from "@/lib/partner-auth";
+import { getOkxAuditPriceUsd } from "@/lib/billing/okx-x402";
 import {
   checkPartnerBilling,
-  consumePartnerCredit,
+  reservePartnerCredit,
 } from "@/lib/partner-billing";
 import { partnerRateLimit } from "@/lib/partner-rate-limit";
 import { linkPartnerAnalysis } from "@/lib/partners";
 import { startWebsiteAnalysis } from "@/lib/mcp/handlers";
-import { normalizeUrl } from "@/lib/validation";
+import { normalizeUrlSafe } from "@/lib/validation";
 import { markAnalysisFailed, runAnalysis } from "@/services/analysis-runner";
 
 export const runtime = "nodejs";
@@ -50,6 +51,22 @@ export async function POST(request: Request) {
     );
   }
 
+  if (billing.mode === "credits") {
+    const reserved = await reservePartnerCredit(partner.id);
+    if (!reserved) {
+      return applyCors(
+        NextResponse.json(
+          {
+            error: "Partner credits required",
+            hint: "Top up credits via admin or pay per audit. Contact hello@blindspotlab.xyz",
+            priceUsd: getOkxAuditPriceUsd(),
+          },
+          { status: 402 }
+        )
+      );
+    }
+  }
+
   const { success } = partnerRateLimit(partner.id);
   if (!success) {
     return applyCors(
@@ -77,17 +94,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const website = normalizeUrl(url);
+    const website = await normalizeUrlSafe(url);
 
     return runWithActivityContext(
       { source: "partner_api", paid: billing.mode === "credits" },
       async () => {
         const started = await startWebsiteAnalysis(website);
         await linkPartnerAnalysis(partner.id, started.analysisId);
-
-        if (billing.mode === "credits") {
-          await consumePartnerCredit(partner.id);
-        }
 
         trackActivity({
           eventType: "analysis_started",

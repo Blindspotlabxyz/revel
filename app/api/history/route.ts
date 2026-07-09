@@ -18,13 +18,14 @@ export async function GET() {
 }
 
 export async function DELETE(request: Request) {
+  const userId = await getCurrentUserId();
   const { id } = await request.json();
 
   if (!id) {
     return NextResponse.json({ error: "ID required" }, { status: 400 });
   }
 
-  const deleted = await deleteAnalysis(id);
+  const deleted = await deleteAnalysis(id, userId ?? undefined);
   if (!deleted) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

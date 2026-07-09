@@ -14,9 +14,8 @@ function authorizeRequest(request: Request): boolean {
     return true;
   }
 
-  // Open when no secrets configured (local dev only)
   if (!cronSecret && !indexNowSecret) {
-    return true;
+    return process.env.NODE_ENV !== "production";
   }
 
   return false;

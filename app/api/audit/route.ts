@@ -10,7 +10,7 @@ import {
 import { runWithActivityContext } from "@/lib/activity-context";
 import { trackActivity } from "@/lib/activity";
 import { startWebsiteAnalysis } from "@/lib/mcp/handlers";
-import { normalizeUrl } from "@/lib/validation";
+import { normalizeUrlSafe } from "@/lib/validation";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -31,10 +31,10 @@ async function auditHandler(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const website = normalizeUrl(url);
+    const website = await normalizeUrlSafe(url);
     const result = await runWithActivityContext(
       { source: "api_audit", paid: true },
-      () => startWebsiteAnalysis(website)
+      async () => startWebsiteAnalysis(website)
     );
     trackActivity({
       eventType: "analysis_started",

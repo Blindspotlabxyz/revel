@@ -89,7 +89,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (validateMcpRequest(request)) {
+  const mcpDevBypass =
+    validateMcpRequest(request) &&
+    (process.env.NODE_ENV === "development" || !isOkxBillingEnabled());
+
+  if (mcpDevBypass) {
     return applyCors(
       await handleMcpHttpRequest(request, { source: "mcp_dev", paid: false })
     );

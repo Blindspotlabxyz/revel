@@ -7,7 +7,7 @@ import { getCurrentUserId } from "@/lib/auth";
 import { checkWeeklyAuditLimit } from "@/lib/weekly-audit-limit";
 import { logEvent } from "@/lib/logger";
 import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
-import { normalizeUrl } from "@/lib/validation";
+import { normalizeUrlSafe } from "@/lib/validation";
 import { markAnalysisFailed, runAnalysis } from "@/services/analysis-runner";
 import { saveAnalysis } from "@/services/store";
 
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const website = normalizeUrl(body.url);
+    const website = await normalizeUrlSafe(body.url);
     const id = uuidv4();
 
     const analysis = {

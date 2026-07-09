@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { assertPublicHttpUrl } from "@/lib/security/ssrf";
 
 export const urlSchema = z
   .string()
@@ -14,4 +15,9 @@ export const urlSchema = z
 
 export function normalizeUrl(url: string): string {
   return urlSchema.parse(url);
+}
+
+/** Normalize format and block SSRF targets (private IPs, metadata, etc.). */
+export async function normalizeUrlSafe(url: string): Promise<string> {
+  return assertPublicHttpUrl(normalizeUrl(url));
 }

@@ -155,7 +155,17 @@ export async function saveAnalysis(analysis: Analysis): Promise<void> {
   throw new Error("No analysis storage is configured.");
 }
 
-export async function deleteAnalysis(id: string): Promise<boolean> {
+export async function deleteAnalysis(
+  id: string,
+  userId?: string
+): Promise<boolean> {
+  if (userId) {
+    const analysis = await getAnalysis(id);
+    if (!analysis || analysis.userId !== userId) {
+      return false;
+    }
+  }
+
   let deleted = false;
 
   if (usePrisma()) {

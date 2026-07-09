@@ -14,6 +14,7 @@ import {
   exportToJson,
   exportToMarkdown,
 } from "@/services/export-service";
+import { userCanAccessAnalysis } from "@/lib/security/analysis-access";
 import { getAnalysis } from "@/services/store";
 
 export async function GET() {
@@ -52,6 +53,13 @@ export async function POST(request: Request) {
     const analysis = await getAnalysis(id);
 
     if (!analysis?.report) {
+      return NextResponse.json(
+        { error: "Report not found or not ready" },
+        { status: 404 }
+      );
+    }
+
+    if (!(await userCanAccessAnalysis(analysis, { userId }))) {
       return NextResponse.json(
         { error: "Report not found or not ready" },
         { status: 404 }

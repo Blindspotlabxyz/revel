@@ -15,7 +15,7 @@ export async function extractWebsiteContent(url: string): Promise<string> {
       context: `Fetch website ${url}`,
       retries: 2,
       headers: FETCH_HEADERS,
-      redirect: "follow",
+      ssrfGuard: true,
     });
 
     if (!response.ok) {
@@ -86,7 +86,7 @@ export async function discoverInternalLinks(
       context: `Discover links on ${baseUrl}`,
       retries: 2,
       headers: FETCH_HEADERS,
-      redirect: "follow",
+      ssrfGuard: true,
     });
 
     if (!response.ok) {

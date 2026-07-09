@@ -4,7 +4,7 @@ import { trackActivity } from "@/lib/activity";
 import { getOkxBillingManifest } from "@/lib/billing/okx-x402";
 import { getMcpUsageSummary } from "@/lib/mcp/usage-model";
 import { getExportCapabilities } from "@/lib/mission-control-config";
-import { normalizeUrl } from "@/lib/validation";
+import { normalizeUrlSafe } from "@/lib/validation";
 import { markAnalysisFailed, runAnalysis } from "@/services/analysis-runner";
 import { executeAgentTool } from "@/services/agent-tools";
 import {
@@ -52,7 +52,7 @@ export function getRevelMcpHealth() {
 }
 
 export async function startWebsiteAnalysis(url: string) {
-  const website = normalizeUrl(url);
+  const website = await normalizeUrlSafe(url);
   const id = uuidv4();
 
   await saveAnalysis({
@@ -149,7 +149,9 @@ export async function exportBlueprint(
 }
 
 export async function fetchUrlContent(url: string) {
-  const result = await executeAgentTool("fetch_url", { url: normalizeUrl(url) });
+  const result = await executeAgentTool("fetch_url", {
+    url: await normalizeUrlSafe(url),
+  });
   return result.response;
 }
 
