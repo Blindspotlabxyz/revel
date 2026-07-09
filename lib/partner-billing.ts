@@ -1,6 +1,9 @@
 import type { AuthenticatedPartner } from "@/lib/partner-auth";
 import { getOkxAuditPriceUsd } from "@/lib/billing/okx-x402";
 import { getPrisma } from "@/lib/prisma";
+import { siteConfig } from "@/lib/site-config";
+
+const supportEmail = siteConfig.organization.email;
 
 export type PartnerBillingCheck =
   | { allowed: true; mode: "whitelisted" | "credits" | "trial" }
@@ -20,7 +23,7 @@ export function checkPartnerBilling(
       allowed: false,
       status: 403,
       error: "Partner account pending approval",
-      hint: "Apply at /partners or contact hello@blindspotlab.xyz",
+      hint: `Apply at /partners or contact ${supportEmail}`,
     };
   }
 
@@ -44,7 +47,7 @@ export function checkPartnerBilling(
     allowed: false,
     status: 402,
     error: "Partner credits required",
-    hint: "Top up credits via admin or pay per audit. Contact hello@blindspotlab.xyz",
+    hint: `Top up credits via admin or pay per audit. Contact ${supportEmail}`,
     priceUsd: getOkxAuditPriceUsd(),
   };
 }

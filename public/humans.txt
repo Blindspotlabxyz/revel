@@ -2,7 +2,7 @@
 Founder: Mojeeb Titilayo — AI Product Engineer
 Company: BlindspotLab
 Site: https://tryrevel.xyz
-Contact: hello@blindspotlab.xyz
+Contact: hello@mail.tryrevel.xyz
 
 /* THANKS */
 Built for founders who ship.

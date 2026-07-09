@@ -35,7 +35,7 @@ export const siteConfig = {
     name: "BlindspotLab",
     legalName: "BlindspotLab",
     url: "https://blindspotlab.xyz",
-    email: "hello@blindspotlab.xyz",
+    email: "hello@mail.tryrevel.xyz",
     slogan: "Reveal what others miss.",
   },
   founder: {

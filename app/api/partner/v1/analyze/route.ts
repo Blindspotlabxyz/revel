@@ -7,6 +7,7 @@ import {
   partnerUnauthorizedResponse,
 } from "@/lib/partner-auth";
 import { getOkxAuditPriceUsd } from "@/lib/billing/okx-x402";
+import { siteConfig } from "@/lib/site-config";
 import {
   checkPartnerBilling,
   reservePartnerCredit,
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
         NextResponse.json(
           {
             error: "Partner credits required",
-            hint: "Top up credits via admin or pay per audit. Contact hello@blindspotlab.xyz",
+            hint: `Top up credits via admin or pay per audit. Contact ${siteConfig.organization.email}`,
             priceUsd: getOkxAuditPriceUsd(),
           },
           { status: 402 }
