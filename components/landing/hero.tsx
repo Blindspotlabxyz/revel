@@ -11,8 +11,12 @@ import { DEFAULT_WEEKLY_AUDIT_LIMIT } from "@/lib/weekly-audit-limit-config";
 export function Hero() {
   return (
     <section className="hero-section illustration-section w-full">
-      <div className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 content-center items-center gap-6 px-4 sm:px-6 md:grid-cols-2 md:gap-12 lg:gap-16">
-        <div className="max-w-xl min-w-0">
+      {/*
+        Mobile: art + scrim are absolute full-bleed layers under the copy.
+        Desktop: layout is a 2-col grid (copy | art); scrim is hidden.
+      */}
+      <div className="hero-section__layout mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 content-center items-center gap-6 px-4 sm:px-6 md:grid-cols-2 md:gap-12 lg:gap-16">
+        <div className="hero-section__copy max-w-xl min-w-0">
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -68,7 +72,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: 0.1 }}
-          className="min-w-0 w-full"
+          className="hero-section__art min-w-0 w-full"
         >
           <IllustrationSlot className="hero-illustration-slot">
             <SectionIllustration
@@ -80,6 +84,9 @@ export function Hero() {
           </IllustrationSlot>
         </motion.div>
       </div>
+
+      {/* Mobile-only legibility layer (hidden on md+) */}
+      <div className="hero-section__scrim" aria-hidden="true" />
     </section>
   );
 }

@@ -57,11 +57,9 @@
 /*
  * Illustration container (frame) — hero-peel, insight-telescope, map-reveal
  *
- * FIXED at every breakpoint (never override in media queries):
- *   radius, padding, border, shadow, background color
- *
- * ONLY changes at breakpoint:
- *   inner __media aspect-ratio (9:16 mobile → 16:9 desktop)
+ * Desktop: padded card + inner media radius + inline <img> object-contain.
+ * Mobile: zero padding; art is background-image cover on the frame itself
+ * so it sits flush to the rounded corners (no gray letterbox margin).
  */
 .illustration-frame {
   position: relative;
@@ -74,7 +72,7 @@
   box-shadow: var(--shadow-illustration);
 }
 
-/* Aspect box — background & radius fixed; only aspect-ratio swaps below */
+/* Aspect box — sizes the frame; only aspect-ratio swaps at breakpoints */
 .illustration-frame__media {
   position: relative;
   width: 100%;
@@ -84,13 +82,47 @@
   background-color: var(--illustration-media-bg);
 }
 
+/* Desktop img: contain inside the padded media box */
 .illustration-frame__media img {
   object-fit: contain;
 }
 
+/* —— Mobile only (< 48rem / Tailwind md) —— */
+@media (max-width: 47.99rem) {
+  .illustration-frame {
+    /* Remove gray padded margin so art meets rounded edges */
+    padding: 0;
+    background-color: transparent;
+    background-image: var(--illustration-mobile-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .illustration-frame__media {
+    /* Transparent shell that only provides height via aspect-ratio */
+    border-radius: 0;
+    background-color: transparent;
+    background-image: none;
+    /* 9/16 from base .illustration-frame__media — no hero 16:9 override
+       (mobile assets are portrait hero-peel / map-reveal / insight-telescope) */
+  }
+}
+
+/* —— Desktop (md+) — previous card + img treatment —— */
 @media (min-width: 48rem) {
+  .illustration-frame {
+    /* Ensure no mobile cover art bleeds on desktop */
+    background-image: none;
+    background-color: var(--illustration-container-bg);
+    padding: var(--illustration-container-padding);
+  }
+
   .illustration-frame__media {
     aspect-ratio: var(--illustration-aspect-desktop);
+    border-radius: var(--illustration-media-radius);
+    background-color: var(--illustration-media-bg);
+    background-image: none;
   }
 }
 
@@ -102,13 +134,6 @@
 /* Illustration slot — full width of parent grid column (hero, insight, map) */
 .illustration-slot {
   width: 100%;
-}
-
-/* Hero only: use landscape ratio on mobile so the image does not push SocialProof far down */
-@media (max-width: 47.99rem) {
-  .hero-illustration-slot .illustration-frame__media {
-    aspect-ratio: var(--illustration-aspect-desktop);
-  }
 }
 
 /*
@@ -140,8 +165,95 @@
   letter-spacing: -0.02em;
 }
 
+/* Scrim only used on mobile hero backdrop; hidden by default (desktop) */
+.hero-section__scrim {
+  display: none;
+}
+
 .first-viewport__social {
   flex-shrink: 0;
+}
+
+/*
+ * Mobile hero: illustration is a full-bleed backdrop under copy.
+ * Desktop (md+) keeps side-by-side grid + card image — rules below.
+ */
+@media (max-width: 47.99rem) {
+  .hero-section {
+    position: relative;
+    overflow: hidden;
+    /* Content-driven height with room for the backdrop to read */
+    min-height: max(100%, 22rem);
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+    /* Let the image show through section tint */
+    background-color: transparent;
+  }
+
+  .hero-section.illustration-section {
+    background-color: transparent;
+  }
+
+  /*
+   * Layout stays in document flow for height (from copy).
+   * position: static so absolutely positioned art/scrim bind to .hero-section.
+   */
+  .hero-section__layout {
+    position: static;
+    display: block;
+    width: 100%;
+  }
+
+  .hero-section__art {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: auto;
+    min-width: 0;
+    pointer-events: none;
+  }
+
+  /* Full-bleed cover; no card chrome on mobile hero backdrop */
+  .hero-section__art .hero-illustration-slot,
+  .hero-section__art .illustration-frame,
+  .hero-section__art .illustration-frame__media {
+    height: 100%;
+    width: 100%;
+    max-height: none;
+    aspect-ratio: auto;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    background-color: transparent;
+  }
+
+  .hero-section__art .illustration-frame {
+    background-image: var(--illustration-mobile-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .hero-section__scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    /* Cream scrim ~80–88% so type stays readable; image still visible */
+    background: linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--color-background) 88%, transparent) 0%,
+      color-mix(in srgb, var(--color-background) 82%, transparent) 45%,
+      color-mix(in srgb, var(--color-background) 76%, transparent) 100%
+    );
+  }
+
+  .hero-section__copy {
+    position: relative;
+    z-index: 2;
+  }
 }
 
 /* Cap hero art so two-column layout + social bar fit shorter laptop heights */
@@ -149,6 +261,17 @@
   .hero-section {
     padding-top: 1.25rem;
     padding-bottom: 1.25rem;
+  }
+
+  .hero-section__scrim {
+    display: none;
+  }
+
+  .hero-section__art {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    pointer-events: auto;
   }
 
   .hero-illustration-slot {
