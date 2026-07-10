@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { normalizeAnalysisReport } from "@/lib/report-schema";
 import { ReportOverview } from "./report-overview";
 import { BlindspotMap } from "./blindspot-map";
 import { Blueprint } from "./blueprint";
@@ -24,13 +25,14 @@ interface ReportTabsProps {
 
 export function ReportTabs({ report, analysisId, website }: ReportTabsProps) {
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const safeReport = useMemo(() => normalizeAnalysisReport(report), [report]);
 
   return (
     <div>
       <div className="mb-2">
         <p className="text-sm text-muted">{website}</p>
         <p className="mt-4 max-w-2xl text-muted leading-relaxed">
-          {report.summary}
+          {safeReport.summary}
         </p>
       </div>
 
@@ -53,14 +55,16 @@ export function ReportTabs({ report, analysisId, website }: ReportTabsProps) {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div>
-        {activeTab === "overview" && <ReportOverview report={report} />}
-        {activeTab === "blindspots" && (
-          <BlindspotMap blindspots={report.blindspots} />
-        )}
-        {activeTab === "blueprint" && <Blueprint steps={report.blueprint} />}
-        {activeTab === "actions" && (
-          <ActionQueue actions={report.actions} />
-        )}
+          {activeTab === "overview" && <ReportOverview report={safeReport} />}
+          {activeTab === "blindspots" && (
+            <BlindspotMap blindspots={safeReport.blindspots} />
+          )}
+          {activeTab === "blueprint" && (
+            <Blueprint steps={safeReport.blueprint} />
+          )}
+          {activeTab === "actions" && (
+            <ActionQueue actions={safeReport.actions} />
+          )}
         </div>
 
         <aside className="lg:sticky lg:top-8 lg:self-start">

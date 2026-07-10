@@ -9,6 +9,7 @@ import {
   pushToLinear,
   pushToNotion,
 } from "@/services/export-integrations";
+import { normalizeAnalysisReport } from "@/lib/report-schema";
 import {
   exportToGitHubMarkdown,
   exportToJson,
@@ -66,7 +67,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const { report, website } = analysis;
+    const website = analysis.website;
+    // Normalize so missing actions / broken LLM JSON never crashes export
+    const report = normalizeAnalysisReport(analysis.report);
     const capabilities = getExportCapabilities();
 
     if (format === "markdown") {

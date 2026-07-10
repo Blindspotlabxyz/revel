@@ -55,10 +55,29 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
         body: JSON.stringify({ id: analysisId, format, ...options }),
       });
 
-      const data = await res.json();
+      let data: {
+        success?: boolean;
+        error?: string;
+        mode?: string;
+        content?: string;
+        filename?: string;
+        message?: string;
+        url?: string;
+        urls?: string[];
+      } = {};
+
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(
+          res.ok
+            ? "Export returned an invalid response."
+            : `Export failed (${res.status}).`
+        );
+      }
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error ?? "Export failed");
+        throw new Error(data.error ?? `Export failed (${res.status}).`);
       }
 
       if (data.mode === "download" && data.content) {
@@ -68,20 +87,24 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement("a");
         anchor.href = url;
-        anchor.download = data.filename;
+        anchor.download =
+          data.filename ??
+          `revel-blueprint.${format === "json" ? "json" : "md"}`;
+        document.body.appendChild(anchor);
         anchor.click();
+        anchor.remove();
         URL.revokeObjectURL(url);
+        setSuccess(data.message ?? "Download started.");
+      } else {
+        const exportLinks = [
+          ...(Array.isArray(data.urls) ? data.urls : []),
+          ...(data.url && !data.urls?.includes(data.url) ? [data.url] : []),
+        ];
+        if (exportLinks.length > 0) {
+          setLinks(exportLinks);
+        }
+        setSuccess(data.message ?? "Export completed.");
       }
-
-      const exportLinks = [
-        ...(Array.isArray(data.urls) ? data.urls : []),
-        ...(data.url && !data.urls?.includes(data.url) ? [data.url] : []),
-      ];
-      if (exportLinks.length > 0) {
-        setLinks(exportLinks);
-      }
-
-      setSuccess(data.message ?? "Export completed.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Export failed");
     } finally {

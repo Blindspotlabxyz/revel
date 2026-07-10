@@ -1,5 +1,8 @@
 import { ZodError } from "zod";
-import { parseAnalysisReport } from "@/lib/report-schema";
+import {
+  normalizeAnalysisReport,
+  parseAnalysisReport,
+} from "@/lib/report-schema";
 import type { AnalysisReport } from "@/types/analysis";
 import {
   discoverInternalLinks,
@@ -161,8 +164,32 @@ export async function executeAgentTool(
     case "submit_analysis_report": {
       try {
         const payload = parseSubmitPayload(args);
-        const report = parseAnalysisReport(payload);
-        return { response: { accepted: true, score: report.score }, report };
+        try {
+          const report = parseAnalysisReport(payload);
+          return { response: { accepted: true, score: report.score }, report };
+        } catch (strictError) {
+          // Accept repaired partial reports rather than failing the whole analysis
+          const repaired = normalizeAnalysisReport(payload);
+          if (
+            repaired.blindspots.length >= 1 ||
+            repaired.blueprint.length >= 1 ||
+            repaired.actions.length >= 1
+          ) {
+            return {
+              response: {
+                accepted: true,
+                score: repaired.score,
+                repaired: true,
+                note:
+                  strictError instanceof ZodError
+                    ? "Report repaired from partial schema"
+                    : "Report normalized",
+              },
+              report: repaired,
+            };
+          }
+          throw strictError;
+        }
       } catch (error) {
         const validationError =
           error instanceof ZodError

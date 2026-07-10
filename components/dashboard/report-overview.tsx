@@ -6,13 +6,16 @@ interface ReportOverviewProps {
 }
 
 export function ReportOverview({ report }: ReportOverviewProps) {
-  const criticalCount = report.blindspots.filter(
-    (b) => b.priority === "critical"
-  ).length;
-  const highPriorityCount = report.blindspots.filter(
+  const blindspots = Array.isArray(report.blindspots) ? report.blindspots : [];
+  const blueprint = Array.isArray(report.blueprint) ? report.blueprint : [];
+  const actions = Array.isArray(report.actions) ? report.actions : [];
+
+  const criticalCount = blindspots.filter((b) => b.priority === "critical")
+    .length;
+  const highPriorityCount = blindspots.filter(
     (b) => b.priority === "critical" || b.priority === "high"
   ).length;
-  const highImpactActions = report.blueprint.filter(
+  const highImpactActions = blueprint.filter(
     (b) => b.expectedImpact === "high"
   ).length;
 
@@ -20,9 +23,12 @@ export function ReportOverview({ report }: ReportOverviewProps) {
     highImpactActions >= 3 ? "High" : highImpactActions >= 1 ? "Medium" : "Low";
 
   const stats = [
-    { label: "Reveal Index™", value: `${report.score} / 100` },
-    { label: "Blindspots Found", value: String(report.blindspots.length) },
-    { label: "High Priority Actions", value: String(highPriorityCount) },
+    { label: "Reveal Index™", value: `${report.score ?? "—"} / 100` },
+    { label: "Blindspots Found", value: String(blindspots.length) },
+    {
+      label: "High Priority Actions",
+      value: String(highPriorityCount || actions.filter((a) => a.priority === "high" || a.priority === "critical").length),
+    },
     { label: "Estimated Impact", value: impact },
   ];
 

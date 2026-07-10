@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { GenesisReportBanner } from "@/components/dashboard/genesis-report-banner";
 import { PUBLIC_SAMPLE_REPORT_ID } from "@/lib/public-sample-report";
+import { normalizeAnalysisReport } from "@/lib/report-schema";
 import { getAnalysis } from "@/services/store";
 import { sampleAnalysis } from "@/lib/sample-report";
 import { ReportTabs } from "@/components/dashboard/report-tabs";
@@ -21,6 +22,7 @@ export default async function ReportPage({
     notFound();
   }
 
+  const report = normalizeAnalysisReport(analysis.report);
   const isGenesisReport = id === PUBLIC_SAMPLE_REPORT_ID;
 
   return (
@@ -31,7 +33,7 @@ export default async function ReportPage({
       ) : null}
       <div className={isGenesisReport ? "mt-6" : "mt-8"}>
         <ReportTabs
-          report={analysis.report}
+          report={report}
           analysisId={analysis.id}
           website={analysis.website}
         />

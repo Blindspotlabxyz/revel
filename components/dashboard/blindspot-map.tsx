@@ -10,24 +10,35 @@ const priorityStyles: Record<Priority, string> = {
 };
 
 interface BlindspotMapProps {
-  blindspots: Blindspot[];
+  blindspots: Blindspot[] | null | undefined;
 }
 
 export function BlindspotMap({ blindspots }: BlindspotMapProps) {
-  const sorted = [...blindspots].sort((a, b) => {
+  const list = Array.isArray(blindspots) ? [...blindspots] : [];
+  const sorted = list.sort((a, b) => {
     const order: Record<Priority, number> = {
       critical: 0,
       high: 1,
       medium: 2,
       low: 3,
     };
-    return order[a.priority] - order[b.priority];
+    return (order[a.priority] ?? 9) - (order[b.priority] ?? 9);
   });
+
+  if (sorted.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-surface p-6">
+        <p className="text-sm text-muted">
+          No blindspots in this report. Re-run the analysis for a fuller audit.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      {sorted.map((blindspot) => (
-        <Card key={blindspot.id}>
+      {sorted.map((blindspot, index) => (
+        <Card key={blindspot.id || `bs-${index}`}>
           <CardContent className="pt-0">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <CardTitle className="text-lg">{blindspot.title}</CardTitle>
@@ -35,7 +46,7 @@ export function BlindspotMap({ blindspots }: BlindspotMapProps) {
                 <span
                   className={cn(
                     "rounded-full px-3 py-1 text-xs font-medium capitalize",
-                    priorityStyles[blindspot.priority]
+                    priorityStyles[blindspot.priority] ?? priorityStyles.medium
                   )}
                 >
                   {blindspot.priority}

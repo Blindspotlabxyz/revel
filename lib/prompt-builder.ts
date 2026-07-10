@@ -68,8 +68,11 @@ Return ONLY valid JSON with this exact structure:
 Rules:
 - Provide 6-10 blindspots across all categories
 - Provide 5-8 blueprint steps ordered by business impact
-- Provide 8-15 actionable tasks
+- Provide 8-15 actionable tasks in the "actions" array (required, never omit)
 - Be specific to this website, not generic
 - Write for founders, not engineers
-- Every recommendation must answer: why it matters, what happens if ignored, how to fix it`;
+- Every recommendation must answer: why it matters, what happens if ignored, how to fix it
+- Return valid JSON only: no trailing commas, no comments, every object fully closed
+- Each blueprint item must use keys: id, step, title, estimatedEffort, expectedImpact, description
+- Each action item must use keys: id, title, description, priority, estimatedEffort, expectedOutcome`;
 }

@@ -1,3 +1,4 @@
+import { normalizeAnalysisReport } from "@/lib/report-schema";
 import { getSupabase } from "@/lib/supabase";
 import type { Analysis, AnalysisReport } from "@/types/analysis";
 
@@ -13,13 +14,15 @@ interface DbAnalysis {
 }
 
 function toAnalysis(row: DbAnalysis): Analysis {
-  const report = row.reports?.[0]?.json_result;
+  const raw = row.reports?.[0]?.json_result;
+  const report =
+    raw && typeof raw === "object" ? normalizeAnalysisReport(raw) : undefined;
   return {
     id: row.id,
     userId: row.user_id ?? undefined,
     website: row.website,
     status: row.status as Analysis["status"],
-    score: row.score ?? undefined,
+    score: report?.score ?? row.score ?? undefined,
     createdAt: row.created_at,
     report,
     error: row.error ?? undefined,

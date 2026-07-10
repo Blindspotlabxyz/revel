@@ -2,6 +2,7 @@ import { getAnalysisMode } from "@/lib/analysis-provider";
 import { trackActivity } from "@/lib/activity";
 import { logEvent } from "@/lib/logger";
 import { generateAnalysis } from "@/lib/openrouter";
+import { normalizeAnalysisReport } from "@/lib/report-schema";
 import { generateAgenticAnalysis } from "@/services/agentic-analysis";
 import { extractWebsiteContent } from "@/services/content-extractor";
 import { getAnalysis, saveAnalysis } from "@/services/store";
@@ -55,13 +56,14 @@ export async function runAnalysis(
   userId?: string | null
 ): Promise<void> {
   const mode = getAnalysisMode();
-  const report =
+  const rawReport =
     mode === "agentic"
       ? await generateAgenticAnalysis(website)
       : await generateAnalysis(
           website,
           await extractWebsiteContent(website)
         );
+  const report = normalizeAnalysisReport(rawReport);
 
   const analysis = await getAnalysis(id);
   if (!analysis) {

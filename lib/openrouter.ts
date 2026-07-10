@@ -1,4 +1,5 @@
 import { resilientFetch } from "@/lib/resilient-fetch";
+import { normalizeAnalysisReport } from "./report-schema";
 import { buildAnalysisPrompt } from "./prompt-builder";
 import { siteConfig } from "./site-config";
 import type { AnalysisReport } from "@/types/analysis";
@@ -114,7 +115,18 @@ export async function generateAnalysis(
     }
 
     try {
-      return JSON.parse(result.raw) as AnalysisReport;
+      const parsed = JSON.parse(result.raw) as unknown;
+      const report = normalizeAnalysisReport(parsed);
+      // Reject empty shells so we try the next model
+      if (
+        report.blindspots.length === 0 &&
+        report.blueprint.length === 0 &&
+        report.actions.length === 0
+      ) {
+        errors.push(`${model}: empty report after normalize`);
+        continue;
+      }
+      return report;
     } catch {
       errors.push(`${model}: invalid JSON`);
     }

@@ -1,4 +1,5 @@
 import { getPrisma } from "@/lib/prisma";
+import { normalizeAnalysisReport } from "@/lib/report-schema";
 import type { Analysis, AnalysisReport } from "@/types/analysis";
 import type { Prisma } from "@/lib/generated/prisma/client";
 
@@ -14,14 +15,18 @@ function toAnalysis(
     report?: { jsonResult: Prisma.JsonValue } | null;
   }
 ): Analysis {
-  const report = row.report?.jsonResult as AnalysisReport | undefined;
+  const raw = row.report?.jsonResult;
+  const report =
+    raw && typeof raw === "object"
+      ? normalizeAnalysisReport(raw)
+      : undefined;
 
   return {
     id: row.id,
     userId: row.userId ?? undefined,
     website: row.website,
     status: row.status as Analysis["status"],
-    score: row.score ?? undefined,
+    score: report?.score ?? row.score ?? undefined,
     createdAt: row.createdAt?.toISOString() ?? new Date().toISOString(),
     report,
     error: row.error ?? undefined,

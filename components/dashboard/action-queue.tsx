@@ -5,15 +5,28 @@ import type { ActionTask } from "@/types/analysis";
 import { cn } from "@/lib/utils";
 
 interface ActionQueueProps {
-  actions: ActionTask[];
+  actions: ActionTask[] | null | undefined;
 }
 
 export function ActionQueue({ actions }: ActionQueueProps) {
+  const list = Array.isArray(actions) ? actions : [];
+
+  if (list.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-surface p-6">
+        <p className="text-sm text-muted">
+          No action items in this report. Export the Blueprint or re-run the
+          analysis for a fuller Action Queue.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="space-y-4">
-        {actions.map((action) => (
-          <Card key={action.id}>
+        {list.map((action, index) => (
+          <Card key={action.id || `action-${index}`}>
             <CardContent className="pt-0">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <CardTitle className="text-base">{action.title}</CardTitle>

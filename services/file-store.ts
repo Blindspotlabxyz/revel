@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { normalizeAnalysisReport } from "@/lib/report-schema";
 import type { Analysis } from "@/types/analysis";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -9,11 +10,22 @@ async function ensureDataDir() {
   await fs.mkdir(DATA_DIR, { recursive: true });
 }
 
+function hydrateAnalysis(analysis: Analysis): Analysis {
+  if (!analysis.report) return analysis;
+  const report = normalizeAnalysisReport(analysis.report);
+  return {
+    ...analysis,
+    score: report.score ?? analysis.score,
+    report,
+  };
+}
+
 async function readAnalyses(): Promise<Analysis[]> {
   try {
     await ensureDataDir();
     const data = await fs.readFile(ANALYSES_FILE, "utf-8");
-    return JSON.parse(data) as Analysis[];
+    const list = JSON.parse(data) as Analysis[];
+    return list.map(hydrateAnalysis);
   } catch {
     return [];
   }

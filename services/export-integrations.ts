@@ -1,3 +1,4 @@
+import { normalizeAnalysisReport } from "@/lib/report-schema";
 import type { AnalysisReport } from "@/types/analysis";
 import { exportToGitHubMarkdown, exportToMarkdown } from "./export-service";
 
@@ -53,7 +54,12 @@ export async function pushToLinear(
   }
 
   const urls: string[] = [];
-  const topActions = report.actions.slice(0, 8);
+  const normalized = normalizeAnalysisReport(report);
+  const topActions = normalized.actions.slice(0, 8);
+
+  if (topActions.length === 0) {
+    throw new Error("No actions available to create Linear issues");
+  }
 
   for (const action of topActions) {
     const response = await fetch("https://api.linear.app/graphql", {
