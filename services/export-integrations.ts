@@ -64,7 +64,7 @@ export async function pushToLinear(
     const response = await fetch("https://api.linear.app/graphql", {
       method: "POST",
       headers: {
-        Authorization: accessToken,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

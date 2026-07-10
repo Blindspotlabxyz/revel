@@ -5,6 +5,8 @@ export type LinearMetadata = {
   teamName?: string;
   workspaceName?: string;
   viewerName?: string;
+  /** Scopes actually granted by Linear (may be a subset of requested). */
+  grantedScopes?: string[];
 };
 
 export type NotionMetadata = {

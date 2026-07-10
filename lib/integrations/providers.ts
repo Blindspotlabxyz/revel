@@ -11,6 +11,35 @@ import {
 } from "@/lib/integrations/oauth-config";
 import { createOAuthState } from "@/lib/integrations/oauth-state";
 
+/** Comma-separated scopes for Linear authorize (per Linear OAuth docs). */
+export const LINEAR_OAUTH_SCOPES = "read,write,issues:create";
+
+/** Scopes we need to create Action Queue issues. */
+const LINEAR_REQUIRED_SCOPES = ["write", "issues:create"] as const;
+
+/**
+ * Normalize Linear scope field: authorize uses commas; token response often
+ * uses spaces; older apps may return a string array.
+ */
+export function normalizeLinearScopes(
+  scope: string | string[] | undefined | null
+): string[] {
+  if (!scope) return [];
+  if (Array.isArray(scope)) {
+    return scope.map((s) => s.trim()).filter(Boolean);
+  }
+  return scope
+    .split(/[,\s]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export function hasLinearIssueCreateScope(scopes: string[]): boolean {
+  const set = new Set(scopes.map((s) => s.toLowerCase()));
+  // write implies broad write; issues:create is the targeted create permission
+  return set.has("write") || set.has("issues:create");
+}
+
 export function buildLinearAuthorizeUrl(userId: string): string {
   if (!isLinearOAuthConfigured()) {
     throw new Error("Linear OAuth is not configured on the server");
@@ -19,7 +48,7 @@ export function buildLinearAuthorizeUrl(userId: string): string {
     client_id: process.env.LINEAR_CLIENT_ID!,
     redirect_uri: oauthCallbackUrl("linear"),
     response_type: "code",
-    scope: "read,write,issues:create",
+    scope: LINEAR_OAUTH_SCOPES,
     state: createOAuthState(userId, "linear"),
     prompt: "consent",
     actor: "user",
@@ -86,13 +115,23 @@ export async function exchangeLinearCode(code: string): Promise<{
     access_token: string;
     refresh_token?: string;
     expires_in?: number;
-    scope?: string;
+    /** Space-separated string, or string[] on apps created before Dec 2023. */
+    scope?: string | string[];
   };
+
+  const grantedScopes = normalizeLinearScopes(tokenJson.scope);
+  if (!hasLinearIssueCreateScope(grantedScopes)) {
+    throw new Error(
+      `Linear did not grant issue-create permission (got: ${grantedScopes.join(", ") || "none"}). ` +
+        `Reconnect and approve write access, or use a Linear account with permission to create issues. ` +
+        `Required one of: ${LINEAR_REQUIRED_SCOPES.join(", ")}.`
+    );
+  }
 
   const meRes = await fetch("https://api.linear.app/graphql", {
     method: "POST",
     headers: {
-      Authorization: tokenJson.access_token,
+      Authorization: `Bearer ${tokenJson.access_token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -109,6 +148,13 @@ export async function exchangeLinearCode(code: string): Promise<{
   }
 
   const meJson = await meRes.json();
+  if (meJson?.errors?.length) {
+    throw new Error(
+      meJson.errors[0]?.message ??
+        "Linear GraphQL error while loading teams (check granted scopes)"
+    );
+  }
+
   const teams = (meJson?.data?.teams?.nodes ?? []) as {
     id: string;
     name: string;
@@ -127,12 +173,14 @@ export async function exchangeLinearCode(code: string): Promise<{
       typeof tokenJson.expires_in === "number"
         ? new Date(Date.now() + tokenJson.expires_in * 1000)
         : undefined,
-    scopes: tokenJson.scope,
+    // Persist granted scopes (normalized, comma-separated for storage)
+    scopes: grantedScopes.join(","),
     metadata: {
       teamId: team.id,
       teamName: team.name,
       workspaceName: meJson?.data?.organization?.name,
       viewerName: meJson?.data?.viewer?.name,
+      grantedScopes,
     },
   };
 }
