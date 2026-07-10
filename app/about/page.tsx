@@ -103,10 +103,10 @@ export default function AboutPage() {
 
         <div className="mt-12 flex flex-wrap gap-4">
           <Button asChild>
-            <Link href="/mission-control">Run Revel</Link>
+            <Link href="/mission-control">Run free analysis</Link>
           </Button>
           <Button asChild variant="secondary">
-            <Link href="/docs/how-it-works">How it works</Link>
+            <Link href="/compare">Compare Revel</Link>
           </Button>
           <Button asChild variant="ghost">
             <Link href="/contact">Contact us</Link>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { GenesisStatCards } from "@/components/landing/genesis-stat-cards";
 import { IllustrationSlot } from "@/components/landing/illustration-slot";
 import { SectionIllustration } from "@/components/landing/section-illustration";
-import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
+import { SECONDARY_CTA, SECONDARY_CTA_HREF } from "@/lib/cta";
 
 export function InsightSection() {
   return (
@@ -43,7 +43,7 @@ export function InsightSection() {
               the insights that matter most.
             </p>
             <Button asChild className="mt-8">
-              <Link href={PUBLIC_SAMPLE_REPORT_PATH}>See a Live Analysis</Link>
+              <Link href={SECONDARY_CTA_HREF}>{SECONDARY_CTA}</Link>
             </Button>
           </motion.div>
         </div>

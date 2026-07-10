@@ -5,7 +5,13 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { IllustrationSlot } from "@/components/landing/illustration-slot";
 import { SectionIllustration } from "@/components/landing/section-illustration";
-import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
+import {
+  PRIMARY_CTA,
+  PRIMARY_CTA_HREF,
+  SECONDARY_CTA,
+  SECONDARY_CTA_HREF,
+} from "@/lib/cta";
+import { DEFAULT_WEEKLY_AUDIT_LIMIT } from "@/lib/weekly-audit-limit";
 
 export function Hero() {
   return (
@@ -38,21 +44,50 @@ export function Hero() {
           className="mt-8 flex flex-wrap gap-4"
         >
           <Button asChild size="lg">
-            <Link href="/mission-control">Run Revel</Link>
+            <Link href={PRIMARY_CTA_HREF}>{PRIMARY_CTA}</Link>
           </Button>
           <Button asChild variant="secondary" size="lg">
-            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>See a Live Report</Link>
+            <Link href={SECONDARY_CTA_HREF}>{SECONDARY_CTA}</Link>
           </Button>
         </motion.div>
 
-        <motion.p
+        {/* Pricing snapshot + trust near primary CTA */}
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2, delay: 0.15 }}
-          className="mt-6 text-sm text-muted"
+          className="mt-6 space-y-2"
         >
-          Built for founders, product teams and builders.
-        </motion.p>
+          <p className="text-sm text-muted">
+            <span className="font-medium text-foreground">
+              Free early access
+            </span>
+            {" · "}
+            up to {DEFAULT_WEEKLY_AUDIT_LIMIT} audits / week.{" "}
+            <Link
+              href="/pricing"
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Access details
+            </Link>
+            {" · "}
+            <Link
+              href="/compare"
+              className="text-primary underline-offset-2 hover:underline"
+            >
+              Why not ChatGPT?
+            </Link>
+          </p>
+          <p className="text-xs text-muted">
+            Public URLs only. We do not sell your data.{" "}
+            <Link
+              href="/privacy"
+              className="underline-offset-2 hover:underline"
+            >
+              Privacy
+            </Link>
+          </p>
+        </motion.div>
       </div>
 
       <motion.div

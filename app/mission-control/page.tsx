@@ -9,9 +9,10 @@ export default function MissionControlPage() {
 
   return (
     <div className="max-w-xl">
-      <h1 className="font-heading text-3xl font-semibold">Run a New Analysis</h1>
+      <h1 className="font-heading text-3xl font-semibold">Run a free analysis</h1>
       <p className="mt-2 text-muted">
-        Analyze your product in under a minute.
+        Paste a public product URL. Get Reveal Index, blindspots, Blueprint, and
+        Action Queue in minutes.
       </p>
 
       <div className="mt-8 rounded-xl border border-border bg-surface p-8">

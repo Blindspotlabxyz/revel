@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { FORM_SUBMIT_CTA, FORM_SUBMIT_LOADING } from "@/lib/cta";
 
 type AnalysisFormProps = {
   weeklyLimit?: number;
@@ -60,19 +62,27 @@ export function AnalysisForm({ weeklyLimit = 3 }: AnalysisFormProps) {
           required
           disabled={loading}
         />
+        <p className="mt-2 text-xs leading-relaxed text-muted">
+          Public pages only. Revel fetches the URL you submit to generate your
+          report. We do not sell your data or store private keys.{" "}
+          <Link href="/privacy" className="text-primary hover:underline">
+            Privacy policy
+          </Link>
+        </p>
       </div>
 
-      {error && (
-        <p className="text-sm text-primary">{error}</p>
-      )}
+      {error ? <p className="text-sm text-primary">{error}</p> : null}
 
       <Button type="submit" size="lg" disabled={loading || !url.trim()}>
-        {loading ? "Starting..." : "Analyze Product"}
+        {loading ? FORM_SUBMIT_LOADING : FORM_SUBMIT_CTA}
       </Button>
 
       <p className="text-xs text-muted">
-        Free early access: up to {weeklyLimit} audits per week (resets Monday 00:00
-        UTC). Need more? OKX.AI marketplace — $0.35 per successful audit.
+        Free early access: up to {weeklyLimit} audits per week (resets Monday
+        00:00 UTC). Need more? OKX.AI marketplace at $0.35 per successful audit.{" "}
+        <Link href="/pricing" className="text-primary hover:underline">
+          Access details
+        </Link>
       </p>
     </form>
   );

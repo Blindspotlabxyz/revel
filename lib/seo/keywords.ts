@@ -42,10 +42,29 @@ export const seoKeywords = [
 ] as const;
 
 export const pageKeywords: Record<string, string[]> = {
-  home: ["AI product analysis", "find growth gaps", "product strategist"],
+  home: [
+    "AI product analysis",
+    "find growth gaps",
+    "product strategist",
+    "free product audit",
+    "Reveal Index",
+    "product blindspots",
+  ],
   "how-it-works": ["how Revel works", "product analysis steps", "AI audit workflow"],
   features: ["product analysis features", "UX review", "Reveal Index", "Blueprint"],
-  pricing: ["Revel pricing", "free product audit", "SaaS pricing"],
+  pricing: [
+    "Revel pricing",
+    "free product audit",
+    "early access",
+    "SaaS pricing",
+  ],
+  compare: [
+    "Revel vs ChatGPT",
+    "product audit comparison",
+    "AI product strategist vs consultant",
+    "Lighthouse vs product audit",
+    "Revel alternatives",
+  ],
   faq: ["Revel FAQ", "AI audit questions", "product analysis help"],
   about: ["BlindspotLab", "Mojeeb Titilayo", "about Revel"],
   docs: [
@@ -59,4 +78,11 @@ export const pageKeywords: Record<string, string[]> = {
   ],
   "sample-reports": ["sample product audit", "example Revel report"],
   contact: ["contact Revel", "BlindspotLab support"],
+  guides: [
+    "product blindspots",
+    "UX friction",
+    "messaging audit",
+    "product growth gaps",
+    "how to audit a SaaS homepage",
+  ],
 };

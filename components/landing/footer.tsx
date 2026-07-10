@@ -5,11 +5,17 @@ const footerLinks = {
   Product: [
     { label: "How it Works", href: "/docs/how-it-works" },
     { label: "Features", href: "/features" },
+    { label: "Compare", href: "/compare" },
+    { label: "Pricing", href: "/pricing" },
     { label: "Mission Control", href: "/mission-control" },
   ],
   Resources: [
     { label: "Docs", href: "/docs" },
     { label: "Sample Reports", href: "/docs/sample-reports" },
+    {
+      label: "Guide: Find blindspots",
+      href: "/guides/find-product-blindspots",
+    },
     { label: "FAQ", href: "/docs/faq" },
     { label: "Contact", href: "/contact" },
   ],

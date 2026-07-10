@@ -2,6 +2,9 @@
 export const publicSitemapPaths = [
   "/",
   "/features",
+  "/compare",
+  "/pricing",
+  "/guides/find-product-blindspots",
   "/about",
   "/contact",
   "/partners",
@@ -30,6 +33,12 @@ export const sitemapPriorities: Record<
 > = {
   "/": { changeFrequency: "weekly", priority: 1 },
   "/features": { changeFrequency: "monthly", priority: 0.9 },
+  "/compare": { changeFrequency: "monthly", priority: 0.9 },
+  "/pricing": { changeFrequency: "monthly", priority: 0.85 },
+  "/guides/find-product-blindspots": {
+    changeFrequency: "monthly",
+    priority: 0.8,
+  },
   "/about": { changeFrequency: "monthly", priority: 0.8 },
   "/contact": { changeFrequency: "yearly", priority: 0.6 },
   "/partners": { changeFrequency: "monthly", priority: 0.8 },
