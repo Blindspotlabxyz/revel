@@ -12,7 +12,7 @@ import {
   SECONDARY_CTA,
   SECONDARY_CTA_HREF,
 } from "@/lib/cta";
-import { DEFAULT_WEEKLY_AUDIT_LIMIT } from "@/lib/weekly-audit-limit";
+import { DEFAULT_WEEKLY_AUDIT_LIMIT } from "@/lib/weekly-audit-limit-config";
 
 const title = "Pricing";
 const description =

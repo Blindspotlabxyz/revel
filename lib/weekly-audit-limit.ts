@@ -1,16 +1,11 @@
 import { isUserAdmin } from "@/lib/admin";
+import {
+  DEFAULT_WEEKLY_AUDIT_LIMIT,
+  getWeeklyAuditLimit,
+} from "@/lib/weekly-audit-limit-config";
 import { getAllAnalyses } from "@/services/store";
 
-export const DEFAULT_WEEKLY_AUDIT_LIMIT = 3;
-
-export function getWeeklyAuditLimit(): number {
-  const raw =
-    process.env.WEEKLY_AUDIT_LIMIT ??
-    process.env.DAILY_AUDIT_LIMIT ??
-    DEFAULT_WEEKLY_AUDIT_LIMIT;
-  const n = Number(raw);
-  return Number.isFinite(n) && n > 0 ? Math.min(Math.floor(n), 20) : DEFAULT_WEEKLY_AUDIT_LIMIT;
-}
+export { DEFAULT_WEEKLY_AUDIT_LIMIT, getWeeklyAuditLimit };
 
 function startOfUtcWeek(): Date {
   const now = new Date();
