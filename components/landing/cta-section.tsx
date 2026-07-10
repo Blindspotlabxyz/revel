@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { PRIMARY_CTA_HREF } from "@/lib/cta";
-import { DEFAULT_WEEKLY_AUDIT_LIMIT } from "@/lib/weekly-audit-limit-config";
+import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
 
 export function CtaSection() {
   return (
@@ -24,12 +23,12 @@ export function CtaSection() {
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Button asChild size="lg">
-            <Link href={PRIMARY_CTA_HREF}>Open Mission Control</Link>
+            <Link href="/mission-control">Run Revel</Link>
+          </Button>
+          <Button asChild variant="secondary" size="lg">
+            <Link href={PUBLIC_SAMPLE_REPORT_PATH}>See Genesis Report</Link>
           </Button>
         </div>
-        <p className="mt-6 text-sm text-muted">
-          Free early access · up to {DEFAULT_WEEKLY_AUDIT_LIMIT} audits / week
-        </p>
       </motion.div>
     </section>
   );

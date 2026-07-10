@@ -2,22 +2,23 @@ import { NavLink } from "@/components/nav-link";
 import { RevelLogo } from "@/components/brand/logo";
 import { getLogoHomeLink } from "@/lib/logo-home";
 
-/** Footer is sitemap + legal — not a second copy of the primary nav CTAs. */
 const footerLinks = {
   Product: [
+    { label: "How it Works", href: "/docs/how-it-works" },
+    { label: "Features", href: "/features" },
     { label: "Mission Control", href: "/mission-control" },
-    { label: "Sample Reports", href: "/docs/sample-reports" },
-    { label: "Partner API", href: "/partners" },
   ],
   Resources: [
-    {
-      label: "Guide: Find blindspots",
-      href: "/guides/find-product-blindspots",
-    },
+    { label: "Docs", href: "/docs" },
+    { label: "Sample Reports", href: "/docs/sample-reports" },
     { label: "FAQ", href: "/docs/faq" },
-    { label: "API Reference", href: "/docs/api" },
-    { label: "MCP / A2MCP", href: "/docs/mcp" },
     { label: "Contact", href: "/contact" },
+  ],
+  Developers: [
+    { label: "API Reference", href: "/docs/api" },
+    { label: "Partner API", href: "/partners" },
+    { label: "MCP / A2MCP", href: "/docs/mcp" },
+    { label: "GitHub", href: "https://github.com/Blindspotlabxyz/revel" },
   ],
   Ecosystem: [
     {
@@ -26,7 +27,7 @@ const footerLinks = {
     },
     { label: "OKX.AI", href: "https://www.okx.ai/" },
     { label: "OKX", href: "https://www.okx.com" },
-    { label: "GitHub", href: "https://github.com/Blindspotlabxyz/revel" },
+    { label: "OKX on X", href: "https://x.com/okx" },
     { label: "BlindspotLab", href: "https://blindspotlab.xyz" },
   ],
   Company: [
@@ -42,7 +43,7 @@ export async function Footer() {
   return (
     <footer className="border-t border-border bg-surface py-16">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
               <h3 className="text-sm font-medium">{category}</h3>
@@ -68,7 +69,6 @@ export async function Footer() {
             className="[&_span]:text-base"
             href={logo.href}
             external={logo.external}
-            surfaceLabel={logo.surfaceLabel}
           />
           <p className="text-sm text-muted">
             Built by{" "}

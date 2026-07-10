@@ -6,14 +6,11 @@ import { isAuthClientEnabled } from "@/lib/auth-client";
 import { NavbarAuthButtons } from "@/components/landing/navbar-auth-buttons";
 import { RevelLogo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
-import { PRIMARY_CTA, PRIMARY_CTA_HREF } from "@/lib/cta";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "How it Works", href: "/docs/how-it-works" },
   { label: "Features", href: "/features" },
-  { label: "Compare", href: "/compare" },
-  { label: "Pricing", href: "/pricing" },
   { label: "Docs", href: "/docs" },
 ];
 
@@ -70,7 +67,7 @@ export function NavbarClient({
         <div className="flex items-center gap-3">
           {authEnabled ? <NavbarAuthButtons /> : null}
           <Button asChild size="sm">
-            <Link href={PRIMARY_CTA_HREF}>{PRIMARY_CTA}</Link>
+            <Link href="/mission-control">Run Revel</Link>
           </Button>
         </div>
       </nav>
