@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { PRIMARY_CTA, PRIMARY_CTA_HREF } from "@/lib/cta";
 
 const points = [
   {
@@ -54,12 +53,9 @@ export function DifferentiationSection() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-wrap gap-3">
-          <Button asChild>
-            <Link href="/compare">Compare Revel side-by-side</Link>
-          </Button>
+        <div className="mt-10">
           <Button asChild variant="secondary">
-            <Link href={PRIMARY_CTA_HREF}>{PRIMARY_CTA}</Link>
+            <Link href="/compare">Compare Revel side-by-side</Link>
           </Button>
         </div>
       </div>

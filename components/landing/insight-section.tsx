@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { GenesisStatCards } from "@/components/landing/genesis-stat-cards";
 import { IllustrationSlot } from "@/components/landing/illustration-slot";
 import { SectionIllustration } from "@/components/landing/section-illustration";
-import { SECONDARY_CTA, SECONDARY_CTA_HREF } from "@/lib/cta";
+import { SECONDARY_CTA_HREF } from "@/lib/cta";
 
 export function InsightSection() {
   return (
@@ -40,31 +38,16 @@ export function InsightSection() {
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted">
               Revel reviews your product from multiple perspectives and surfaces
-              the insights that matter most.
+              the insights that matter most.{" "}
+              <Link
+                href={SECONDARY_CTA_HREF}
+                className="font-medium text-primary underline-offset-2 hover:underline"
+              >
+                See a real example →
+              </Link>
             </p>
-            <Button asChild className="mt-8">
-              <Link href={SECONDARY_CTA_HREF}>{SECONDARY_CTA}</Link>
-            </Button>
           </motion.div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.25, delay: 0.05 }}
-          className="mt-16 md:mt-20"
-        >
-          <p className="font-heading text-xl font-semibold md:text-2xl">
-            A report your team can act on.
-          </p>
-          <p className="mt-3 max-w-[680px] text-muted">
-            Clean cards. Clear priorities. No dashboards full of charts. Real
-            output from Revel&apos;s audit of Arcapush.
-          </p>
-
-          <GenesisStatCards className="mt-8" />
-        </motion.div>
       </div>
     </section>
   );

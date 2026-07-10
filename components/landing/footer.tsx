@@ -1,38 +1,31 @@
 import { NavLink } from "@/components/nav-link";
 import { RevelLogo } from "@/components/brand/logo";
 
+/** Footer is sitemap + legal — not a second copy of the primary nav CTAs. */
 const footerLinks = {
   Product: [
-    { label: "How it Works", href: "/docs/how-it-works" },
-    { label: "Features", href: "/features" },
-    { label: "Compare", href: "/compare" },
-    { label: "Pricing", href: "/pricing" },
     { label: "Mission Control", href: "/mission-control" },
+    { label: "Sample Reports", href: "/docs/sample-reports" },
+    { label: "Partner API", href: "/partners" },
   ],
   Resources: [
-    { label: "Docs", href: "/docs" },
-    { label: "Sample Reports", href: "/docs/sample-reports" },
     {
       label: "Guide: Find blindspots",
       href: "/guides/find-product-blindspots",
     },
     { label: "FAQ", href: "/docs/faq" },
-    { label: "Contact", href: "/contact" },
-  ],
-  Developers: [
     { label: "API Reference", href: "/docs/api" },
-    { label: "Partner API", href: "/partners" },
     { label: "MCP / A2MCP", href: "/docs/mcp" },
-    { label: "GitHub", href: "https://github.com/Blindspotlabxyz/revel" },
+    { label: "Contact", href: "/contact" },
   ],
   Ecosystem: [
     {
       label: "Onchain OS Docs",
       href: "https://web3.okx.com/help/section/onchain-os",
     },
-    { label: "OKX.AI", href: "https://web3.okx.com/ai/home" },
+    { label: "OKX.AI", href: "https://www.okx.ai/" },
     { label: "OKX", href: "https://www.okx.com" },
-    { label: "OKX on X", href: "https://x.com/okx" },
+    { label: "GitHub", href: "https://github.com/Blindspotlabxyz/revel" },
     { label: "BlindspotLab", href: "https://blindspotlab.xyz" },
   ],
   Company: [
@@ -46,7 +39,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-surface py-16">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
               <h3 className="text-sm font-medium">{category}</h3>
@@ -78,7 +71,17 @@ export function Footer() {
             >
               BlindspotLab
             </a>
-            . Listed on OKX.AI · Reveal what others miss.
+            . Listed on{" "}
+            <a
+              href="https://www.okx.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted transition-colors hover:text-foreground"
+            >
+              OKX.AI
+            </a>
+            {" · "}
+            Reveal what others miss.
           </p>
         </div>
       </div>

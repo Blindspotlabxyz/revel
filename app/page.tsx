@@ -8,7 +8,6 @@ import { InsightSection } from "@/components/landing/insight-section";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { DifferentiationSection } from "@/components/landing/differentiation-section";
 import { MapSection } from "@/components/landing/map-section";
-import { DemoSection } from "@/components/landing/demo-section";
 import { ExportSection } from "@/components/landing/export-section";
 import { FaqSection } from "@/components/landing/faq-section";
 import { CtaSection } from "@/components/landing/cta-section";
@@ -54,7 +53,6 @@ export default function HomePage() {
         <ProblemSection />
         <HowItWorks />
         <InsightSection />
-        <DemoSection />
         <FeaturesSection />
         <DifferentiationSection />
         <MapSection />

@@ -3,12 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import {
-  PRIMARY_CTA,
-  PRIMARY_CTA_HREF,
-  SECONDARY_CTA,
-  SECONDARY_CTA_HREF,
-} from "@/lib/cta";
+import { PRIMARY_CTA, PRIMARY_CTA_HREF } from "@/lib/cta";
 import { DEFAULT_WEEKLY_AUDIT_LIMIT } from "@/lib/weekly-audit-limit-config";
 
 export function CtaSection() {
@@ -31,15 +26,9 @@ export function CtaSection() {
           <Button asChild size="lg">
             <Link href={PRIMARY_CTA_HREF}>{PRIMARY_CTA}</Link>
           </Button>
-          <Button asChild variant="secondary" size="lg">
-            <Link href={SECONDARY_CTA_HREF}>{SECONDARY_CTA}</Link>
-          </Button>
         </div>
         <p className="mt-6 text-sm text-muted">
-          Free early access · up to {DEFAULT_WEEKLY_AUDIT_LIMIT} audits / week ·{" "}
-          <Link href="/pricing" className="text-primary hover:underline">
-            Pricing
-          </Link>
+          Free early access · up to {DEFAULT_WEEKLY_AUDIT_LIMIT} audits / week
         </p>
       </motion.div>
     </section>

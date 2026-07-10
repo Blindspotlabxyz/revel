@@ -5,12 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { IllustrationSlot } from "@/components/landing/illustration-slot";
 import { SectionIllustration } from "@/components/landing/section-illustration";
-import {
-  PRIMARY_CTA,
-  PRIMARY_CTA_HREF,
-  SECONDARY_CTA,
-  SECONDARY_CTA_HREF,
-} from "@/lib/cta";
+import { PRIMARY_CTA, PRIMARY_CTA_HREF } from "@/lib/cta";
 import { DEFAULT_WEEKLY_AUDIT_LIMIT } from "@/lib/weekly-audit-limit-config";
 
 export function Hero() {
@@ -46,12 +41,8 @@ export function Hero() {
           <Button asChild size="lg">
             <Link href={PRIMARY_CTA_HREF}>{PRIMARY_CTA}</Link>
           </Button>
-          <Button asChild variant="secondary" size="lg">
-            <Link href={SECONDARY_CTA_HREF}>{SECONDARY_CTA}</Link>
-          </Button>
         </motion.div>
 
-        {/* Pricing snapshot + trust near primary CTA */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

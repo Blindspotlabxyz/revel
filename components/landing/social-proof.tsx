@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { GENESIS_REPORT_WEBSITE } from "@/lib/genesis-report-stats";
-import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
 
 const signals = [
   {
     label: "Listed on OKX.AI",
-    href: "https://web3.okx.com/ai/home",
+    href: "https://www.okx.ai/",
     external: true,
   },
   {
@@ -18,21 +16,9 @@ const signals = [
     href: "/partners",
     external: false,
   },
-  {
-    label: "Live Genesis report",
-    href: PUBLIC_SAMPLE_REPORT_PATH,
-    external: false,
-  },
 ];
 
 export function SocialProof() {
-  let host = "arcapush.com";
-  try {
-    host = new URL(GENESIS_REPORT_WEBSITE).hostname.replace(/^www\./, "");
-  } catch {
-    /* keep default */
-  }
-
   return (
     <section className="border-y border-border bg-surface/60 py-10">
       <div className="mx-auto max-w-6xl px-6">
@@ -67,25 +53,6 @@ export function SocialProof() {
             </li>
           ))}
         </ul>
-
-        <p className="mt-6 text-center text-xs text-muted">
-          Sample audit on{" "}
-          <a
-            href={GENESIS_REPORT_WEBSITE}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-foreground hover:text-primary"
-          >
-            {host}
-          </a>
-          {" · "}
-          <Link
-            href={PUBLIC_SAMPLE_REPORT_PATH}
-            className="font-medium text-primary hover:underline"
-          >
-            Open the full report
-          </Link>
-        </p>
       </div>
     </section>
   );
