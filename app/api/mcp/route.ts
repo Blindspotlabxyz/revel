@@ -14,6 +14,10 @@ import {
   validateMcpRequest,
 } from "@/lib/mcp/auth";
 import { handleMcpHttpRequest } from "@/lib/mcp/http-transport";
+import {
+  mcpBodyRequiresPayment,
+  REVEL_BILLABLE_MCP_TOOLS,
+} from "@/lib/mcp/payment-gate";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -37,9 +41,29 @@ function applyCors(response: Response): NextResponse {
   return next;
 }
 
-async function mcpPostHandler(request: NextRequest): Promise<NextResponse> {
+function cloneRequestWithBody(
+  request: NextRequest,
+  bodyText: string
+): NextRequest {
+  const init: ConstructorParameters<typeof NextRequest>[1] = {
+    method: request.method,
+    headers: request.headers,
+    ...(bodyText.length > 0
+      ? { body: bodyText, duplex: "half" as const }
+      : {}),
+  };
+  return new NextRequest(request.url, init);
+}
+
+async function mcpPostHandler(
+  request: NextRequest,
+  paid: boolean
+): Promise<NextResponse> {
   return applyCors(
-    await handleMcpHttpRequest(request, { source: "mcp_okx", paid: true })
+    await handleMcpHttpRequest(request, {
+      source: "mcp_okx",
+      paid,
+    })
   );
 }
 
@@ -69,7 +93,10 @@ export async function GET() {
         isOkxBillingEnabled()
           ? {
               protocol: "x402",
-              requiredOn: "POST",
+              agentPaymentsProtocol: "okx-agent-payments-protocol",
+              /** Handshake + tools/list stay free; payment only on billable tools. */
+              requiredOn: "tools/call (billable)",
+              billableTools: [...REVEL_BILLABLE_MCP_TOOLS],
               headers: ["PAYMENT-SIGNATURE", "X-PAYMENT"],
             }
           : null,
@@ -89,25 +116,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const bodyText = await request.text();
+  const requestWithBody = cloneRequestWithBody(request, bodyText);
+
   const mcpDevBypass =
-    validateMcpRequest(request) &&
+    validateMcpRequest(requestWithBody) &&
     (process.env.NODE_ENV === "development" || !isOkxBillingEnabled());
 
   if (mcpDevBypass) {
     return applyCors(
-      await handleMcpHttpRequest(request, { source: "mcp_dev", paid: false })
+      await handleMcpHttpRequest(requestWithBody, {
+        source: "mcp_dev",
+        paid: false,
+      })
     );
   }
 
   if (isOkxBillingEnabled()) {
+    // A2MCP compliance: free initialize / tools/list / health / poll / export.
+    // Charge only when starting a billable audit (OKX Agent Payments Protocol).
+    if (!mcpBodyRequiresPayment(bodyText)) {
+      return mcpPostHandler(requestWithBody, false);
+    }
+
     await ensureOkxResourceServerReady();
     const paidPost = withX402(
-      mcpPostHandler,
+      (req) => mcpPostHandler(req, true),
       getMcpRouteConfig(),
       getOkxResourceServer(),
       getOkxPaywallConfig()
     );
-    return paidPost(request);
+    return paidPost(requestWithBody);
   }
 
   return applyCors(mcpUnauthorizedResponse());

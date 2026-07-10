@@ -101,14 +101,19 @@ Auth      Authorization: Bearer MCP_API_KEY  (dev bypass)
 }`}</DocCode>
         </DocSection>
 
-        <DocSection title="Billing (OKX x402)">
+        <DocSection title="Billing (OKX Agent Payments Protocol / x402)">
           <p>
-            OKX marketplace billing uses the Agent Payments Protocol (x402) on{" "}
-            <code>POST /api/mcp</code> — ${price.toFixed(2)} USDT0 per completed
-            audit on X Layer. Unpaid requests return{" "}
-            <strong className="text-foreground">402</strong> with payment
-            instructions. Set price via <code>OKX_AUDIT_PRICE_USD</code>.
-            Alternate paid HTTP route: <code>POST /api/audit</code>.
+            Marketplace billing uses the{" "}
+            <strong className="text-foreground">OKX Agent Payments Protocol</strong>{" "}
+            (x402) — ${price.toFixed(2)} USDT0 per started audit on X Layer.
+            Free without payment: <code>initialize</code>, <code>tools/list</code>,{" "}
+            <code>revel_health</code>, poll/export tools. Paid:{" "}
+            <code>revel_analyze_website</code> /{" "}
+            <code>revel_analyze_website_and_wait</code> return{" "}
+            <strong className="text-foreground">402</strong> +{" "}
+            <code>PAYMENT-REQUIRED</code> when unpaid. Set price via{" "}
+            <code>OKX_AUDIT_PRICE_USD</code>. Alternate paid HTTP route:{" "}
+            <code>POST /api/audit</code>.
           </p>
           <p>
             Full operator checklist:{" "}

@@ -58,7 +58,7 @@ export function getOkxBillingManifest() {
     endpoint: mcpEndpoint,
     alternateEndpoint: `${siteConfig.url}/api/audit`,
     enabled: isOkxBillingEnabled(),
-    note: "POST the A2MCP endpoint with x402 payment headers. One charge per started audit.",
+    note: "OKX Agent Payments Protocol (x402) on billable MCP tools only (revel_analyze_website*). initialize/tools/list/health/poll/export stay free. One charge per started audit.",
   };
 }
 

@@ -57,9 +57,14 @@ export default function EcosystemDocsPage() {
 
         <DocSection title="Agent Payments Protocol (x402)">
           <p>
-            Paid MCP requests use x402 on <code>POST /api/mcp</code>. Unpaid
-            requests return <strong className="text-foreground">402</strong> with
-            payment instructions. Development bypass:{" "}
+            Revel uses the <strong className="text-foreground">OKX Agent Payments Protocol</strong>{" "}
+            (x402) on <code>POST /api/mcp</code>. MCP handshake and discovery stay free (
+            <code>initialize</code>, <code>tools/list</code>, health, poll, export). Payment is
+            required only when starting a billable audit (
+            <code>revel_analyze_website</code> / <code>revel_analyze_website_and_wait</code>
+            ). Unpaid billable calls return{" "}
+            <strong className="text-foreground">402</strong> with{" "}
+            <code>PAYMENT-REQUIRED</code>. Development bypass:{" "}
             <code>MCP_API_KEY</code> in Authorization header.
           </p>
           <p>Alternate paid HTTP route: <code>POST /api/audit</code> with JSON body <code>{`{ "url": "..." }`}</code>.</p>
@@ -69,7 +74,10 @@ export default function EcosystemDocsPage() {
           <ol className="list-decimal space-y-2 pl-5">
             <li>Register ASP on Onchain OS (Agentic Wallet)</li>
             <li>Set OKX API keys + <code>OKX_PAY_TO</code> on Vercel</li>
-            <li>Ensure <code>POST /api/mcp</code> returns 402 without payment</li>
+            <li>
+              Ensure free methods work without payment; billable{" "}
+              <code>tools/call</code> returns 402 without payment
+            </li>
             <li>Submit listing for review; wait for approval email</li>
             <li>Test with <code>npx tsx scripts/test-mcp-marketplace-flow.ts</code></li>
           </ol>
