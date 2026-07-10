@@ -47,8 +47,11 @@ export default function HomePage() {
       />
       <Navbar />
       <main>
-        <Hero />
-        <SocialProof />
+        {/* Hero + social proof share first viewport so trust line is above the fold */}
+        <div className="first-viewport">
+          <Hero />
+          <SocialProof />
+        </div>
         <ProblemSection />
         <HowItWorks />
         <InsightSection />

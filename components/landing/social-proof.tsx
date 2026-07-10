@@ -1,8 +1,17 @@
 export function SocialProof() {
   return (
-    <section className="border-y border-border py-8">
-      <p className="text-center text-sm text-muted">
-        Trusted by founders building the next generation of software.
+    <section className="first-viewport__social border-t border-border bg-surface/80 py-4 sm:py-5">
+      <p className="mx-auto max-w-3xl px-4 text-center text-sm leading-relaxed text-muted sm:px-6">
+        Trusted by founders building the next generation of software. Listed on{" "}
+        <a
+          href="https://www.okx.ai/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-foreground underline-offset-2 hover:underline"
+        >
+          OKX.AI
+        </a>
+        .
       </p>
     </section>
   );

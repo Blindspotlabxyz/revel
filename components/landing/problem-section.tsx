@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Box, MessageSquare, Layout, Users } from "lucide-react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -29,8 +30,8 @@ const cards = [
 
 export function ProblemSection() {
   return (
-    <section className="border-t border-border bg-surface py-24">
-      <div className="mx-auto max-w-6xl px-6">
+    <section className="border-t border-border bg-surface py-16 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="max-w-2xl">
           <h2 className="font-heading text-3xl font-semibold md:text-4xl">
             You&apos;re too close to your own product.
@@ -39,7 +40,14 @@ export function ProblemSection() {
             When you build every day, it&apos;s easy to overlook problems. Weak
             messaging. Confusing onboarding. Missing trust. Hidden UX friction.
             Competitors moving faster. Revel uncovers those blindspots before
-            your users do.
+            your users do.{" "}
+            <Link
+              href="/compare"
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              How we differ from ChatGPT and audit tools
+            </Link>
+            .
           </p>
         </div>
 

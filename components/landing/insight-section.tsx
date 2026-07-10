@@ -10,8 +10,8 @@ import { PUBLIC_SAMPLE_REPORT_PATH } from "@/lib/public-sample-report";
 
 export function InsightSection() {
   return (
-    <section className="illustration-section border-t border-border py-24">
-      <div className="mx-auto max-w-6xl px-6">
+    <section className="illustration-section border-t border-border py-16 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
           <motion.div
             initial={{ opacity: 0, x: -16 }}

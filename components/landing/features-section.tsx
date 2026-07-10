@@ -46,13 +46,13 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="features" className="py-16 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <h2 className="font-heading text-3xl font-semibold md:text-4xl">
           Everything you need to improve your product.
         </h2>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-2">
+        <div className="mt-10 grid gap-4 sm:mt-16 sm:gap-6 sm:grid-cols-2">
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}

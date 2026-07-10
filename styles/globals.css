@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+:root {
+  /* Fixed marketing header (h-16) — used for hero offset + scroll-margin */
+  --header-height: 4rem;
+}
+
 @theme inline {
   --color-background: #f7f2eb;
   --color-surface: #ffffff;
@@ -106,12 +111,73 @@
   }
 }
 
+/*
+ * First viewport = fixed header offset + hero + social-proof bar.
+ * Social proof stays visible without scrolling on typical laptop heights.
+ */
+.first-viewport {
+  box-sizing: border-box;
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  padding-top: var(--header-height);
+}
+
+.hero-section {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.hero-section__heading {
+  font-size: clamp(2.25rem, 4.2vw + 0.75rem, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.first-viewport__social {
+  flex-shrink: 0;
+}
+
+/* Cap hero art so two-column layout + social bar fit shorter laptop heights */
+@media (min-width: 48rem) {
+  .hero-section {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .hero-illustration-slot {
+    max-height: min(20rem, calc(100dvh - var(--header-height) - 7rem));
+  }
+
+  .hero-illustration-slot .illustration-frame {
+    max-height: inherit;
+  }
+
+  .hero-illustration-slot .illustration-frame__media {
+    max-height: min(18rem, calc(100dvh - var(--header-height) - 8rem));
+  }
+}
+
+/* Anchor targets clear the fixed header */
+main > section,
+main > .first-viewport,
+main section[id] {
+  scroll-margin-top: calc(var(--header-height) + 0.5rem);
+}
+
 * {
   box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -120,6 +186,7 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
 }
 
 h1,

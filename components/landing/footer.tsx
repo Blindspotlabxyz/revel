@@ -41,18 +41,18 @@ export async function Footer() {
   const logo = await getLogoHomeLink();
 
   return (
-    <footer className="border-t border-border bg-surface py-16">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+    <footer className="border-t border-border bg-surface py-12 sm:py-16">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5 lg:gap-10">
           {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
+            <div key={category} className="min-w-0">
               <h3 className="text-sm font-medium">{category}</h3>
               <ul className="mt-4 space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
                     <NavLink
                       href={link.href}
-                      className="text-sm text-muted transition-colors hover:text-foreground"
+                      className="break-words text-sm text-muted transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </NavLink>
@@ -63,14 +63,14 @@ export async function Footer() {
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
+        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-8 sm:mt-16 sm:flex-row sm:items-center">
           <RevelLogo
             size="sm"
             className="[&_span]:text-base"
             href={logo.href}
             external={logo.external}
           />
-          <p className="text-sm text-muted">
+          <p className="max-w-md text-sm leading-relaxed text-muted sm:text-right">
             Built by{" "}
             <a
               href="https://blindspotlab.xyz"

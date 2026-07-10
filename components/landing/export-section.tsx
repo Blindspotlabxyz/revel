@@ -13,16 +13,16 @@ const exports = [
 
 export function ExportSection() {
   return (
-    <section className="border-t border-border bg-surface py-24">
-      <div className="mx-auto max-w-6xl px-6 text-center">
+    <section className="border-t border-border bg-surface py-16 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
         <h2 className="font-heading text-3xl font-semibold md:text-4xl">
           Take action immediately.
         </h2>
-        <p className="mx-auto mt-4 max-w-lg text-lg text-muted">
+        <p className="mx-auto mt-4 max-w-lg text-base text-muted sm:text-lg">
           Turn recommendations into tasks with one click.
         </p>
 
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-8">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-5 sm:mt-12 sm:gap-8">
           {exports.map((item, i) => (
             <motion.div
               key={item.name}

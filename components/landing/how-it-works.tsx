@@ -33,13 +33,13 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-24">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="how-it-works" className="py-16 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <h2 className="font-heading text-3xl font-semibold md:text-4xl">
           How It Works
         </h2>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-5">
+        <div className="mt-10 grid grid-cols-1 gap-8 sm:mt-16 sm:grid-cols-2 lg:grid-cols-5">
           {steps.map((step, i) => (
             <motion.div
               key={step.title}
@@ -47,12 +47,12 @@ export function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.2, delay: i * 0.05 }}
-              className="relative text-center md:text-left"
+              className="relative text-left sm:text-left"
             >
               {i < steps.length - 1 && (
-                <div className="absolute left-1/2 top-6 hidden h-px w-full bg-border md:block" />
+                <div className="absolute left-[calc(50%+1.5rem)] top-6 hidden h-px w-[calc(100%-1.5rem)] bg-border lg:block" />
               )}
-              <div className="relative mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface md:mx-0">
+              <div className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface">
                 <step.icon className="h-5 w-5 text-primary" />
               </div>
               <h3 className="font-heading text-lg font-semibold">

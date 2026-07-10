@@ -6,8 +6,8 @@ import { SectionIllustration } from "@/components/landing/section-illustration";
 
 export function MapSection() {
   return (
-    <section className="illustration-section py-24">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 md:grid-cols-2 md:gap-16">
+    <section className="illustration-section py-16 sm:py-24">
+      <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 md:grid-cols-2 md:gap-16">
         <motion.div
           initial={{ opacity: 0, x: -16 }}
           whileInView={{ opacity: 1, x: 0 }}
