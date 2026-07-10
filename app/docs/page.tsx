@@ -46,11 +46,8 @@ export default function DocsPage() {
           },
         ]}
       />
-      <div className="mx-auto max-w-2xl px-6 pb-24 pt-32">
-        <p className="section-eyebrow">Docs</p>
-        <h1 className="mt-4 font-heading text-4xl font-bold tracking-tight">
-          Documentation
-        </h1>
+      <div className="mx-auto max-w-2xl px-6 py-32">
+        <h1 className="font-heading text-4xl font-semibold">Documentation</h1>
         <p className="mt-4 text-lg text-muted">
           Pick your path — {siteConfig.name} docs for founders, integrators,
           agents, and operators.
@@ -61,7 +58,7 @@ export default function DocsPage() {
             const section = docAudiencePaths[audience];
             return (
               <section key={audience}>
-                <h2 className="font-heading text-2xl font-bold tracking-tight">
+                <h2 className="font-heading text-2xl font-semibold">
                   {section.title}
                 </h2>
                 <p className="mt-2 text-muted">{section.subtitle}</p>
@@ -70,9 +67,9 @@ export default function DocsPage() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[var(--shadow-card-hover)]"
+                      className="rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary/30"
                     >
-                      <p className="font-medium text-foreground">{item.label}</p>
+                      <p className="font-medium">{item.label}</p>
                       <p className="mt-1 text-sm text-muted">
                         {item.description}
                       </p>
@@ -84,10 +81,8 @@ export default function DocsPage() {
           })}
         </div>
 
-        <section className="mt-16 rounded-xl border border-border bg-surface p-6 shadow-[var(--shadow-card)]">
-          <h2 className="font-heading text-xl font-bold tracking-tight">
-            Quick start
-          </h2>
+        <section className="mt-16 rounded-xl border border-border bg-surface p-6">
+          <h2 className="font-heading text-xl font-semibold">Quick start</h2>
           <ol className="mt-4 list-decimal space-y-2 pl-5 text-muted">
             <li>
               Open{" "}

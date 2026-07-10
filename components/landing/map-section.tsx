@@ -6,13 +6,13 @@ import { SectionIllustration } from "@/components/landing/section-illustration";
 
 export function MapSection() {
   return (
-    <section className="illustration-section py-20 md:py-28">
+    <section className="illustration-section py-24">
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 md:grid-cols-2 md:gap-16">
         <motion.div
           initial={{ opacity: 0, x: -16 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
         >
           <IllustrationSlot>
             <SectionIllustration
@@ -27,11 +27,10 @@ export function MapSection() {
           initial={{ opacity: 0, x: 16 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
           className="max-w-xl"
         >
-          <p className="section-eyebrow">Compound gains</p>
-          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight md:text-4xl">
+          <h2 className="font-heading text-3xl font-semibold md:text-4xl">
             Small improvements create massive outcomes.
           </h2>
           <p className="mt-6 text-lg leading-relaxed text-muted">

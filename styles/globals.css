@@ -1,30 +1,19 @@
 @import "tailwindcss";
 
-/*
- * Revel design system — "diagnostic clarity"
- * Cool paper, ink structure, ultramarine signal (the reveal beam).
- * Not warm-cream + terracotta; product-lab instrument feel.
- */
 @theme inline {
-  --color-background: #f3f5f8;
+  --color-background: #f7f2eb;
   --color-surface: #ffffff;
-  --color-ink: #0a0f1c;
-  --color-primary: #3559e0;
+  --color-primary: #e07a5f;
   --color-primary-foreground: #ffffff;
-  --color-primary-hover: #2a47c4;
-  --color-primary-soft: #ebf0ff;
-  --color-foreground: #0a0f1c;
-  --color-muted: #5a6478;
-  --color-border: #e1e5ed;
-  --color-success: #0f766e;
-  --font-heading: var(--font-syne);
-  --font-body: var(--font-plus-jakarta);
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --color-foreground: #111111;
+  --color-muted: #707070;
+  --color-border: #e9ddd2;
+  --color-primary-hover: #c96a52;
+  --font-heading: var(--font-fraunces);
+  --font-body: var(--font-dm-sans);
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
-
-  /* Container chrome — one radius; padding is 50% of radius */
+  /* Container chrome — one radius; padding is 50% of radius (relative, never per-section) */
   --illustration-container-radius: 1rem;
   --illustration-container-padding: calc(var(--illustration-container-radius) * 0.5);
   --illustration-media-radius: calc(
@@ -33,27 +22,29 @@
   --illustration-section-bg: var(--color-background);
   --illustration-container-border: 1px solid var(--color-border);
   --illustration-container-bg: var(--illustration-section-bg);
+  /* Match container — prevents white letterbox strips around artwork */
   --illustration-media-bg: var(--illustration-container-bg);
+  /* Legacy alias — container padding never changes at breakpoints */
   --spacing-illustration-padding: var(--illustration-container-padding);
+  /* Aspect ratios — desktop 16:9, mobile 9:16 (per spec, never crop) */
   --illustration-aspect-mobile: 9 / 16;
   --illustration-aspect-desktop: 16 / 9;
   --illustration-breakpoint: 48rem;
 
-  --illustration-shadow-color: 10 15 28;
-  --illustration-shadow-opacity: 0.08;
+  /* Illustration shadow — one neutral recipe for all three homepage images */
+  --illustration-shadow-color: 17 17 17;
+  --illustration-shadow-opacity: 0.07;
   --illustration-shadow-offset-x: 0px;
-  --illustration-shadow-offset-y: 10px;
-  --illustration-shadow-blur: 28px;
+  --illustration-shadow-offset-y: 8px;
+  --illustration-shadow-blur: 24px;
   --illustration-shadow-spread: 0px;
   --shadow-illustration: var(--illustration-shadow-offset-x)
     var(--illustration-shadow-offset-y) var(--illustration-shadow-blur)
     var(--illustration-shadow-spread)
     rgb(var(--illustration-shadow-color) / var(--illustration-shadow-opacity));
-
-  --shadow-card: 0 1px 2px rgb(10 15 28 / 0.04), 0 8px 24px rgb(10 15 28 / 0.04);
-  --shadow-card-hover: 0 2px 4px rgb(10 15 28 / 0.05), 0 12px 32px rgb(53 89 224 / 0.08);
 }
 
+/* Reusable illustration shadow — hero-peel, insight-telescope, map-reveal */
 @utility illustration-shadow {
   box-shadow: var(--shadow-illustration);
 }
@@ -78,6 +69,7 @@
   box-shadow: var(--shadow-illustration);
 }
 
+/* Aspect box — background & radius fixed; only aspect-ratio swaps below */
 .illustration-frame__media {
   position: relative;
   width: 100%;
@@ -97,63 +89,21 @@
   }
 }
 
+/* Section backdrop — hero, insight, map share one warm tone (not bg-surface) */
 .illustration-section {
   background-color: var(--illustration-section-bg);
 }
 
+/* Illustration slot — full width of parent grid column (hero, insight, map) */
 .illustration-slot {
   width: 100%;
 }
 
-/* Hero only: landscape ratio on mobile so image does not push SocialProof far down */
+/* Hero only: use landscape ratio on mobile so the image does not push SocialProof far down */
 @media (max-width: 47.99rem) {
   .hero-illustration-slot .illustration-frame__media {
     aspect-ratio: var(--illustration-aspect-desktop);
   }
-}
-
-/* Section eyebrow — structural label, not decoration */
-.section-eyebrow {
-  display: flex;
-  width: fit-content;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-primary);
-}
-
-.section-eyebrow::before {
-  content: "";
-  display: block;
-  width: 1.25rem;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--color-primary);
-}
-
-/* Soft signal wash for icon wells */
-.icon-well {
-  display: inline-flex;
-  height: 2.75rem;
-  width: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.75rem;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-}
-
-/* Focus ring utility */
-.focus-ring {
-  outline: none;
-}
-
-.focus-ring:focus-visible {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
 
 * {
@@ -164,25 +114,10 @@ html {
   scroll-behavior: smooth;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-body), system-ui, sans-serif;
-  font-feature-settings: "ss01" on, "cv11" on;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -193,24 +128,11 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-heading), system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--color-foreground);
+  font-family: var(--font-heading), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
-  color: var(--color-foreground);
-}
-
-/* Docs prose refinements */
-.docs-prose a {
-  color: var(--color-primary);
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.docs-prose a:hover {
-  color: var(--color-primary-hover);
+  background: color-mix(in srgb, var(--color-primary) 25%, transparent);
 }

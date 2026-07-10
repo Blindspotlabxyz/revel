@@ -72,9 +72,8 @@ export function SignUpPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8 shadow-[var(--shadow-card)]">
-        <p className="section-eyebrow">Get started</p>
-        <h1 className="mt-3 font-heading text-2xl font-bold tracking-tight">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8 shadow-sm">
+        <h1 className="font-heading text-2xl font-semibold">
           Create your Revel account
         </h1>
         <p className="mt-2 text-sm text-muted">

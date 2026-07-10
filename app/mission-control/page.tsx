@@ -9,15 +9,12 @@ export default function MissionControlPage() {
 
   return (
     <div className="max-w-xl">
-      <p className="section-eyebrow">Mission Control</p>
-      <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight">
-        Run a new analysis
-      </h1>
+      <h1 className="font-heading text-3xl font-semibold">Run a New Analysis</h1>
       <p className="mt-2 text-muted">
         Analyze your product in under a minute.
       </p>
 
-      <div className="mt-8 rounded-xl border border-border bg-surface p-6 shadow-[var(--shadow-card)] sm:p-8">
+      <div className="mt-8 rounded-xl border border-border bg-surface p-8">
         <AnalysisForm weeklyLimit={weeklyLimit} />
       </div>
 

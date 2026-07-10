@@ -29,14 +29,13 @@ const cards = [
 
 export function ProblemSection() {
   return (
-    <section className="border-t border-border bg-surface py-20 md:py-28">
+    <section className="border-t border-border bg-surface py-24">
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-2xl">
-          <p className="section-eyebrow">The blindspot</p>
-          <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight md:text-4xl">
+          <h2 className="font-heading text-3xl font-semibold md:text-4xl">
             You&apos;re too close to your own product.
           </h2>
-          <p className="mt-6 max-w-[40rem] text-lg leading-relaxed text-muted">
+          <p className="mt-6 max-w-[680px] text-lg leading-relaxed text-muted">
             When you build every day, it&apos;s easy to overlook problems. Weak
             messaging. Confusing onboarding. Missing trust. Hidden UX friction.
             Competitors moving faster. Revel uncovers those blindspots before
@@ -44,20 +43,18 @@ export function ProblemSection() {
           </p>
         </div>
 
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {cards.map((card, i) => (
             <motion.div
               key={card.title}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.25, delay: i * 0.05 }}
+              transition={{ duration: 0.2, delay: i * 0.05 }}
             >
-              <Card className="h-full hover:-translate-y-0.5">
+              <Card className="h-full hover:-translate-y-1">
                 <CardContent className="pt-0">
-                  <div className="icon-well mb-4">
-                    <card.icon className="h-5 w-5" strokeWidth={1.75} />
-                  </div>
+                  <card.icon className="mb-4 h-5 w-5 text-primary" />
                   <CardTitle>{card.title}</CardTitle>
                   <p className="mt-2 text-sm leading-relaxed text-muted">
                     {card.description}

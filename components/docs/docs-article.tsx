@@ -24,12 +24,9 @@ export function DocsArticle({
   ];
 
   return (
-    <article className="mx-auto max-w-2xl px-6 pb-24 pt-32">
+    <article className="mx-auto max-w-2xl px-6 py-32">
       <p className="text-sm text-muted">
-        <Link
-          href="/docs"
-          className="transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-sm"
-        >
+        <Link href="/docs" className="hover:text-foreground">
           ← Documentation
         </Link>
       </p>
@@ -37,20 +34,15 @@ export function DocsArticle({
       <nav className="mt-4 flex flex-wrap gap-2 text-xs text-muted">
         {crumbs.map((crumb, i) => (
           <span key={crumb.path} className="flex items-center gap-2">
-            {i > 0 ? <span aria-hidden>/</span> : null}
-            <Link
-              href={crumb.path}
-              className="transition-colors hover:text-foreground"
-            >
+            {i > 0 ? <span>/</span> : null}
+            <Link href={crumb.path} className="hover:text-foreground">
               {crumb.name}
             </Link>
           </span>
         ))}
       </nav>
 
-      <h1 className="mt-6 font-heading text-4xl font-bold tracking-tight">
-        {title}
-      </h1>
+      <h1 className="mt-6 font-heading text-4xl font-semibold">{title}</h1>
       <p className="mt-4 text-lg text-muted">{description}</p>
 
       <div className="docs-prose mt-12 space-y-10 text-muted">{children}</div>
@@ -71,7 +63,7 @@ export function DocSection({
 }) {
   return (
     <section>
-      <h2 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+      <h2 className="font-heading text-2xl font-semibold text-foreground">
         {title}
       </h2>
       <div className="mt-4 space-y-4 leading-relaxed">{children}</div>
@@ -81,7 +73,7 @@ export function DocSection({
 
 export function DocCode({ children }: { children: string }) {
   return (
-    <pre className="overflow-x-auto rounded-lg border border-border bg-ink p-4 font-mono text-sm leading-relaxed text-white/90 shadow-[var(--shadow-card)]">
+    <pre className="overflow-x-auto rounded-lg border border-border bg-surface p-4 text-sm text-foreground">
       {children}
     </pre>
   );
@@ -99,12 +91,9 @@ export function DocEndpoint({
   description: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-card)]">
+    <div className="rounded-lg border border-border bg-surface p-4">
       <p className="font-medium text-foreground">
-        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-primary">
-          {method}
-        </span>{" "}
-        <span className="font-mono text-sm">{path}</span>
+        <span className="text-primary">{method}</span> {path}
       </p>
       {body ? (
         <p className="mt-1 font-mono text-xs text-muted">Body: {body}</p>
