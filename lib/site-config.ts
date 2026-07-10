@@ -15,6 +15,14 @@ export const siteConfig = {
   tagline: "Find the hidden gaps stopping your product from growing",
   description:
     "Revel analyzes your website, product experience, messaging and competitors, then generates a prioritized roadmap your team can implement.",
+  /**
+   * Marketing apex (logo home). Prefer NEXT_PUBLIC_MARKETING_URL so docs/legal
+   * deployments can pin home without coupling to a product subdomain APP_URL.
+   */
+  marketingUrl: normalizeSiteUrl(
+    process.env.NEXT_PUBLIC_MARKETING_URL ?? process.env.NEXT_PUBLIC_APP_URL,
+    "https://tryrevel.xyz"
+  ),
   url: normalizeSiteUrl(
     process.env.NEXT_PUBLIC_APP_URL,
     "https://tryrevel.xyz"

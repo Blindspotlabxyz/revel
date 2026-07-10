@@ -14,8 +14,20 @@ type RevelLogoProps = {
   variant?: "wordmark" | "icon";
   size?: LogoSize;
   className?: string;
-  href?: string;
+  /**
+   * Home target. Relative paths use Next.js <Link>; absolute http(s) URLs use
+   * a plain <a> for cross-subdomain navigation (docs/legal → marketing).
+   * Pass null/undefined to render without a link.
+   */
+  href?: string | null;
+  /**
+   * Force plain <a> even for relative paths. Prefer absolute marketing URL +
+   * this for cross-origin; usually auto-detected from href.
+   */
+  external?: boolean;
   showText?: boolean;
+  /** Optional surface label, e.g. "Docs" → Revel / Docs */
+  surfaceLabel?: string;
 };
 
 function RevelIcon({ size, className }: { size: number; className?: string }) {
@@ -43,24 +55,48 @@ function RevelIcon({ size, className }: { size: number; className?: string }) {
   );
 }
 
+function isAbsoluteHttpUrl(href: string): boolean {
+  return /^https?:\/\//i.test(href);
+}
+
 export function RevelLogo({
   variant = "wordmark",
   size = "md",
   className,
   href = "/",
+  external,
   showText = true,
+  surfaceLabel,
 }: RevelLogoProps) {
   const px = iconSizes[size];
   const isIconOnly = variant === "icon" || !showText;
+  const useExternalAnchor =
+    external === true || (typeof href === "string" && isAbsoluteHttpUrl(href));
+
+  const wordmark = (
+    <span className="font-heading text-lg font-semibold tracking-tight text-foreground">
+      Revel
+    </span>
+  );
 
   const content = isIconOnly ? (
     <RevelIcon size={px} />
   ) : (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <RevelIcon size={px} />
-      <span className="font-heading text-lg font-semibold tracking-tight text-foreground">
-        Revel
-      </span>
+      {surfaceLabel ? (
+        <span className="inline-flex items-baseline gap-1.5">
+          {wordmark}
+          <span className="text-muted" aria-hidden>
+            /
+          </span>
+          <span className="font-body text-sm font-medium text-muted">
+            {surfaceLabel}
+          </span>
+        </span>
+      ) : (
+        wordmark
+      )}
     </span>
   );
 
@@ -68,15 +104,25 @@ export function RevelLogo({
     return <span className={className}>{content}</span>;
   }
 
+  const linkClass = cn(
+    "inline-flex items-center transition-opacity hover:opacity-90",
+    className
+  );
+
+  if (useExternalAnchor) {
+    return (
+      <a
+        href={href}
+        className={linkClass}
+        aria-label="Revel home"
+      >
+        {content}
+      </a>
+    );
+  }
+
   return (
-    <Link
-      href={href}
-      className={cn(
-        "inline-flex items-center transition-opacity hover:opacity-90",
-        className
-      )}
-      aria-label="Revel home"
-    >
+    <Link href={href} className={linkClass} aria-label="Revel home">
       {content}
     </Link>
   );

@@ -1,5 +1,6 @@
 import { NavLink } from "@/components/nav-link";
 import { RevelLogo } from "@/components/brand/logo";
+import { getLogoHomeLink } from "@/lib/logo-home";
 
 /** Footer is sitemap + legal — not a second copy of the primary nav CTAs. */
 const footerLinks = {
@@ -35,7 +36,9 @@ const footerLinks = {
   ],
 };
 
-export function Footer() {
+export async function Footer() {
+  const logo = await getLogoHomeLink();
+
   return (
     <footer className="border-t border-border bg-surface py-16">
       <div className="mx-auto max-w-6xl px-6">
@@ -60,7 +63,13 @@ export function Footer() {
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
-          <RevelLogo size="sm" className="[&_span]:text-base" />
+          <RevelLogo
+            size="sm"
+            className="[&_span]:text-base"
+            href={logo.href}
+            external={logo.external}
+            surfaceLabel={logo.surfaceLabel}
+          />
           <p className="text-sm text-muted">
             Built by{" "}
             <a
