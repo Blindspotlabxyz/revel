@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { PRIMARY_CTA, PRIMARY_CTA_HREF } from "@/lib/cta";
+import { PRIMARY_CTA_HREF } from "@/lib/cta";
 import { DEFAULT_WEEKLY_AUDIT_LIMIT } from "@/lib/weekly-audit-limit-config";
 
 export function CtaSection() {
@@ -24,7 +24,7 @@ export function CtaSection() {
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Button asChild size="lg">
-            <Link href={PRIMARY_CTA_HREF}>{PRIMARY_CTA}</Link>
+            <Link href={PRIMARY_CTA_HREF}>Open Mission Control</Link>
           </Button>
         </div>
         <p className="mt-6 text-sm text-muted">
