@@ -116,3 +116,21 @@ export function notifyUserWelcome(input: { email: string }): void {
     text: `Welcome to Revel. Open Mission Control: ${siteConfig.url}/mission-control`,
   });
 }
+
+export function notifyPasswordReset(input: {
+  email: string;
+  resetUrl: string;
+}): void {
+  sendEmailAsync({
+    to: input.email,
+    subject: "Reset your Revel password",
+    html: layout(`
+      <h1 style="font-size:20px;margin:0 0 12px">Reset your password</h1>
+      <p>We received a request to reset the password for your Revel account.</p>
+      <p><a href="${input.resetUrl}" style="display:inline-block;margin-top:8px;padding:10px 18px;background:#c45c26;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">Choose a new password</a></p>
+      <p style="margin-top:16px;font-size:14px;color:#6b6b6b">This link expires in 1 hour. If you did not request a reset, you can ignore this email.</p>
+      <p style="font-size:12px;color:#8a8a8a;word-break:break-all">${input.resetUrl}</p>
+    `),
+    text: `Reset your Revel password (expires in 1 hour): ${input.resetUrl}`,
+  });
+}

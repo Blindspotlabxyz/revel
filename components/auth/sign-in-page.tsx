@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -65,7 +66,15 @@ export function SignInPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="sign-in-password">Password</Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="sign-in-password">Password</Label>
+              <Link
+                href="/forgot-password"
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <Input
               id="sign-in-password"
               type="password"
@@ -88,6 +97,13 @@ export function SignInPage() {
         </div>
 
         <GoogleSignInButton callbackUrl={redirectUrl} />
+
+        <p className="mt-6 text-center text-sm text-muted">
+          No account?{" "}
+          <Link href="/sign-up" className="text-primary hover:underline">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   );

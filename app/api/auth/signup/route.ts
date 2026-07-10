@@ -4,6 +4,13 @@ import { randomUUID } from "crypto";
 import { notifyUserWelcome } from "@/lib/email/notifications";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { getPrisma, isPrismaEnabled } from "@/lib/prisma";
+import {
+  normalizeEmail,
+  normalizeUsername,
+  validateDisplayName,
+  validatePassword,
+  validateUsername,
+} from "@/lib/user-profile";
 
 function errorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -20,8 +27,10 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const email = body.email?.toString().trim().toLowerCase();
-    const password = body.password?.toString();
+    const email = normalizeEmail(String(body.email ?? ""));
+    const password = body.password?.toString() ?? "";
+    const nameRaw = body.name?.toString()?.trim() ?? "";
+    const usernameRaw = body.username?.toString()?.trim() ?? "";
 
     if (!email || !password) {
       return NextResponse.json(
@@ -30,11 +39,27 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters." },
-        { status: 400 }
-      );
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return NextResponse.json({ error: passwordError }, { status: 400 });
+    }
+
+    let name: string | null = null;
+    if (nameRaw) {
+      const nameError = validateDisplayName(nameRaw);
+      if (nameError) {
+        return NextResponse.json({ error: nameError }, { status: 400 });
+      }
+      name = nameRaw;
+    }
+
+    let username: string | null = null;
+    if (usernameRaw) {
+      const usernameError = validateUsername(usernameRaw);
+      if (usernameError) {
+        return NextResponse.json({ error: usernameError }, { status: 400 });
+      }
+      username = normalizeUsername(usernameRaw);
     }
 
     const prisma = getPrisma();
@@ -56,6 +81,16 @@ export async function POST(request: Request) {
       );
     }
 
+    if (username) {
+      const taken = await prisma.user.findUnique({ where: { username } });
+      if (taken) {
+        return NextResponse.json(
+          { error: "That username is already taken." },
+          { status: 409 }
+        );
+      }
+    }
+
     const passwordHash = await bcrypt.hash(password, 12);
 
     try {
@@ -64,6 +99,8 @@ export async function POST(request: Request) {
           id: randomUUID(),
           email,
           passwordHash,
+          name,
+          username,
         },
       });
     } catch (createError) {
@@ -72,7 +109,7 @@ export async function POST(request: Request) {
         createError.code === "P2002"
       ) {
         return NextResponse.json(
-          { error: "Email already in use" },
+          { error: "Email or username already in use" },
           { status: 409 }
         );
       }
@@ -92,7 +129,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Database schema is out of date (missing password_hash). Run: npx prisma db push",
+            "Database schema is out of date. Run the user profile migration (npx prisma db push or apply migration SQL).",
         },
         { status: 500 }
       );

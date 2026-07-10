@@ -4,7 +4,12 @@
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE,
+  name TEXT,
+  username TEXT UNIQUE,
+  image TEXT,
   password_hash TEXT,
+  password_reset_token_hash TEXT,
+  password_reset_expires TIMESTAMPTZ,
   is_admin BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

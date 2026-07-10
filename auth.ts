@@ -53,7 +53,8 @@ const credentialsProvider = Credentials({
     return {
       id: user.id,
       email: user.email ?? email,
-      name: user.email ?? email,
+      name: user.name ?? user.username ?? user.email ?? email,
+      image: user.image ?? undefined,
     };
   },
 });
@@ -94,12 +95,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (prisma) {
             let dbUser = await prisma.user.findUnique({ where: { email } });
 
+            const googleProfile = profile as {
+              name?: string;
+              picture?: string;
+            } | null;
+
             if (!dbUser) {
               try {
                 dbUser = await prisma.user.create({
                   data: {
                     id: randomUUID(),
                     email,
+                    name: user.name ?? googleProfile?.name ?? null,
+                    image: user.image ?? googleProfile?.picture ?? null,
                   },
                 });
               } catch (error) {
@@ -112,22 +120,47 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                   throw error;
                 }
               }
+            } else if (
+              (!dbUser.name && (user.name || googleProfile?.name)) ||
+              (!dbUser.image && (user.image || googleProfile?.picture))
+            ) {
+              dbUser = await prisma.user.update({
+                where: { id: dbUser.id },
+                data: {
+                  name:
+                    dbUser.name ??
+                    user.name ??
+                    googleProfile?.name ??
+                    null,
+                  image:
+                    dbUser.image ??
+                    user.image ??
+                    googleProfile?.picture ??
+                    null,
+                },
+              });
             }
 
             token.sub = dbUser?.id ?? user.id;
+            token.name =
+              dbUser?.name ??
+              dbUser?.username ??
+              user.name ??
+              googleProfile?.name ??
+              token.name;
+            token.username = dbUser?.username ?? undefined;
+            token.email = email;
+            token.picture =
+              dbUser?.image ??
+              user.image ??
+              googleProfile?.picture ??
+              token.picture;
           } else {
             token.sub = user.id;
+            token.name = user.name ?? token.name;
+            token.email = email;
+            token.picture = user.image ?? token.picture;
           }
-
-          const googleProfile = profile as {
-            name?: string;
-            picture?: string;
-          } | null;
-
-          token.name = user.name ?? googleProfile?.name ?? token.name;
-          token.email = email;
-          token.picture =
-            user.image ?? googleProfile?.picture ?? token.picture;
         } else {
           token.sub = user.id;
           token.name = user.name ?? token.name;
@@ -138,24 +171,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       if (token.sub) {
         let isAdmin = false;
+        const prisma = getPrisma();
 
-        if (token.email && isEmailInAdminAllowlist(token.email)) {
-          isAdmin = true;
-        } else {
-          const prisma = getPrisma();
-          if (prisma) {
-            try {
-              const dbUser = await prisma.user.findUnique({
-                where: { id: token.sub },
-                select: { isAdmin: true, email: true },
-              });
+        if (prisma) {
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: token.sub },
+              select: {
+                isAdmin: true,
+                email: true,
+                name: true,
+                username: true,
+                image: true,
+              },
+            });
+
+            if (dbUser) {
+              token.name =
+                dbUser.name ?? dbUser.username ?? token.name ?? dbUser.email;
+              token.username = dbUser.username ?? undefined;
+              token.email = dbUser.email ?? token.email;
+              if (dbUser.image) token.picture = dbUser.image;
               isAdmin =
-                dbUser?.isAdmin === true ||
-                isEmailInAdminAllowlist(dbUser?.email ?? token.email);
-            } catch {
+                dbUser.isAdmin === true ||
+                isEmailInAdminAllowlist(dbUser.email ?? token.email);
+            } else {
               isAdmin = isEmailInAdminAllowlist(token.email);
             }
+          } catch {
+            isAdmin = isEmailInAdminAllowlist(token.email);
           }
+        } else if (token.email && isEmailInAdminAllowlist(token.email)) {
+          isAdmin = true;
         }
 
         token.isAdmin = isAdmin;
@@ -169,6 +216,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.name = token.name ?? session.user.name;
         session.user.email = token.email ?? session.user.email;
         session.user.image = token.picture ?? session.user.image;
+        session.user.username =
+          typeof token.username === "string" ? token.username : null;
         session.user.isAdmin = token.isAdmin === true;
       }
       return session;

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -15,6 +16,8 @@ export function SignUpPage() {
   const redirectUrl = resolveAuthCallbackUrl(searchParams);
   const oauthError = authErrorMessage(searchParams.get("error"));
 
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -40,7 +43,7 @@ export function SignUpPage() {
     const signupResponse = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, name, username }),
     });
 
     const signupBody = await signupResponse.json().catch(() => ({}));
@@ -81,6 +84,30 @@ export function SignUpPage() {
         </p>
 
         <form className="mt-8 space-y-4" onSubmit={handleCredentialsSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="sign-up-name">Display name</Label>
+            <Input
+              id="sign-up-name"
+              type="text"
+              autoComplete="name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Optional"
+              maxLength={80}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="sign-up-username">Username</Label>
+            <Input
+              id="sign-up-username"
+              type="text"
+              autoComplete="username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              placeholder="Optional · e.g. mojeeb"
+              maxLength={24}
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="sign-up-email">Email</Label>
             <Input
@@ -127,6 +154,13 @@ export function SignUpPage() {
         </div>
 
         <GoogleSignInButton callbackUrl={redirectUrl} />
+
+        <p className="mt-6 text-center text-sm text-muted">
+          Already have an account?{" "}
+          <Link href="/log-in" className="text-primary hover:underline">
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   );
