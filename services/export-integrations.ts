@@ -1,15 +1,15 @@
-import { normalizeAnalysisReport } from "@/lib/report-schema";
 import type { AnalysisReport } from "@/types/analysis";
+import { normalizeAnalysisReport } from "@/lib/report-schema";
 import { exportToGitHubMarkdown, exportToMarkdown } from "./export-service";
 
 export async function pushToGitHubGist(
   report: AnalysisReport,
   website: string,
-  analysisId: string
+  analysisId: string,
+  accessToken: string
 ): Promise<{ url: string }> {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    throw new Error("GITHUB_TOKEN is not configured");
+  if (!accessToken) {
+    throw new Error("Connect your GitHub account to create a private Gist");
   }
 
   const content = exportToGitHubMarkdown(report, website);
@@ -17,7 +17,7 @@ export async function pushToGitHubGist(
   const response = await fetch("https://api.github.com/gists", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       Accept: "application/vnd.github+json",
       "Content-Type": "application/json",
       "X-GitHub-Api-Version": "2022-11-28",
@@ -44,13 +44,12 @@ export async function pushToGitHubGist(
 
 export async function pushToLinear(
   report: AnalysisReport,
-  website: string
+  website: string,
+  accessToken: string,
+  teamId: string
 ): Promise<{ created: number; urls: string[] }> {
-  const apiKey = process.env.LINEAR_API_KEY;
-  const teamId = process.env.LINEAR_TEAM_ID;
-
-  if (!apiKey || !teamId) {
-    throw new Error("LINEAR_API_KEY and LINEAR_TEAM_ID are required");
+  if (!accessToken || !teamId) {
+    throw new Error("Connect your Linear account to export issues");
   }
 
   const urls: string[] = [];
@@ -65,7 +64,7 @@ export async function pushToLinear(
     const response = await fetch("https://api.linear.app/graphql", {
       method: "POST",
       headers: {
-        Authorization: apiKey,
+        Authorization: accessToken,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -134,44 +133,54 @@ export async function pushToLinear(
 export async function pushToNotion(
   report: AnalysisReport,
   website: string,
-  analysisId: string
+  analysisId: string,
+  accessToken: string,
+  parent: { databaseId?: string; pageId?: string },
+  titleProperty = "Name"
 ): Promise<{ url: string }> {
-  const apiKey = process.env.NOTION_API_KEY;
-  const databaseId = process.env.NOTION_DATABASE_ID;
-
-  if (!apiKey || !databaseId) {
-    throw new Error("NOTION_API_KEY and NOTION_DATABASE_ID are required");
+  if (!accessToken) {
+    throw new Error("Connect your Notion account to export");
+  }
+  if (!parent.databaseId && !parent.pageId) {
+    throw new Error(
+      "No Notion page or database is linked. Reconnect Notion and share a page/database with Revel."
+    );
   }
 
   const markdown = exportToMarkdown(report, website);
-
-  const titleProperty = process.env.NOTION_TITLE_PROPERTY ?? "Name";
   const hostname = new URL(website).hostname;
+  const title = `Revel Blueprint — ${hostname} (${report.score})`;
+
+  const pageBody: Record<string, unknown> = {
+    children: chunkMarkdownForNotion(
+      `${markdown}\n\n_Analysis ID: ${analysisId}_`
+    ),
+  };
+
+  if (parent.databaseId) {
+    pageBody.parent = { database_id: parent.databaseId };
+    pageBody.properties = {
+      [titleProperty]: {
+        title: [{ text: { content: title } }],
+      },
+    };
+  } else {
+    pageBody.parent = { page_id: parent.pageId };
+    pageBody.properties = {
+      title: {
+        title: [{ text: { content: title } }],
+      },
+    };
+  }
 
   const response = await fetch("https://api.notion.com/v1/pages", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${accessToken}`,
       "Notion-Version": "2022-06-28",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      parent: { database_id: databaseId },
-      properties: {
-        [titleProperty]: {
-          title: [
-            {
-              text: {
-                content: `Revel Blueprint — ${hostname} (${report.score})`,
-              },
-            },
-          ],
-        },
-      },
-      children: chunkMarkdownForNotion(
-        `${markdown}\n\n_Analysis ID: ${analysisId}_`
-      ),
-    }),
+    body: JSON.stringify(pageBody),
   });
 
   if (!response.ok) {
@@ -181,8 +190,18 @@ export async function pushToNotion(
     );
   }
 
-  const data = (await response.json()) as { url: string };
-  return { url: data.url };
+  const data = (await response.json()) as { url?: string; id?: string };
+  const url =
+    data.url ||
+    (data.id
+      ? `https://www.notion.so/${data.id.replace(/-/g, "")}`
+      : undefined);
+
+  if (!url) {
+    throw new Error("Notion page created but no URL was returned");
+  }
+
+  return { url };
 }
 
 function chunkMarkdownForNotion(markdown: string) {

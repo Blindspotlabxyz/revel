@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Braces, ExternalLink, FileText, Github } from "lucide-react";
 import {
   GitHubGistIcon,
@@ -31,6 +32,7 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
   const [success, setSuccess] = useState<string | null>(null);
   const [links, setLinks] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [connectUrl, setConnectUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/export")
@@ -47,6 +49,7 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
     setSuccess(null);
     setLinks([]);
     setError(null);
+    setConnectUrl(null);
 
     try {
       const res = await fetch("/api/export", {
@@ -64,6 +67,7 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
         message?: string;
         url?: string;
         urls?: string[];
+        connectUrl?: string;
       } = {};
 
       try {
@@ -77,6 +81,7 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
       }
 
       if (!res.ok || !data.success) {
+        if (data.connectUrl) setConnectUrl(data.connectUrl);
         throw new Error(data.error ?? `Export failed (${res.status}).`);
       }
 
@@ -120,7 +125,9 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
     <div className="rounded-xl border border-border bg-surface p-6">
       <h2 className="font-heading text-lg font-semibold">Export Blueprint</h2>
       <p className="mt-1 text-sm text-muted">
-        Download or push your report into your workflow.
+        Downloads stay on your device. Cloud exports use{" "}
+        <strong className="font-medium text-foreground">your</strong> connected
+        accounts only.
       </p>
 
       <div className="mt-4 space-y-3">
@@ -158,20 +165,20 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
         </div>
 
         <p className="pt-2 text-xs font-medium uppercase tracking-wide text-muted">
-          Integrations
+          Your integrations
         </p>
         <div className="flex flex-wrap gap-2">
           <Button
             onClick={() =>
-              handleExport("github", gistEnabled ? { destination: "gist" } : undefined)
+              handleExport("github", { destination: "gist" })
             }
             disabled={!!exporting || !gistEnabled}
             variant="outline"
             size="sm"
             title={
               gistEnabled
-                ? "Create a private GitHub Gist"
-                : "Add GITHUB_TOKEN to .env.local or Vercel to enable"
+                ? "Create a private Gist in your GitHub account"
+                : "Connect GitHub in Integrations first"
             }
           >
             <IntegrationIconBadge tint="bg-foreground/8">
@@ -188,8 +195,8 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
             size="sm"
             title={
               linearEnabled
-                ? "Create Linear issues from Action Queue"
-                : "Add LINEAR_API_KEY + LINEAR_TEAM_ID to .env.local or Vercel"
+                ? "Create Linear issues in your team"
+                : "Connect Linear in Integrations first"
             }
           >
             <IntegrationIconBadge tint="bg-[#5E6AD2]/15">
@@ -204,8 +211,8 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
             size="sm"
             title={
               notionEnabled
-                ? "Create a Notion page"
-                : "Add NOTION_API_KEY + NOTION_DATABASE_ID to .env.local or Vercel"
+                ? "Create a page in your Notion workspace"
+                : "Connect Notion in Integrations first"
             }
           >
             <IntegrationIconBadge tint="bg-foreground/8">
@@ -214,6 +221,18 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
             {exporting === "notion" ? "Exporting..." : "Notion"}
           </Button>
         </div>
+        {!linearEnabled || !notionEnabled || !gistEnabled ? (
+          <p className="text-xs text-muted">
+            Connect accounts in{" "}
+            <Link
+              href="/mission-control/integrations"
+              className="text-primary hover:underline"
+            >
+              Integrations
+            </Link>{" "}
+            to enable cloud export.
+          </p>
+        ) : null}
       </div>
 
       {success ? (
@@ -246,6 +265,14 @@ export function ExportPanel({ analysisId }: ExportPanelProps) {
         </ul>
       ) : null}
       {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+      {connectUrl ? (
+        <Link
+          href={connectUrl}
+          className="mt-2 inline-block text-sm text-primary hover:underline"
+        >
+          Connect account →
+        </Link>
+      ) : null}
     </div>
   );
 }

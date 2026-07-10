@@ -124,13 +124,25 @@ async function main() {
   console.log("capabilities", getExportCapabilities());
 
   if (format === "linear") {
-    const result = await pushToLinear(sampleReport, website);
+    const token = process.env.LINEAR_API_KEY;
+    const teamId = process.env.LINEAR_TEAM_ID;
+    if (!token || !teamId) {
+      throw new Error("Set LINEAR_API_KEY and LINEAR_TEAM_ID for this smoke test");
+    }
+    const result = await pushToLinear(sampleReport, website, token, teamId);
     console.log("linear ok", result);
     return;
   }
 
   if (format === "notion") {
-    const result = await pushToNotion(sampleReport, website, analysisId);
+    const token = process.env.NOTION_API_KEY;
+    const databaseId = process.env.NOTION_DATABASE_ID;
+    if (!token || !databaseId) {
+      throw new Error("Set NOTION_API_KEY and NOTION_DATABASE_ID for this smoke test");
+    }
+    const result = await pushToNotion(sampleReport, website, analysisId, token, {
+      databaseId,
+    });
     console.log("notion ok", result);
     return;
   }

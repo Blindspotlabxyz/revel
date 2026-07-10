@@ -29,17 +29,19 @@ export function getActiveStorageBackend():
   return prismaEnabled || process.env.SUPABASE_URL ? "supabase" : "file";
 }
 
+/**
+ * Server-level export feature availability.
+ * Cloud exports (Linear / Notion / Gist) require per-user OAuth — capability
+ * is refined per session in GET /api/export.
+ */
 export function getExportCapabilities() {
   return {
     markdown: true,
     json: true,
     github: true,
-    linear: Boolean(
-      process.env.LINEAR_API_KEY && process.env.LINEAR_TEAM_ID
-    ),
-    notion: Boolean(
-      process.env.NOTION_API_KEY && process.env.NOTION_DATABASE_ID
-    ),
-    githubGist: Boolean(process.env.GITHUB_TOKEN),
+    /** Enabled when user has connected Linear (checked at request time). */
+    linear: true,
+    notion: true,
+    githubGist: true,
   };
 }

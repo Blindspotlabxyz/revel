@@ -8,20 +8,41 @@ datasource db {
 }
 
 model User {
-  id                     String          @id
-  email                  String?         @unique
+  id                     String            @id
+  email                  String?           @unique
   name                   String?
-  username               String?         @unique
+  username               String?           @unique
   image                  String?
-  passwordHash           String?         @map("password_hash")
-  passwordResetTokenHash String?         @map("password_reset_token_hash")
-  passwordResetExpires   DateTime?       @map("password_reset_expires") @db.Timestamptz(6)
-  isAdmin                Boolean         @default(false) @map("is_admin")
-  createdAt              DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  passwordHash           String?           @map("password_hash")
+  passwordResetTokenHash String?           @map("password_reset_token_hash")
+  passwordResetExpires   DateTime?         @map("password_reset_expires") @db.Timestamptz(6)
+  isAdmin                Boolean           @default(false) @map("is_admin")
+  createdAt              DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
   analyses               Analysis[]
   activityEvents         ActivityEvent[]
+  integrations           UserIntegration[]
 
   @@map("users")
+}
+
+/** Per-user OAuth tokens for private exports (Linear, Notion, GitHub Gist). */
+model UserIntegration {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String    @map("user_id")
+  provider             String
+  accessTokenEncrypted String    @map("access_token_encrypted")
+  refreshTokenEncrypted String?  @map("refresh_token_encrypted")
+  tokenExpiresAt       DateTime? @map("token_expires_at") @db.Timestamptz(6)
+  scopes               String?
+  /** Non-secret display + routing data (teamId, databaseId, login, workspace name). */
+  metadata             Json?     @db.JsonB
+  connectedAt          DateTime? @default(now()) @map("connected_at") @db.Timestamptz(6)
+  updatedAt            DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider], map: "user_integrations_user_provider_key")
+  @@index([userId], map: "idx_user_integrations_user_id")
+  @@map("user_integrations")
 }
 
 model Analysis {

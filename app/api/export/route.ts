@@ -3,7 +3,12 @@ import { trackActivity } from "@/lib/activity";
 import { getCurrentUserId } from "@/lib/auth";
 import { logEvent } from "@/lib/logger";
 import type { ExportFormat } from "@/lib/mission-control-config";
-import { getExportCapabilities } from "@/lib/mission-control-config";
+import { getUserIntegration } from "@/lib/integrations/store";
+import type {
+  GitHubMetadata,
+  LinearMetadata,
+  NotionMetadata,
+} from "@/lib/integrations/types";
 import {
   pushToGitHubGist,
   pushToLinear,
@@ -19,7 +24,56 @@ import { userCanAccessAnalysis } from "@/lib/security/analysis-access";
 import { getAnalysis } from "@/services/store";
 
 export async function GET() {
-  return NextResponse.json({ exports: getExportCapabilities() });
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return NextResponse.json({
+      exports: {
+        markdown: true,
+        json: true,
+        github: true,
+        linear: false,
+        notion: false,
+        githubGist: false,
+      },
+      requiresAuth: true,
+    });
+  }
+
+  const [linear, notion, github] = await Promise.all([
+    getUserIntegration(userId, "linear"),
+    getUserIntegration(userId, "notion"),
+    getUserIntegration(userId, "github"),
+  ]);
+
+  return NextResponse.json({
+    exports: {
+      markdown: true,
+      json: true,
+      github: true,
+      linear: Boolean(linear?.accessToken),
+      notion: Boolean(notion?.accessToken),
+      githubGist: Boolean(github?.accessToken),
+    },
+    connections: {
+      linear: linear
+        ? {
+            label:
+              (linear.metadata as LinearMetadata).teamName ||
+              (linear.metadata as LinearMetadata).viewerName,
+          }
+        : null,
+      notion: notion
+        ? {
+            label:
+              (notion.metadata as NotionMetadata).workspaceName ||
+              (notion.metadata as NotionMetadata).parentPageTitle,
+          }
+        : null,
+      github: github
+        ? { label: (github.metadata as GitHubMetadata).login }
+        : null,
+    },
+  });
 }
 
 function recordExport(
@@ -68,9 +122,7 @@ export async function POST(request: Request) {
     }
 
     const website = analysis.website;
-    // Normalize so missing actions / broken LLM JSON never crashes export
     const report = normalizeAnalysisReport(analysis.report);
-    const capabilities = getExportCapabilities();
 
     if (format === "markdown") {
       const content = exportToMarkdown(report, website);
@@ -97,14 +149,41 @@ export async function POST(request: Request) {
     if (format === "github") {
       const content = exportToGitHubMarkdown(report, website);
 
-      if (destination === "gist" && capabilities.githubGist) {
-        const gist = await pushToGitHubGist(report, website, analysis.id);
-        recordExport(id, "github-gist", userId);
+      if (destination === "gist") {
+        if (!userId) {
+          return NextResponse.json(
+            { error: "Sign in and connect GitHub to create a private Gist." },
+            { status: 401 }
+          );
+        }
+        const connection = await getUserIntegration(userId, "github");
+        if (!connection?.accessToken) {
+          return NextResponse.json(
+            {
+              error:
+                "Connect your GitHub account first (Mission Control → Integrations).",
+              connectUrl: "/mission-control/integrations#github",
+            },
+            { status: 403 }
+          );
+        }
+
+        const gist = await pushToGitHubGist(
+          report,
+          website,
+          analysis.id,
+          connection.accessToken
+        );
+        recordExport(id, "github-gist", userId, {
+          private: true,
+          owner: (connection.metadata as GitHubMetadata).login,
+        });
         return NextResponse.json({
           success: true,
           mode: "link",
           url: gist.url,
-          message: "Blueprint saved to a private GitHub Gist.",
+          message:
+            "Private Gist created in your GitHub account. Only you can see it unless you share the link.",
         });
       }
 
@@ -118,46 +197,87 @@ export async function POST(request: Request) {
     }
 
     if (format === "linear") {
-      if (!capabilities.linear) {
+      if (!userId) {
+        return NextResponse.json(
+          { error: "Sign in and connect Linear to export issues." },
+          { status: 401 }
+        );
+      }
+      const connection = await getUserIntegration(userId, "linear");
+      const meta = (connection?.metadata ?? {}) as LinearMetadata;
+      if (!connection?.accessToken || !meta.teamId) {
         return NextResponse.json(
           {
             error:
-              "Linear export is not configured. Set LINEAR_API_KEY and LINEAR_TEAM_ID on Vercel.",
+              "Connect your Linear account first (Mission Control → Integrations).",
+            connectUrl: "/mission-control/integrations#linear",
           },
-          { status: 503 }
+          { status: 403 }
         );
       }
 
-      const result = await pushToLinear(report, website);
-      recordExport(id, "linear", userId, { created: result.created });
+      const result = await pushToLinear(
+        report,
+        website,
+        connection.accessToken,
+        meta.teamId
+      );
+      recordExport(id, "linear", userId, {
+        created: result.created,
+        teamId: meta.teamId,
+      });
       return NextResponse.json({
         success: true,
         mode: "link",
         created: result.created,
         url: result.urls[0] ?? null,
         urls: result.urls,
-        message: `Created ${result.created} Linear issues from your Action Queue.`,
+        message: `Created ${result.created} Linear issues in your team${meta.teamName ? ` (${meta.teamName})` : ""}. Only your Linear workspace members can see them.`,
       });
     }
 
     if (format === "notion") {
-      if (!capabilities.notion) {
+      if (!userId) {
+        return NextResponse.json(
+          { error: "Sign in and connect Notion to export." },
+          { status: 401 }
+        );
+      }
+      const connection = await getUserIntegration(userId, "notion");
+      const meta = (connection?.metadata ?? {}) as NotionMetadata & {
+        databaseId?: string;
+      };
+      if (!connection?.accessToken) {
         return NextResponse.json(
           {
             error:
-              "Notion export is not configured. Set NOTION_API_KEY and NOTION_DATABASE_ID on Vercel.",
+              "Connect your Notion account first (Mission Control → Integrations).",
+            connectUrl: "/mission-control/integrations#notion",
           },
-          { status: 503 }
+          { status: 403 }
         );
       }
 
-      const result = await pushToNotion(report, website, analysis.id);
-      recordExport(id, "notion", userId);
+      const result = await pushToNotion(
+        report,
+        website,
+        analysis.id,
+        connection.accessToken,
+        {
+          databaseId: meta.databaseId,
+          pageId: meta.parentPageId,
+        },
+        process.env.NOTION_TITLE_PROPERTY ?? "Name"
+      );
+      recordExport(id, "notion", userId, {
+        workspace: meta.workspaceName,
+      });
       return NextResponse.json({
         success: true,
         mode: "link",
         url: result.url,
-        message: "Blueprint page created in Notion.",
+        message:
+          "Blueprint page created in your Notion workspace. Only you (and people you share with) can see it.",
       });
     }
 
