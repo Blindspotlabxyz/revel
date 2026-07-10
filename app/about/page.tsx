@@ -67,8 +67,21 @@ export default function AboutPage() {
         <section className="mt-16 rounded-2xl border border-border bg-surface p-8">
           <h2 className="font-heading text-2xl font-semibold">The mission</h2>
           <p className="mt-4 leading-relaxed text-muted">
-            Make world-class product strategy accessible to every builder.
+            Make world-class product strategy accessible to every builder.{" "}
             {organization.name} exists so teams ship with clarity, not guesswork.
+          </p>
+          <p className="mt-4 leading-relaxed text-muted">
+            We treat export privacy the same way. Early export experiments that
+            wrote into a shared workspace were not good enough for multi-user
+            reports, so Revel uses{" "}
+            <strong className="text-foreground">per-user OAuth</strong> for
+            Linear, Notion, and GitHub: your blueprints land in{" "}
+            <em>your</em> accounts, not a shared BlindspotLab dump. Details are
+            in our{" "}
+            <Link href="/privacy" className="text-primary hover:underline">
+              Privacy Policy
+            </Link>
+            .
           </p>
         </section>
 

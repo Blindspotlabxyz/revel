@@ -105,7 +105,32 @@ NEXT_PUBLIC_ENABLE_SUBDOMAIN_REDIRECTS=true
 | MCP | `MCP_API_KEY` |
 | OKX billing | `OKX_API_KEY`, `OKX_SECRET_KEY`, `OKX_PASSPHRASE`, `OKX_PAY_TO`, `OKX_AUDIT_PRICE_USD` |
 | Email (Resend) | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `REVEL_ADMIN_NOTIFY_EMAIL` |
-| Exports | `GITHUB_TOKEN`, `LINEAR_API_KEY`, `LINEAR_TEAM_ID`, `NOTION_API_KEY`, `NOTION_DATABASE_ID` |
+| Export OAuth (per-user) | `LINEAR_CLIENT_ID/SECRET`, `NOTION_CLIENT_ID/SECRET`, `GITHUB_CLIENT_ID/SECRET`, `INTEGRATIONS_ENCRYPTION_KEY` (encrypts OAuth tokens at rest; falls back to `AUTH_SECRET`) |
+
+### Per-user export privacy (Linear / Notion / GitHub)
+
+Cloud exports do **not** use a shared BlindspotLab Linear/Notion/GitHub workspace. Each signed-in user connects **their own** account via OAuth under **Mission Control → Integrations**. Tokens are stored encrypted; disconnecting deletes them. Downloads (Markdown / JSON / GitHub MD) never require a connection.
+
+| Provider | OAuth scopes (approx.) | Export lands in |
+|----------|------------------------|-----------------|
+| Linear | `read,write,issues:create` | User’s Linear team |
+| Notion | User-granted pages/databases | User’s Notion workspace |
+| GitHub | `gist` | User’s **private** Gist |
+
+Redirect URIs (production):
+
+```text
+https://tryrevel.xyz/api/integrations/linear/callback
+https://tryrevel.xyz/api/integrations/notion/callback
+https://tryrevel.xyz/api/integrations/github/callback
+```
+
+Generate an encryption key for local/prod:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+# → INTEGRATIONS_ENCRYPTION_KEY=<output>
+```
 
 ```bash
 node scripts/generate-secrets.mjs
@@ -113,15 +138,32 @@ node scripts/generate-secrets.mjs
 
 ### Database migrations
 
-Profile + password-reset columns (if not already applied):
+Profile + password-reset + per-user integrations (if not already applied):
 
 ```sql
+-- Profile / password reset
 ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "name" TEXT;
 ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "username" TEXT;
 ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "image" TEXT;
 ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "password_reset_token_hash" TEXT;
 ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "password_reset_expires" TIMESTAMPTZ(6);
 CREATE UNIQUE INDEX IF NOT EXISTS "users_username_key" ON "users" ("username");
+
+-- Per-user OAuth tokens for private exports
+CREATE TABLE IF NOT EXISTS "user_integrations" (
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "user_id" TEXT NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+  "provider" TEXT NOT NULL,
+  "access_token_encrypted" TEXT NOT NULL,
+  "refresh_token_encrypted" TEXT,
+  "token_expires_at" TIMESTAMPTZ(6),
+  "scopes" TEXT,
+  "metadata" JSONB,
+  "connected_at" TIMESTAMPTZ(6) DEFAULT NOW(),
+  "updated_at" TIMESTAMPTZ(6) DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "user_integrations_user_provider_key"
+  ON "user_integrations" ("user_id", "provider");
 ```
 
 Or: `npx prisma db push` / `npx prisma migrate deploy`.
