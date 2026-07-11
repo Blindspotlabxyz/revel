@@ -251,7 +251,7 @@ Start by fetching the homepage, then discover and fetch 1-2 key pages (pricing o
         role: "user",
         parts: [
           {
-            text: "You have enough page content. Call submit_analysis_report now with report_json containing score, summary, blindspots (min 4), blueprint (min 3), actions (min 5).",
+            text: "You have enough page content. Call submit_analysis_report now. Requirements: ≥4 blindspots with description≠title and specific suggestedFix (never 'Review this area…'), ≥2 categories, ≥1 high/critical priority, ≥3 blueprint steps, ≥5 actions. Quote real page text in descriptions.",
           },
         ],
       });

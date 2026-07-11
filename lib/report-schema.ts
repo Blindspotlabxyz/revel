@@ -58,27 +58,93 @@ export const MIN_BLINDSPOTS = 4;
 export const MIN_BLUEPRINT_STEPS = 3;
 export const MIN_ACTIONS = 5;
 
+/** Placeholder the normalizer used to inject — never treat as a real recommendation. */
+export const GENERIC_SUGGESTED_FIX =
+  "Review this area and implement a concrete fix this week.";
+
 export function parseAnalysisReport(raw: unknown): AnalysisReport {
   return analysisReportSchema.parse(raw);
 }
 
-/** True when the report has enough real findings to show users (not an empty shell). */
+/** True when the report has enough *substantive* findings (not bare titles / defaults). */
 export function isCompleteReport(report: AnalysisReport): boolean {
+  const qualityBlindspots = report.blindspots.filter(isSubstantiveBlindspot);
+  const qualityBlueprint = report.blueprint.filter(isSubstantiveBlueprint);
+  const qualityActions = report.actions.filter(isSubstantiveAction);
+  const categories = new Set(qualityBlindspots.map((b) => b.category));
+  const hasPrioritySpread = qualityBlindspots.some(
+    (b) => b.priority === "critical" || b.priority === "high"
+  );
+
   return (
-    report.blindspots.length >= MIN_BLINDSPOTS &&
-    report.blueprint.length >= MIN_BLUEPRINT_STEPS &&
-    report.actions.length >= MIN_ACTIONS &&
-    report.summary.trim().length >= 40
+    qualityBlindspots.length >= MIN_BLINDSPOTS &&
+    qualityBlueprint.length >= MIN_BLUEPRINT_STEPS &&
+    qualityActions.length >= MIN_ACTIONS &&
+    report.summary.trim().length >= 60 &&
+    categories.size >= 2 &&
+    hasPrioritySpread
   );
 }
 
 export function reportCompletenessError(report: AnalysisReport): string {
+  const qualityBlindspots = report.blindspots.filter(isSubstantiveBlindspot);
+  const qualityBlueprint = report.blueprint.filter(isSubstantiveBlueprint);
+  const qualityActions = report.actions.filter(isSubstantiveAction);
+  const categories = new Set(qualityBlindspots.map((b) => b.category)).size;
+  const highCount = qualityBlindspots.filter(
+    (b) => b.priority === "critical" || b.priority === "high"
+  ).length;
+
   return [
-    `Incomplete audit JSON.`,
-    `Need ≥${MIN_BLINDSPOTS} blindspots, ≥${MIN_BLUEPRINT_STEPS} blueprint steps, ≥${MIN_ACTIONS} actions.`,
-    `Got blindspots=${report.blindspots.length}, blueprint=${report.blueprint.length}, actions=${report.actions.length}.`,
-    `Resubmit report_json with full arrays grounded in fetched page content.`,
+    `Incomplete or generic audit JSON.`,
+    `Need ≥${MIN_BLINDSPOTS} substantive blindspots (unique description + specific suggestedFix, not title-only),`,
+    `≥${MIN_BLUEPRINT_STEPS} blueprint steps, ≥${MIN_ACTIONS} actions,`,
+    `≥2 categories, and ≥1 high/critical priority.`,
+    `Got quality blindspots=${qualityBlindspots.length} (raw ${report.blindspots.length}),`,
+    `blueprint=${qualityBlueprint.length}, actions=${qualityActions.length},`,
+    `categories=${categories}, high/critical=${highCount}.`,
+    `Each blindspot must include: why it matters (quote page text), what happens if ignored, and a concrete fix.`,
+    `Do NOT use placeholder fixes like "${GENERIC_SUGGESTED_FIX}". Resubmit full report_json.`,
   ].join(" ");
+}
+
+function isSubstantiveBlindspot(item: Blindspot): boolean {
+  const title = item.title.trim();
+  const description = item.description.trim();
+  const fix = item.suggestedFix.trim();
+  if (title.length < 8) return false;
+  if (description.length < 50) return false;
+  if (fix.length < 30) return false;
+  if (fix === GENERIC_SUGGESTED_FIX) return false;
+  if (/review this area/i.test(fix)) return false;
+  if (description.toLowerCase() === title.toLowerCase()) return false;
+  // Title repeated as the whole description with almost no extra detail
+  if (
+    description.toLowerCase().startsWith(title.toLowerCase()) &&
+    description.length < title.length + 40
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function isSubstantiveBlueprint(item: BlueprintStep): boolean {
+  const title = item.title.trim();
+  const description = item.description.trim();
+  if (title.length < 8 || description.length < 40) return false;
+  if (description.toLowerCase() === title.toLowerCase()) return false;
+  return true;
+}
+
+function isSubstantiveAction(item: ActionTask): boolean {
+  const title = item.title.trim();
+  const description = item.description.trim();
+  const outcome = item.expectedOutcome.trim();
+  if (title.length < 8 || description.length < 30 || outcome.length < 15) {
+    return false;
+  }
+  if (description.toLowerCase() === title.toLowerCase()) return false;
+  return true;
 }
 
 /** Always returns arrays — never throws on partial/malformed LLM output. */
@@ -191,13 +257,9 @@ function pickFieldArray(
 
 function asObjectArray(value: unknown): Record<string, unknown>[] {
   if (Array.isArray(value)) {
-    if (value.every((item) => typeof item === "string" && item.trim())) {
-      return (value as string[]).map((title, index) => ({
-        id: `item-${index + 1}`,
-        title: title.trim(),
-        description: title.trim(),
-        name: title.trim(),
-      }));
+    // Title-only strings are not real findings — ignore so quality gates reject
+    if (value.every((item) => typeof item === "string")) {
+      return [];
     }
 
     return value.filter(
@@ -291,16 +353,21 @@ function normalizeBlindspot(
   const title = pickString(item, ["title", "name", "issue"], "");
   if (!title) return null;
 
+  // No silent title/default fill — thin model rows stay thin and fail quality gates
   const description = pickString(
     item,
-    ["description", "detail", "details", "issue"],
-    title
+    ["description", "detail", "details", "body", "why", "impact"],
+    ""
   );
   const suggestedFix = pickString(
     item,
     ["suggestedFix", "suggested_fix", "fix", "recommendation", "solution"],
-    "Review this area and implement a concrete fix this week."
+    ""
   );
+
+  if (!description || !suggestedFix) return null;
+  if (description.toLowerCase() === title.toLowerCase()) return null;
+  if (suggestedFix === GENERIC_SUGGESTED_FIX) return null;
 
   return {
     id: pickString(item, ["id"], `bs-${index + 1}`),
