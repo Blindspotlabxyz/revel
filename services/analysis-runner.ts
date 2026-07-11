@@ -2,7 +2,11 @@ import { getAnalysisMode } from "@/lib/analysis-provider";
 import { trackActivity } from "@/lib/activity";
 import { logEvent } from "@/lib/logger";
 import { generateAnalysis } from "@/lib/openrouter";
-import { normalizeAnalysisReport } from "@/lib/report-schema";
+import {
+  isCompleteReport,
+  normalizeAnalysisReport,
+  reportCompletenessError,
+} from "@/lib/report-schema";
 import { generateAgenticAnalysis } from "@/services/agentic-analysis";
 import { extractWebsiteContent } from "@/services/content-extractor";
 import { getAnalysis, saveAnalysis } from "@/services/store";
@@ -64,6 +68,10 @@ export async function runAnalysis(
           await extractWebsiteContent(website)
         );
   const report = normalizeAnalysisReport(rawReport);
+
+  if (!isCompleteReport(report)) {
+    throw new Error(reportCompletenessError(report));
+  }
 
   const analysis = await getAnalysis(id);
   if (!analysis) {

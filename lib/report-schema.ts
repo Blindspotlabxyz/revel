@@ -54,32 +54,72 @@ export const analysisReportSchema = z.object({
     .min(5),
 });
 
+export const MIN_BLINDSPOTS = 4;
+export const MIN_BLUEPRINT_STEPS = 3;
+export const MIN_ACTIONS = 5;
+
 export function parseAnalysisReport(raw: unknown): AnalysisReport {
   return analysisReportSchema.parse(raw);
 }
 
+/** True when the report has enough real findings to show users (not an empty shell). */
+export function isCompleteReport(report: AnalysisReport): boolean {
+  return (
+    report.blindspots.length >= MIN_BLINDSPOTS &&
+    report.blueprint.length >= MIN_BLUEPRINT_STEPS &&
+    report.actions.length >= MIN_ACTIONS &&
+    report.summary.trim().length >= 40
+  );
+}
+
+export function reportCompletenessError(report: AnalysisReport): string {
+  return [
+    `Incomplete audit JSON.`,
+    `Need ≥${MIN_BLINDSPOTS} blindspots, ≥${MIN_BLUEPRINT_STEPS} blueprint steps, ≥${MIN_ACTIONS} actions.`,
+    `Got blindspots=${report.blindspots.length}, blueprint=${report.blueprint.length}, actions=${report.actions.length}.`,
+    `Resubmit report_json with full arrays grounded in fetched page content.`,
+  ].join(" ");
+}
+
 /** Always returns arrays — never throws on partial/malformed LLM output. */
 export function normalizeAnalysisReport(raw: unknown): AnalysisReport {
-  const source =
-    raw && typeof raw === "object" && !Array.isArray(raw)
-      ? (raw as Record<string, unknown>)
-      : {};
+  const source = unwrapReportSource(raw);
 
-  const blindspots = asObjectArray(source.blindspots)
+  const blindspots = pickFieldArray(source, [
+    "blindspots",
+    "blind_spots",
+    "blindSpots",
+    "findings",
+    "issues",
+    "problems",
+    "gaps",
+  ])
     .map((item, index) => normalizeBlindspot(item, index))
     .filter((item): item is Blindspot => item !== null);
 
-  const blueprint = asObjectArray(source.blueprint)
+  const blueprint = pickFieldArray(source, [
+    "blueprint",
+    "roadmap",
+    "steps",
+    "plan",
+  ])
     .flatMap((item, index) => normalizeBlueprintSteps(item, index))
     .map((step, index) => ({ ...step, step: step.step || index + 1 }))
     .sort((a, b) => a.step - b.step);
 
-  let actions = asObjectArray(source.actions)
+  let actions = pickFieldArray(source, [
+    "actions",
+    "action_queue",
+    "actionQueue",
+    "tasks",
+    "recommendations",
+  ])
     .map((item, index) => normalizeAction(item, index))
     .filter((item): item is ActionTask => item !== null);
 
-  // Recover when models omit actions or return non-arrays
-  if (actions.length === 0) {
+  // Recover Action Queue from real findings only — never invent a lone default row
+  // that would make empty audits look "complete".
+  if (actions.length === 0 && (blindspots.length > 0 || blueprint.length > 0)) {
     actions = synthesizeActions(blindspots, blueprint);
   }
 
@@ -94,7 +134,12 @@ export function normalizeAnalysisReport(raw: unknown): AnalysisReport {
   const summary =
     typeof source.summary === "string" && source.summary.trim()
       ? source.summary.trim()
-      : "Analysis completed. Review blindspots and the blueprint for prioritized next steps.";
+      : typeof source.overview === "string" && source.overview.trim()
+        ? source.overview.trim()
+        : typeof source.executiveSummary === "string" &&
+            source.executiveSummary.trim()
+          ? source.executiveSummary.trim()
+          : "Analysis completed. Review blindspots and the blueprint for prioritized next steps.";
 
   return {
     score,
@@ -105,15 +150,62 @@ export function normalizeAnalysisReport(raw: unknown): AnalysisReport {
   };
 }
 
+function unwrapReportSource(raw: unknown): Record<string, unknown> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return {};
+  }
+
+  let current = raw as Record<string, unknown>;
+
+  for (const key of ["report", "analysis", "result", "data", "payload"]) {
+    const nested = current[key];
+    if (
+      nested &&
+      typeof nested === "object" &&
+      !Array.isArray(nested) &&
+      (Array.isArray((nested as Record<string, unknown>).blindspots) ||
+        Array.isArray((nested as Record<string, unknown>).blind_spots) ||
+        Array.isArray((nested as Record<string, unknown>).findings) ||
+        typeof (nested as Record<string, unknown>).score === "number" ||
+        typeof (nested as Record<string, unknown>).summary === "string")
+    ) {
+      current = nested as Record<string, unknown>;
+      break;
+    }
+  }
+
+  return current;
+}
+
+function pickFieldArray(
+  source: Record<string, unknown>,
+  keys: string[]
+): Record<string, unknown>[] {
+  for (const key of keys) {
+    if (!(key in source)) continue;
+    const arr = asObjectArray(source[key]);
+    if (arr.length > 0) return arr;
+  }
+  return [];
+}
+
 function asObjectArray(value: unknown): Record<string, unknown>[] {
   if (Array.isArray(value)) {
+    if (value.every((item) => typeof item === "string" && item.trim())) {
+      return (value as string[]).map((title, index) => ({
+        id: `item-${index + 1}`,
+        title: title.trim(),
+        description: title.trim(),
+        name: title.trim(),
+      }));
+    }
+
     return value.filter(
       (item): item is Record<string, unknown> =>
         !!item && typeof item === "object" && !Array.isArray(item)
     );
   }
 
-  // Some models nest under { items: [...] } or similar
   if (value && typeof value === "object") {
     const record = value as Record<string, unknown>;
     for (const key of ["items", "data", "list", "results"]) {
@@ -380,18 +472,5 @@ function synthesizeActions(
     expectedOutcome: "Reduce this blindspot and improve product clarity",
   }));
 
-  const merged = [...fromBlueprint, ...fromBlindspots];
-  if (merged.length > 0) return merged;
-
-  return [
-    {
-      id: "synth-default-1",
-      title: "Review report findings",
-      description:
-        "Walk through blindspots and blueprint with your team and pick the top three fixes for this week.",
-      priority: "high",
-      estimatedEffort: "30 minutes",
-      expectedOutcome: "Clear prioritized plan",
-    },
-  ];
+  return [...fromBlueprint, ...fromBlindspots];
 }

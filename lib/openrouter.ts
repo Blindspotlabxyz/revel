@@ -1,5 +1,9 @@
 import { resilientFetch } from "@/lib/resilient-fetch";
-import { normalizeAnalysisReport } from "./report-schema";
+import {
+  isCompleteReport,
+  normalizeAnalysisReport,
+  reportCompletenessError,
+} from "./report-schema";
 import { buildAnalysisPrompt } from "./prompt-builder";
 import { siteConfig } from "./site-config";
 import type { AnalysisReport } from "@/types/analysis";
@@ -117,13 +121,11 @@ export async function generateAnalysis(
     try {
       const parsed = JSON.parse(result.raw) as unknown;
       const report = normalizeAnalysisReport(parsed);
-      // Reject empty shells so we try the next model
-      if (
-        report.blindspots.length === 0 &&
-        report.blueprint.length === 0 &&
-        report.actions.length === 0
-      ) {
-        errors.push(`${model}: empty report after normalize`);
+      // Reject thin shells (e.g. summary-only with 0 blindspots) — try next model
+      if (!isCompleteReport(report)) {
+        errors.push(
+          `${model}: ${reportCompletenessError(report).slice(0, 140)}`
+        );
         continue;
       }
       return report;

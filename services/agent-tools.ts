@@ -1,7 +1,9 @@
 import { ZodError } from "zod";
 import {
+  isCompleteReport,
   normalizeAnalysisReport,
   parseAnalysisReport,
+  reportCompletenessError,
 } from "@/lib/report-schema";
 import type { AnalysisReport } from "@/types/analysis";
 import {
@@ -166,15 +168,19 @@ export async function executeAgentTool(
         const payload = parseSubmitPayload(args);
         try {
           const report = parseAnalysisReport(payload);
+          if (!isCompleteReport(report)) {
+            return {
+              response: {
+                accepted: false,
+                error: reportCompletenessError(report),
+              },
+            };
+          }
           return { response: { accepted: true, score: report.score }, report };
         } catch (strictError) {
-          // Accept repaired partial reports rather than failing the whole analysis
+          // Accept repaired reports only when still complete enough for users
           const repaired = normalizeAnalysisReport(payload);
-          if (
-            repaired.blindspots.length >= 1 ||
-            repaired.blueprint.length >= 1 ||
-            repaired.actions.length >= 1
-          ) {
+          if (isCompleteReport(repaired)) {
             return {
               response: {
                 accepted: true,
@@ -188,7 +194,19 @@ export async function executeAgentTool(
               report: repaired,
             };
           }
-          throw strictError;
+          return {
+            response: {
+              accepted: false,
+              error:
+                reportCompletenessError(repaired) +
+                (strictError instanceof ZodError
+                  ? ` Schema: ${strictError.issues
+                      .slice(0, 3)
+                      .map((i) => i.message)
+                      .join("; ")}`
+                  : ""),
+            },
+          };
         }
       } catch (error) {
         const validationError =
