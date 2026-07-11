@@ -94,7 +94,6 @@ export async function GET() {
           ? {
               protocol: "x402",
               agentPaymentsProtocol: "okx-agent-payments-protocol",
-              /** Handshake + tools/list stay free; payment only on billable tools. */
               requiredOn: "tools/call (billable)",
               billableTools: [...REVEL_BILLABLE_MCP_TOOLS],
               headers: ["PAYMENT-SIGNATURE", "X-PAYMENT"],
@@ -133,8 +132,6 @@ export async function POST(request: NextRequest) {
   }
 
   if (isOkxBillingEnabled()) {
-    // A2MCP compliance: free initialize / tools/list / health / poll / export.
-    // Charge only when starting a billable audit (OKX Agent Payments Protocol).
     if (!mcpBodyRequiresPayment(bodyText)) {
       return mcpPostHandler(requestWithBody, false);
     }

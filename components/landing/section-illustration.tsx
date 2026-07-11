@@ -7,7 +7,6 @@ import {
   type CSSProperties,
 } from "react";
 
-/** Matches Tailwind `md` / illustration breakpoint (48rem). */
 const DESKTOP_MQ = "(min-width: 48rem)";
 const DESKTOP_SIZES = "(max-width: 47.99rem) 0px, 50vw";
 
@@ -18,11 +17,6 @@ interface SectionIllustrationProps {
   priority?: boolean;
 }
 
-/**
- * Desktop (md+): Next/Image 16:9, object-contain — previous treatment.
- * Mobile: NO <img> in the DOM. Asset is CSS background-image cover on the
- * frame so art fills the rounded card edge-to-edge (no padding letterbox).
- */
 export function SectionIllustration({
   desktopSrc,
   mobileSrc,

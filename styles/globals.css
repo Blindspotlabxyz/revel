@@ -54,13 +54,7 @@
   box-shadow: var(--shadow-illustration);
 }
 
-/*
- * Illustration container (frame) — hero-peel, insight-telescope, map-reveal
- *
- * Desktop: padded card + inner media radius + inline <img> object-contain.
- * Mobile: zero padding; art is background-image cover on the frame itself
- * so it sits flush to the rounded corners (no gray letterbox margin).
- */
+/* Illustration container (frame) — hero-peel, insight-telescope, map-reveal */
 .illustration-frame {
   position: relative;
   width: 100%;
@@ -72,7 +66,6 @@
   box-shadow: var(--shadow-illustration);
 }
 
-/* Aspect box — sizes the frame; only aspect-ratio swaps at breakpoints */
 .illustration-frame__media {
   position: relative;
   width: 100%;
@@ -82,15 +75,12 @@
   background-color: var(--illustration-media-bg);
 }
 
-/* Desktop img: contain inside the padded media box */
 .illustration-frame__media img {
   object-fit: contain;
 }
 
-/* —— Mobile only (< 48rem / Tailwind md) —— */
 @media (max-width: 47.99rem) {
   .illustration-frame {
-    /* Remove gray padded margin so art meets rounded edges */
     padding: 0;
     background-color: transparent;
     background-image: var(--illustration-mobile-bg);
@@ -100,19 +90,14 @@
   }
 
   .illustration-frame__media {
-    /* Transparent shell that only provides height via aspect-ratio */
     border-radius: 0;
     background-color: transparent;
     background-image: none;
-    /* 9/16 from base .illustration-frame__media — no hero 16:9 override
-       (mobile assets are portrait hero-peel / map-reveal / insight-telescope) */
   }
 }
 
-/* —— Desktop (md+) — previous card + img treatment —— */
 @media (min-width: 48rem) {
   .illustration-frame {
-    /* Ensure no mobile cover art bleeds on desktop */
     background-image: none;
     background-color: var(--illustration-container-bg);
     padding: var(--illustration-container-padding);
@@ -165,7 +150,6 @@
   letter-spacing: -0.02em;
 }
 
-/* Scrim only used on mobile hero backdrop; hidden by default (desktop) */
 .hero-section__scrim {
   display: none;
 }
@@ -174,19 +158,13 @@
   flex-shrink: 0;
 }
 
-/*
- * Mobile hero: illustration is a full-bleed backdrop under copy.
- * Desktop (md+) keeps side-by-side grid + card image — rules below.
- */
 @media (max-width: 47.99rem) {
   .hero-section {
     position: relative;
     overflow: hidden;
-    /* Content-driven height with room for the backdrop to read */
     min-height: max(100%, 22rem);
     padding-top: 2rem;
     padding-bottom: 2.5rem;
-    /* Let the image show through section tint */
     background-color: transparent;
   }
 
@@ -194,10 +172,6 @@
     background-color: transparent;
   }
 
-  /*
-   * Layout stays in document flow for height (from copy).
-   * position: static so absolutely positioned art/scrim bind to .hero-section.
-   */
   .hero-section__layout {
     position: static;
     display: block;
@@ -213,7 +187,6 @@
     pointer-events: none;
   }
 
-  /* Full-bleed cover; no card chrome on mobile hero backdrop */
   .hero-section__art .hero-illustration-slot,
   .hero-section__art .illustration-frame,
   .hero-section__art .illustration-frame__media {
@@ -241,7 +214,6 @@
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    /* Cream scrim ~80–88% so type stays readable; image still visible */
     background: linear-gradient(
       165deg,
       color-mix(in srgb, var(--color-background) 88%, transparent) 0%,

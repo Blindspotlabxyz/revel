@@ -11,10 +11,6 @@ import { DEFAULT_WEEKLY_AUDIT_LIMIT } from "@/lib/weekly-audit-limit-config";
 export function Hero() {
   return (
     <section className="hero-section illustration-section w-full">
-      {/*
-        Mobile: art + scrim are absolute full-bleed layers under the copy.
-        Desktop: layout is a 2-col grid (copy | art); scrim is hidden.
-      */}
       <div className="hero-section__layout mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 content-center items-center gap-6 px-4 sm:px-6 md:grid-cols-2 md:gap-12 lg:gap-16">
         <div className="hero-section__copy max-w-xl min-w-0">
           <motion.h1
@@ -85,7 +81,6 @@ export function Hero() {
         </motion.div>
       </div>
 
-      {/* Mobile-only legibility layer (hidden on md+) */}
       <div className="hero-section__scrim" aria-hidden="true" />
     </section>
   );
