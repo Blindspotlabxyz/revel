@@ -1,19 +1,30 @@
 import { isNetworkFetchError } from "@/lib/resilient-fetch";
 
 export type AnalysisMode = "agentic" | "legacy";
+/** Ordered backends — Groq and OpenRouter first; Gemini last (tight free quota). */
+export type AnalysisBackend = "groq" | "openrouter" | "gemini";
+/** @deprecated Use AnalysisBackend — kept for older call sites */
 export type AgentProvider = "groq" | "gemini";
 
 /**
- * Agentic provider priority:
- * 1. Groq (GROQ_API_KEY) — fast local tool calling, generous free tier
- * 2. Google AI Studio (GEMINI_API_KEY) — Gemini function calling
- * 3. OpenRouter — legacy single-shot or agent failure fallback
+ * Default analysis order when ANALYSIS_PROVIDER=auto:
+ * 1. Groq — agentic tool calling, strong free tier
+ * 2. OpenRouter — single-shot grounded JSON (paid/reliable models)
+ * 3. Gemini — last resort (small free quota)
  */
 export function getAnalysisMode(): AnalysisMode {
   const raw = process.env.ANALYSIS_MODE?.toLowerCase();
   if (raw === "legacy") return "legacy";
   if (raw === "agentic") return "agentic";
-  if (isGroqAgentEnabled() || isGeminiAgentEnabled()) return "agentic";
+  if (
+    isGroqAgentEnabled() ||
+    isGeminiAgentEnabled() ||
+    isOpenRouterEnabled()
+  ) {
+    // OpenRouter-only → still use cascade via generateAgenticAnalysis when agentic keys exist
+    if (isGroqAgentEnabled() || isGeminiAgentEnabled()) return "agentic";
+    return "legacy";
+  }
   return "legacy";
 }
 
@@ -25,6 +36,14 @@ export function isGeminiAgentEnabled(): boolean {
   return Boolean(process.env.GEMINI_API_KEY?.trim());
 }
 
+export function isOpenRouterEnabled(): boolean {
+  return Boolean(process.env.OPENROUTER_API_KEY?.trim());
+}
+
+/**
+ * Preferred single agent provider for logging / explicit override.
+ * Does not include openrouter (handled in the cascade).
+ */
 export function getAgentProvider(): AgentProvider | null {
   const preferred = process.env.ANALYSIS_PROVIDER?.toLowerCase();
 
@@ -36,8 +55,43 @@ export function getAgentProvider(): AgentProvider | null {
   return null;
 }
 
+/**
+ * Full provider chain for analysis. Order is always tried until one succeeds.
+ * ANALYSIS_PROVIDER can pin the first backend: groq | openrouter | gemini | auto
+ */
+export function getAnalysisProviderChain(): AnalysisBackend[] {
+  const preferred = process.env.ANALYSIS_PROVIDER?.toLowerCase() ?? "auto";
+  const chain: AnalysisBackend[] = [];
+
+  const push = (backend: AnalysisBackend) => {
+    if (chain.includes(backend)) return;
+    if (backend === "groq" && !isGroqAgentEnabled()) return;
+    if (backend === "openrouter" && !isOpenRouterEnabled()) return;
+    if (backend === "gemini" && !isGeminiAgentEnabled()) return;
+    chain.push(backend);
+  };
+
+  if (
+    preferred === "groq" ||
+    preferred === "openrouter" ||
+    preferred === "gemini"
+  ) {
+    push(preferred);
+  }
+
+  // Default order: Groq → OpenRouter → Gemini (Gemini last)
+  push("groq");
+  push("openrouter");
+  push("gemini");
+
+  return chain;
+}
+
 const DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
-const BUILTIN_GROQ_FALLBACKS = ["meta-llama/llama-4-scout-17b-16e-instruct", "llama-3.1-8b-instant"];
+const BUILTIN_GROQ_FALLBACKS = [
+  "meta-llama/llama-4-scout-17b-16e-instruct",
+  "llama-3.1-8b-instant",
+];
 
 export function getGroqModel(): string {
   return getGroqModels()[0];
@@ -87,13 +141,14 @@ export function getAgentMaxSteps(): number {
   return Number.isFinite(n) && n > 0 ? Math.min(n, 20) : 10;
 }
 
-export function isOpenRouterEnabled(): boolean {
-  return Boolean(process.env.OPENROUTER_API_KEY?.trim());
-}
-
 export function isRateLimitError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
-  return message.includes("429") || /quota/i.test(message) || /rate limit/i.test(message);
+  return (
+    message.includes("429") ||
+    /quota/i.test(message) ||
+    /rate limit/i.test(message) ||
+    /resource.exhausted/i.test(message)
+  );
 }
 
 /** @deprecated Use isRateLimitError */
@@ -101,15 +156,23 @@ export function isGeminiQuotaError(error: unknown): boolean {
   return isRateLimitError(error);
 }
 
+/** Failures where trying the next provider/model is the right move. */
 export function isRecoverableAgenticFailure(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return (
-    isGeminiQuotaError(error) ||
+    isRateLimitError(error) ||
     isNetworkFetchError(error) ||
     message.includes("did not submit a report") ||
     message.includes("returned no tool calls") ||
     message.includes("All Groq models failed") ||
+    message.includes("All analysis models failed") ||
+    message.includes("All analysis providers failed") ||
     message.includes("Groq API") ||
-    message.includes("Gemini API")
+    message.includes("Gemini API") ||
+    message.includes("OpenRouter") ||
+    message.includes("Incomplete") ||
+    message.includes("generic audit") ||
+    message.includes("Incomplete or generic") ||
+    message.includes("Incomplete audit")
   );
 }

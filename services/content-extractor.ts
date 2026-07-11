@@ -65,12 +65,19 @@ function cleanHtml(html: string): string {
     .filter((t) => t.length > 0 && t.length < 50);
   if (buttons.length) parts.push(`CTAs: ${buttons.join(" | ")}`);
 
-  const bodyText = $("main, article, section, body")
+  const nav = $("nav a, header a")
+    .map((_, el) => $(el).text().trim())
+    .get()
+    .filter((t) => t.length > 0 && t.length < 40)
+    .slice(0, 16);
+  if (nav.length) parts.push(`Nav: ${[...new Set(nav)].join(" | ")}`);
+
+  const bodyText = $("main, article, [role='main'], body")
     .first()
     .text()
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, 8000);
+    .slice(0, 12000);
 
   if (bodyText) parts.push(`Content: ${bodyText}`);
 

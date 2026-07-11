@@ -1,10 +1,6 @@
 import {
-  getAgentProvider,
-  isGeminiAgentEnabled,
-  isGeminiQuotaError,
+  getAnalysisProviderChain,
   isRateLimitError,
-  isGroqAgentEnabled,
-  isOpenRouterEnabled,
   isRecoverableAgenticFailure,
 } from "@/lib/analysis-provider";
 import { generateAnalysis } from "@/lib/openrouter";
@@ -23,18 +19,17 @@ async function fetchContentForFallback(website: string): Promise<string> {
   } catch (error) {
     const detail = errorMessage(error);
     console.warn(
-      `[Revel] Website fetch failed during OpenRouter fallback (${detail}) — continuing with URL-only context`
+      `[Revel] Website fetch failed during OpenRouter path (${detail}) — continuing with URL-only context`
     );
     return [
       `[Live page fetch failed: ${detail}]`,
       `Website URL: ${website}`,
-      "Analyze using the domain, URL structure, and typical product patterns for this category.",
-      "Note in blindspots that live page content could not be verified.",
+      "Only use the domain and URL structure. Mark every blindspot as unverified live content.",
     ].join("\n\n");
   }
 }
 
-async function fallbackToOpenRouter(website: string): Promise<AnalysisReport> {
+async function runOpenRouterAnalysis(website: string): Promise<AnalysisReport> {
   const attempts = 2;
   let lastError: unknown;
 
@@ -45,54 +40,77 @@ async function fallbackToOpenRouter(website: string): Promise<AnalysisReport> {
     } catch (error) {
       lastError = error;
       if (attempt < attempts - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
       }
     }
   }
 
   throw new Error(
-    `OpenRouter fallback failed after ${attempts} attempts: ${errorMessage(lastError)}`
+    `OpenRouter analysis failed after ${attempts} attempts: ${errorMessage(lastError)}`
   );
 }
 
+/**
+ * Run analysis with cascade:
+ *   Groq (agentic) → OpenRouter (grounded single-shot) → Gemini (agentic, last)
+ * On recoverable errors (quota, incomplete report, API failure), try the next backend.
+ */
 export async function generateAgenticAnalysis(
   website: string
 ): Promise<AnalysisReport> {
-  const provider = getAgentProvider();
+  const chain = getAnalysisProviderChain();
 
-  if (!provider) {
+  if (chain.length === 0) {
     throw new Error(
-      "Agentic analysis requires GROQ_API_KEY or GEMINI_API_KEY in .env.local"
+      "Analysis requires GROQ_API_KEY, OPENROUTER_API_KEY, or GEMINI_API_KEY"
     );
   }
 
-  try {
-    if (provider === "groq") {
-      return await runGroqAgent(website);
-    }
-    return await runGeminiAgent(website);
-  } catch (error) {
-    if (isRecoverableAgenticFailure(error) && isOpenRouterEnabled()) {
-      const label = getAgentProvider() ?? "agent";
-      const reason = isRateLimitError(error) ? "rate limited" : "agent incomplete";
-      console.warn(
-        `[Revel] ${label} agent ${reason} — falling back to OpenRouter legacy analysis`
+  const errors: string[] = [];
+
+  for (let i = 0; i < chain.length; i++) {
+    const provider = chain[i];
+    const isLast = i === chain.length - 1;
+
+    try {
+      console.info(
+        `[Revel] Analysis provider: ${provider} (${i + 1}/${chain.length})`
       );
-      try {
-        return await fallbackToOpenRouter(website);
-      } catch (fallbackError) {
-        throw new Error(
-          `Gemini unavailable (${errorMessage(error)}). OpenRouter fallback also failed (${errorMessage(fallbackError)}). Retry in a few minutes or wait for Gemini quota reset.`
-        );
+
+      if (provider === "groq") {
+        return await runGroqAgent(website);
       }
-    }
+      if (provider === "openrouter") {
+        return await runOpenRouterAnalysis(website);
+      }
+      return await runGeminiAgent(website);
+    } catch (error) {
+      const detail = errorMessage(error);
+      errors.push(`${provider}: ${detail}`);
 
-    if (isGeminiQuotaError(error)) {
-      throw new Error(
-        "Gemini free quota exceeded. Quota resets daily (midnight Pacific). Add OPENROUTER_API_KEY for automatic fallback, or set ANALYSIS_MODE=legacy."
+      const canFallback =
+        !isLast &&
+        (isRecoverableAgenticFailure(error) || isRateLimitError(error));
+
+      if (canFallback) {
+        console.warn(
+          `[Revel] ${provider} failed (${detail.slice(0, 160)}) — falling back to next provider`
+        );
+        continue;
+      }
+
+      if (isLast) {
+        break;
+      }
+
+      // Non-recoverable on a non-last provider still try next so one bad key doesn't block
+      console.warn(
+        `[Revel] ${provider} error (${detail.slice(0, 160)}) — trying next provider anyway`
       );
     }
-
-    throw error;
   }
+
+  throw new Error(
+    `All analysis providers failed (${chain.join(" → ")}). ${errors.slice(-3).join(" | ")}`
+  );
 }
