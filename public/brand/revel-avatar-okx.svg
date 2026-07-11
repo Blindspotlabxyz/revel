@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="440" viewBox="0 0 440 440">
+  <!-- Full-bleed square canvas — corners must be opaque square pixels -->
+  <rect width="440" height="440" fill="#111111"/>
+
+  <!-- Subtle product grid (map / audit surface) -->
+  <g stroke="#2A2A2A" stroke-width="2">
+    <line x1="0" y1="88" x2="440" y2="88"/><line x1="88" y1="0" x2="88" y2="440"/><line x1="0" y1="176" x2="440" y2="176"/><line x1="176" y1="0" x2="176" y2="440"/><line x1="0" y1="264" x2="440" y2="264"/><line x1="264" y1="0" x2="264" y2="440"/><line x1="0" y1="352" x2="440" y2="352"/><line x1="352" y1="0" x2="352" y2="440"/>
+  </g>
+
+  <!-- Cream analysis panel (hard square, inset) -->
+  <rect x="48" y="48" width="344" height="344" fill="#F7F2EB"/>
+
+  <!-- Panel grid -->
+  <g stroke="#E5D9CC" stroke-width="1.5">
+    <line x1="48" y1="134" x2="392" y2="134"/><line x1="134" y1="48" x2="134" y2="392"/><line x1="48" y1="220" x2="392" y2="220"/><line x1="220" y1="48" x2="220" y2="392"/><line x1="48" y1="306" x2="392" y2="306"/><line x1="306" y1="48" x2="306" y2="392"/>
+  </g>
+
+  <!-- Radar / focus rings = product insight -->
+  <circle cx="220" cy="220" r="92" fill="none" stroke="#E07A5F" stroke-width="3" opacity="0.35"/>
+  <circle cx="220" cy="220" r="58" fill="none" stroke="#E07A5F" stroke-width="5"/>
+  <circle cx="220" cy="220" r="18" fill="#E07A5F"/>
+
+  <!-- Crosshair -->
+  <line x1="220" y1="110" x2="220" y2="330" stroke="#111111" stroke-width="2" opacity="0.2"/>
+  <line x1="110" y1="220" x2="330" y2="220" stroke="#111111" stroke-width="2" opacity="0.2"/>
+
+  <!-- Blindspot nodes on the map -->
+  <rect x="118" y="148" width="36" height="24" fill="none" stroke="#E07A5F" stroke-width="3"/>
+  <polygon points="292,150 312,170 292,190 272,170" fill="none" stroke="#E07A5F" stroke-width="3"/>
+  <polygon points="150,268 168,248 186,268 168,288" fill="none" stroke="#C96A52" stroke-width="3"/>
+  <circle cx="300" cy="290" r="8" fill="#111111"/>
+
+  <!-- Paper peel reveal (hard geometric, square outer edge) -->
+  <path d="M280 48 H392 V160 Z" fill="#F7F2EB"/>
+  <path d="M280 48 L392 160 L392 48 Z" fill="#E07A5F"/>
+  <path d="M280 48 L392 160" stroke="#C96A52" stroke-width="5" stroke-linecap="square"/>
+
+  <!-- Small accent bar (software product chrome) -->
+  <rect x="48" y="392" width="120" height="8" fill="#E07A5F"/>
+</svg>
