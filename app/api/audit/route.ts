@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     getOkxResourceServer(),
     {
       appName: "Revel",
-      appLogo: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://tryrevel.xyz"}/icon.png`,
+      appLogo: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://tryrevel.xyz"}/brand/revel-icon-256.png`,
     }
   );
 

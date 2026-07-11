@@ -32,26 +32,14 @@ type RevelLogoProps = {
 
 function RevelIcon({ size, className }: { size: number; className?: string }) {
   return (
-    <svg
+    <Image
+      src="/brand/revel-icon.png"
+      alt=""
       width={size}
       height={size}
-      viewBox="0 0 64 64"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={cn("shrink-0", className)}
+      className={cn("shrink-0 rounded-none", className)}
       aria-hidden
-    >
-      <rect x="10" y="14" width="38" height="38" rx="9" fill="#111111" />
-      <path d="M38 14h14v14c-6-4-10-6-14-8V14z" fill="#F7F2EB" />
-      <path d="M38 14h14v14l-9-5.5C41 20.5 39 17.5 38 14z" fill="#E07A5F" />
-      <path
-        d="M38 14l14 14"
-        stroke="#C96A52"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <circle cx="30" cy="36" r="3" fill="#E07A5F" opacity="0.9" />
-    </svg>
+    />
   );
 }
 
@@ -128,11 +116,11 @@ export function RevelLogo({
   );
 }
 
-/** Static logo image for contexts that need the official SVG asset */
+/** Static logo image for contexts that need the official brand asset */
 export function RevelLogoImage({
   className,
-  width = 120,
-  height = 29,
+  width = 140,
+  height = 32,
 }: {
   className?: string;
   width?: number;
@@ -140,7 +128,7 @@ export function RevelLogoImage({
 }) {
   return (
     <Image
-      src="/brand/revel-logo.svg"
+      src="/brand/revel-logo.png"
       alt="Revel"
       width={width}
       height={height}

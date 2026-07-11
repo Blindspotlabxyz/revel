@@ -65,7 +65,7 @@ export function getOkxBillingManifest() {
 export function getOkxPaywallConfig() {
   return {
     appName: "Revel",
-    appLogo: `${siteConfig.url}/icon.png`,
+    appLogo: `${siteConfig.url}/brand/revel-icon-256.png`,
   };
 }
 
