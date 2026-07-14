@@ -138,8 +138,20 @@ export function getAgentMaxSteps(): number {
   return Number.isFinite(n) && n > 0 ? Math.min(n, 20) : 10;
 }
 
+function errorTextForMatch(error: unknown): string {
+  const publicMsg = error instanceof Error ? error.message : String(error);
+  const serverDetail =
+    error &&
+    typeof error === "object" &&
+    "serverDetail" in error &&
+    typeof (error as { serverDetail: unknown }).serverDetail === "string"
+      ? (error as { serverDetail: string }).serverDetail
+      : "";
+  return `${publicMsg} ${serverDetail}`;
+}
+
 export function isRateLimitError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error);
+  const message = errorTextForMatch(error);
   return (
     message.includes("429") ||
     /quota/i.test(message) ||
@@ -155,7 +167,9 @@ export function isGeminiQuotaError(error: unknown): boolean {
 
 /** Failures where trying the next provider/model is the right move. */
 export function isRecoverableAgenticFailure(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error);
+  // ClientSafeError.message is public — match against serverDetail as well
+  const message = errorTextForMatch(error);
+
   return (
     isRateLimitError(error) ||
     isNetworkFetchError(error) ||
@@ -164,9 +178,12 @@ export function isRecoverableAgenticFailure(error: unknown): boolean {
     message.includes("All Groq models failed") ||
     message.includes("All analysis models failed") ||
     message.includes("All analysis providers failed") ||
+    message.includes("all models failed") ||
     message.includes("Groq API") ||
     message.includes("Gemini API") ||
     message.includes("OpenRouter") ||
+    message.includes("openrouter:") ||
+    message.includes("AI gateway error") ||
     message.includes("Incomplete") ||
     message.includes("generic audit") ||
     message.includes("Incomplete or generic") ||

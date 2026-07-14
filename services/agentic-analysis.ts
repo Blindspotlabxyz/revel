@@ -5,9 +5,9 @@ import {
 } from "@/lib/analysis-provider";
 import { generateAnalysis } from "@/lib/openrouter";
 import {
-  clientAiGatewayError,
   logServerError,
-  rawErrorMessage,
+  serverErrorDetail,
+  throwClientAiGatewayError,
 } from "@/lib/safe-client-error";
 import type { AnalysisReport } from "@/types/analysis";
 import { extractWebsiteContent } from "@/services/content-extractor";
@@ -43,11 +43,12 @@ async function runOpenRouterAnalysis(website: string): Promise<AnalysisReport> {
     }
   }
 
-  logServerError("openrouter_analysis_failed", lastError, {
+  const detail = serverErrorDetail(lastError);
+  logServerError("openrouter_analysis_failed", detail, {
     website,
     attempts,
   });
-  throw new Error(clientAiGatewayError());
+  throwClientAiGatewayError(`openrouter: ${detail}`);
 }
 
 /**
@@ -63,10 +64,10 @@ export async function generateAgenticAnalysis(
   if (chain.length === 0) {
     logServerError(
       "analysis_no_providers",
-      new Error("No analysis API keys configured"),
+      "No analysis API keys configured",
       { website }
     );
-    throw new Error(clientAiGatewayError());
+    throwClientAiGatewayError("No analysis API keys configured");
   }
 
   const errors: Array<{ provider: string; detail: string }> = [];
@@ -88,7 +89,8 @@ export async function generateAgenticAnalysis(
       }
       return await runGeminiAgent(website);
     } catch (error) {
-      const detail = rawErrorMessage(error);
+      // Prefer serverDetail so ClientSafeError does not collapse to the public message
+      const detail = serverErrorDetail(error);
       errors.push({ provider, detail });
 
       const canFallback =
@@ -99,7 +101,7 @@ export async function generateAgenticAnalysis(
         console.warn(
           `[Revel] ${provider} failed — falling back to next provider`
         );
-        logServerError("analysis_provider_fallback", error, {
+        logServerError("analysis_provider_fallback", detail, {
           website,
           provider,
           next: chain[i + 1],
@@ -114,7 +116,7 @@ export async function generateAgenticAnalysis(
       console.warn(
         `[Revel] ${provider} error — trying next provider anyway`
       );
-      logServerError("analysis_provider_error", error, {
+      logServerError("analysis_provider_error", detail, {
         website,
         provider,
         next: chain[i + 1],
@@ -122,10 +124,17 @@ export async function generateAgenticAnalysis(
     }
   }
 
-  logServerError(
-    "analysis_all_providers_failed",
-    new Error("All analysis providers failed"),
-    { website, chain, errors }
-  );
-  throw new Error(clientAiGatewayError());
+  const chainSummary = errors
+    .map((e) => `${e.provider}: ${e.detail}`)
+    .join(" | ");
+  const summary =
+    chainSummary ||
+    `All analysis providers failed (chain: ${chain.join("→")})`;
+
+  logServerError("analysis_all_providers_failed", summary, {
+    website,
+    chain,
+    errors,
+  });
+  throwClientAiGatewayError(summary);
 }

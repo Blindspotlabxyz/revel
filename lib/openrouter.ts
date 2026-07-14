@@ -1,7 +1,7 @@
 import { resilientFetch } from "@/lib/resilient-fetch";
 import {
-  clientAiGatewayError,
   logServerError,
+  throwClientAiGatewayError,
 } from "@/lib/safe-client-error";
 import {
   isCompleteReport,
@@ -138,11 +138,15 @@ export async function generateAnalysis(
     }
   }
 
-  logServerError("openrouter_all_models_failed", new Error("All models failed"), {
+  const summary =
+    errors.length > 0
+      ? `OpenRouter all models failed: ${errors.join(" | ")}`
+      : "OpenRouter all models failed (no model details)";
+  logServerError("openrouter_all_models_failed", summary, {
     errors,
     models,
   });
-  throw new Error(clientAiGatewayError());
+  throwClientAiGatewayError(summary);
 }
 
 function generateDemoReport(website: string): AnalysisReport {

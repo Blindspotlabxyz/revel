@@ -5,7 +5,7 @@ import { generateAnalysis } from "@/lib/openrouter";
 import {
   clientAiGatewayError,
   logServerError,
-  rawErrorMessage,
+  serverErrorDetail,
   toClientErrorMessage,
 } from "@/lib/safe-client-error";
 import {
@@ -25,10 +25,13 @@ export async function markAnalysisFailed(
   const failed = await getAnalysis(id);
   if (!failed) return;
 
-  // Full detail stays server-side only
-  logServerError("analysis_failed", error, {
+  const website = context?.website ?? failed.website;
+  // Real reason for Vercel logs (never the generic client string alone)
+  const detail = serverErrorDetail(error);
+
+  logServerError("analysis_failed", detail, {
     id,
-    website: context?.website ?? failed.website,
+    website,
     userId: context?.userId,
   });
 
@@ -43,17 +46,18 @@ export async function markAnalysisFailed(
     error: clientMessage,
   });
 
+  // Production: single JSON line via logEvent — include full server detail
   logEvent("analysis_failed", {
     id,
-    website: context?.website ?? failed.website,
+    website,
     userId: context?.userId,
     error: clientMessage,
-    errorDetail: rawErrorMessage(error).slice(0, 500),
+    errorDetail: detail.slice(0, 2000),
   });
   trackActivity({
     eventType: "analysis_failed",
     analysisId: id,
-    website: context?.website ?? failed.website,
+    website,
     userId: context?.userId,
     status: "failed",
     metadata: { error: clientMessage },

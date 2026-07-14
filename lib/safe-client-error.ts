@@ -1,5 +1,6 @@
 /**
  * Client-safe error handling: full detail stays server-side only.
+ * Vercel Runtime Logs get searchable single-line JSON via logServerError.
  */
 
 const CLIENT_AI_GATEWAY_ERROR = "AI gateway error. Please try again.";
@@ -66,7 +67,34 @@ const UNSAFE_PATTERNS = [
   /GEMINI_/i,
 ];
 
+/**
+ * Error thrown to callers/clients with a safe message, while keeping the real
+ * reason on `.serverDetail` for Vercel logs and markAnalysisFailed.
+ */
+export class ClientSafeError extends Error {
+  readonly serverDetail: string;
+  readonly clientMessage: string;
+
+  constructor(clientMessage: string, serverDetail: string) {
+    super(clientMessage);
+    this.name = "ClientSafeError";
+    this.clientMessage = clientMessage;
+    this.serverDetail = serverDetail;
+  }
+}
+
+function safeJson(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '"[unserializable]"';
+  }
+}
+
 export function rawErrorMessage(error: unknown): string {
+  if (error instanceof ClientSafeError) {
+    return error.serverDetail || error.clientMessage;
+  }
   if (error instanceof Error) {
     const cause = error.cause;
     if (
@@ -86,16 +114,46 @@ export function rawErrorMessage(error: unknown): string {
   }
 }
 
+/**
+ * Full detail for server logs / logEvent (never send this to the browser).
+ */
+export function serverErrorDetail(error: unknown): string {
+  if (error instanceof ClientSafeError) {
+    return error.serverDetail || error.message;
+  }
+  return rawErrorMessage(error);
+}
+
+/**
+ * Emit a searchable single-line JSON error for Vercel Runtime Logs.
+ * Do not rely on console.error(msg, object) — Vercel often collapses objects to [Object].
+ */
 export function logServerError(
   scope: string,
   error: unknown,
   meta?: Record<string, unknown>
 ): void {
-  console.error(`[Revel] ${scope}`, {
-    ...meta,
-    error: rawErrorMessage(error),
-    stack: error instanceof Error ? error.stack : undefined,
-  });
+  const detail = serverErrorDetail(error);
+  const payload: Record<string, unknown> = {
+    level: "error",
+    source: "revel",
+    scope,
+    timestamp: new Date().toISOString(),
+    error: detail,
+    ...(meta ?? {}),
+  };
+
+  if (error instanceof Error && error.stack && !(error instanceof ClientSafeError)) {
+    payload.stack = error.stack.split("\n").slice(0, 15).join("\n");
+  }
+
+  // One line — fully visible & filterable in Vercel
+  console.error(JSON.stringify(payload));
+  // Plain summary for log search by scope name
+  console.error(`[Revel] ${scope}: ${detail}`);
+  if (meta && Object.keys(meta).length > 0) {
+    console.error(`[Revel] ${scope} meta: ${safeJson(meta).slice(0, 4000)}`);
+  }
 }
 
 function looksUnsafe(message: string): boolean {
@@ -118,7 +176,11 @@ export function toClientErrorMessage(
   error: unknown,
   fallback: string = CLIENT_GENERIC_ERROR
 ): string {
-  const message = rawErrorMessage(error).trim();
+  if (error instanceof ClientSafeError) {
+    return error.clientMessage;
+  }
+
+  const message = (error instanceof Error ? error.message : rawErrorMessage(error)).trim();
 
   if (isAllowlistedSafeMessage(message) && !looksUnsafe(message)) {
     return message;
@@ -141,7 +203,6 @@ export function toClientErrorMessage(
     return fallback;
   }
 
-  // Unknown but short/safe-looking product errors may pass; still prefer generic for 500s
   return fallback;
 }
 
@@ -151,4 +212,15 @@ export function clientAiGatewayError(): string {
 
 export function clientGenericError(): string {
   return CLIENT_GENERIC_ERROR;
+}
+
+/**
+ * Throw a client-safe AI gateway error while preserving the real reason for logs.
+ */
+export function throwClientAiGatewayError(serverDetail: unknown): never {
+  const detail =
+    typeof serverDetail === "string"
+      ? serverDetail
+      : serverErrorDetail(serverDetail);
+  throw new ClientSafeError(CLIENT_AI_GATEWAY_ERROR, detail);
 }
