@@ -14,7 +14,7 @@
 
 | Area | Status |
 |------|--------|
-| Website analysis | Public URLs via Mission Control (agentic: Groq / Gemini + OpenRouter fallback) |
+| Website analysis | Public URLs via Mission Control (cascade: Groq → OpenRouter → Gemini) |
 | Outputs | Blindspot Map, Reveal Index, Blueprint, Action Queue |
 | Export | Markdown, GitHub MD, JSON; optional Linear / Notion / Gist when configured |
 | Auth | NextAuth (email/password + Google), forgot/reset password, editable profile |
@@ -31,13 +31,13 @@
 
 ## Tech stack
 
-- **Framework:** Next.js 16, React 19, TypeScript
-- **Styling:** Tailwind CSS 4, Framer Motion, Radix UI
-- **AI:** Groq / Gemini agentic tools, OpenRouter fallback
-- **Auth:** NextAuth (Auth.js v5) + Google OAuth + credentials
-- **Email:** Resend (welcome, partner, password reset)
-- **Data:** Supabase Postgres, Prisma 7
-- **Deploy:** Vercel
+- **App:** Next.js 16, React 19, TypeScript, Tailwind 4, Framer Motion, Radix
+- **Data / auth:** Supabase Postgres, Prisma 7, NextAuth (Google + credentials), Resend
+- **AI:** Custom agentic tool loop — **Groq** (`llama-3.3-70b-versatile` → `llama-3.1-8b-instant`) → **OpenRouter** → **Gemini** last; Zod quality gates on reports
+- **Agents / payments:** MCP A2MCP (`/api/mcp`), OKX x402 on billable tools, Partner API keys
+- **Deploy:** Vercel (long-running analyze/mcp/audit functions)
+
+Full technical brief (including prompt-engineering attribution): **[stacks.md](./stacks.md)**
 
 ---
 
