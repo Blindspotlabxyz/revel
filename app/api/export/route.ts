@@ -286,8 +286,15 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Export failed. Please try again.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("export_failed", error);
+    return NextResponse.json(
+      {
+        error: toClientErrorMessage(error, "Export failed. Please try again."),
+      },
+      { status: 500 }
+    );
   }
 }

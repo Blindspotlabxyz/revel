@@ -88,10 +88,7 @@ export function getAnalysisProviderChain(): AnalysisBackend[] {
 }
 
 const DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
-const BUILTIN_GROQ_FALLBACKS = [
-  "meta-llama/llama-4-scout-17b-16e-instruct",
-  "llama-3.1-8b-instant",
-];
+const BUILTIN_GROQ_FALLBACKS = ["llama-3.1-8b-instant"];
 
 export function getGroqModel(): string {
   return getGroqModels()[0];
@@ -104,12 +101,12 @@ export function getGroqModels(): string[] {
     .map((model) => model.trim())
     .filter(Boolean);
 
+  const removed = new Set(["meta-llama/llama-4-scout-17b-16e-instruct"]);
   return [
-    ...new Set([
-      primary,
-      ...extra,
-      ...BUILTIN_GROQ_FALLBACKS.filter((model) => model !== primary),
-    ]),
+    ...new Set(
+      [primary, ...extra, ...BUILTIN_GROQ_FALLBACKS.filter((m) => m !== primary)]
+        .filter((model) => !removed.has(model))
+    ),
   ];
 }
 

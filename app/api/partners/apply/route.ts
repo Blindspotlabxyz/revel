@@ -53,8 +53,15 @@ export async function POST(request: Request) {
         "Application received. We will review and email your API key when approved.",
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Application failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("partner_apply_failed", error);
+    return NextResponse.json(
+      {
+        error: toClientErrorMessage(error, "Application failed. Please try again."),
+      },
+      { status: 500 }
+    );
   }
 }

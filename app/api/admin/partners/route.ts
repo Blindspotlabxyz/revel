@@ -82,7 +82,15 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ partnerId: created.id });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Create failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("admin_partner_create_failed", error);
+    return NextResponse.json(
+      {
+        error: toClientErrorMessage(error, "Could not create partner."),
+      },
+      { status: 500 }
+    );
   }
 }

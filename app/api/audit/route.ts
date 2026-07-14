@@ -53,9 +53,16 @@ async function auditHandler(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Could not start audit";
-    return NextResponse.json({ error: message }, { status: 400 });
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("audit_start_failed", error);
+    return NextResponse.json(
+      {
+        error: toClientErrorMessage(error, "Could not start audit"),
+      },
+      { status: 400 }
+    );
   }
 }
 

@@ -4,25 +4,23 @@ import {
   isRecoverableAgenticFailure,
 } from "@/lib/analysis-provider";
 import { generateAnalysis } from "@/lib/openrouter";
+import {
+  clientAiGatewayError,
+  logServerError,
+  rawErrorMessage,
+} from "@/lib/safe-client-error";
 import type { AnalysisReport } from "@/types/analysis";
 import { extractWebsiteContent } from "@/services/content-extractor";
 import { runGeminiAgent } from "@/services/gemini-agent";
 import { runGroqAgent } from "@/services/groq-agent";
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error";
-}
-
 async function fetchContentForFallback(website: string): Promise<string> {
   try {
     return await extractWebsiteContent(website);
   } catch (error) {
-    const detail = errorMessage(error);
-    console.warn(
-      `[Revel] Website fetch failed during OpenRouter path (${detail}) — continuing with URL-only context`
-    );
+    logServerError("openrouter_fetch_failed", error, { website });
     return [
-      `[Live page fetch failed: ${detail}]`,
+      `[Live page fetch failed]`,
       `Website URL: ${website}`,
       "Only use the domain and URL structure. Mark every blindspot as unverified live content.",
     ].join("\n\n");
@@ -45,15 +43,17 @@ async function runOpenRouterAnalysis(website: string): Promise<AnalysisReport> {
     }
   }
 
-  throw new Error(
-    `OpenRouter analysis failed after ${attempts} attempts: ${errorMessage(lastError)}`
-  );
+  logServerError("openrouter_analysis_failed", lastError, {
+    website,
+    attempts,
+  });
+  throw new Error(clientAiGatewayError());
 }
 
 /**
  * Run analysis with cascade:
  *   Groq (agentic) → OpenRouter (grounded single-shot) → Gemini (agentic, last)
- * On recoverable errors (quota, incomplete report, API failure), try the next backend.
+ * On recoverable errors, try the next backend. Client only ever sees a generic message.
  */
 export async function generateAgenticAnalysis(
   website: string
@@ -61,12 +61,15 @@ export async function generateAgenticAnalysis(
   const chain = getAnalysisProviderChain();
 
   if (chain.length === 0) {
-    throw new Error(
-      "Analysis requires GROQ_API_KEY, OPENROUTER_API_KEY, or GEMINI_API_KEY"
+    logServerError(
+      "analysis_no_providers",
+      new Error("No analysis API keys configured"),
+      { website }
     );
+    throw new Error(clientAiGatewayError());
   }
 
-  const errors: string[] = [];
+  const errors: Array<{ provider: string; detail: string }> = [];
 
   for (let i = 0; i < chain.length; i++) {
     const provider = chain[i];
@@ -85,8 +88,8 @@ export async function generateAgenticAnalysis(
       }
       return await runGeminiAgent(website);
     } catch (error) {
-      const detail = errorMessage(error);
-      errors.push(`${provider}: ${detail}`);
+      const detail = rawErrorMessage(error);
+      errors.push({ provider, detail });
 
       const canFallback =
         !isLast &&
@@ -94,8 +97,13 @@ export async function generateAgenticAnalysis(
 
       if (canFallback) {
         console.warn(
-          `[Revel] ${provider} failed (${detail.slice(0, 160)}) — falling back to next provider`
+          `[Revel] ${provider} failed — falling back to next provider`
         );
+        logServerError("analysis_provider_fallback", error, {
+          website,
+          provider,
+          next: chain[i + 1],
+        });
         continue;
       }
 
@@ -103,14 +111,21 @@ export async function generateAgenticAnalysis(
         break;
       }
 
-      // Non-recoverable on a non-last provider still try next so one bad key doesn't block
       console.warn(
-        `[Revel] ${provider} error (${detail.slice(0, 160)}) — trying next provider anyway`
+        `[Revel] ${provider} error — trying next provider anyway`
       );
+      logServerError("analysis_provider_error", error, {
+        website,
+        provider,
+        next: chain[i + 1],
+      });
     }
   }
 
-  throw new Error(
-    `All analysis providers failed (${chain.join(" → ")}). ${errors.slice(-3).join(" | ")}`
+  logServerError(
+    "analysis_all_providers_failed",
+    new Error("All analysis providers failed"),
+    { website, chain, errors }
   );
+  throw new Error(clientAiGatewayError());
 }

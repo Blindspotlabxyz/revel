@@ -12,11 +12,6 @@ import {
   validateUsername,
 } from "@/lib/user-profile";
 
-function errorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
-
 export async function POST(request: Request) {
   try {
     if (!isPrismaEnabled()) {
@@ -135,8 +130,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("signup_error", error);
     return NextResponse.json(
-      { error: errorMessage(error) },
+      {
+        error: toClientErrorMessage(
+          error,
+          "Could not create account. Please try again."
+        ),
+      },
       { status: 500 }
     );
   }

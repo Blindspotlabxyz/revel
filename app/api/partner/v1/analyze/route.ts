@@ -139,9 +139,18 @@ export async function POST(request: Request) {
       }
     );
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Could not start analysis";
-    return applyCors(NextResponse.json({ error: message }, { status: 400 }));
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("partner_analyze_start_failed", error);
+    return applyCors(
+      NextResponse.json(
+        {
+          error: toClientErrorMessage(error, "Could not start analysis"),
+        },
+        { status: 400 }
+      )
+    );
   }
 }
 

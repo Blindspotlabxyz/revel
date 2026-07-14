@@ -38,8 +38,16 @@ async function handleIndexNow(request: Request) {
       results: result.results,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "IndexNow failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("indexnow_failed", error);
+    return NextResponse.json(
+      {
+        error: toClientErrorMessage(error, "IndexNow request failed."),
+      },
+      { status: 500 }
+    );
   }
 }
 

@@ -45,10 +45,16 @@ export async function GET(
 
     return NextResponse.redirect(url);
   } catch (error) {
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("integration_start_failed", error, { provider });
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Could not start connect flow",
+        error: toClientErrorMessage(
+          error,
+          "Could not start connect flow. Please try again."
+        ),
       },
       { status: 500 }
     );

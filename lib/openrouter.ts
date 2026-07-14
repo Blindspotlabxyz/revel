@@ -1,5 +1,9 @@
 import { resilientFetch } from "@/lib/resilient-fetch";
 import {
+  clientAiGatewayError,
+  logServerError,
+} from "@/lib/safe-client-error";
+import {
   isCompleteReport,
   normalizeAnalysisReport,
   reportCompletenessError,
@@ -134,14 +138,11 @@ export async function generateAnalysis(
     }
   }
 
-  const hint =
-    process.env.OPENROUTER_MODEL?.endsWith(":free") || !process.env.OPENROUTER_MODEL
-      ? " Try OPENROUTER_MODEL=google/gemini-2.5-flash with $5+ OpenRouter credits for production."
-      : "";
-
-  throw new Error(
-    `All analysis models failed.${hint} Last errors: ${errors.slice(-2).join(" | ")}`
-  );
+  logServerError("openrouter_all_models_failed", new Error("All models failed"), {
+    errors,
+    models,
+  });
+  throw new Error(clientAiGatewayError());
 }
 
 function generateDemoReport(website: string): AnalysisReport {

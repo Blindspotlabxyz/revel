@@ -3,6 +3,12 @@ import { trackActivity } from "@/lib/activity";
 import { logEvent } from "@/lib/logger";
 import { generateAnalysis } from "@/lib/openrouter";
 import {
+  clientAiGatewayError,
+  logServerError,
+  rawErrorMessage,
+  toClientErrorMessage,
+} from "@/lib/safe-client-error";
+import {
   isCompleteReport,
   normalizeAnalysisReport,
   reportCompletenessError,
@@ -10,17 +16,6 @@ import {
 import { generateAgenticAnalysis } from "@/services/agentic-analysis";
 import { extractWebsiteContent } from "@/services/content-extractor";
 import { getAnalysis, saveAnalysis } from "@/services/store";
-
-function errorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    const cause = error.cause;
-    if (cause instanceof Error && cause.message && cause.message !== error.message) {
-      return `${error.message} (${cause.message})`;
-    }
-    return error.message;
-  }
-  return "Analysis failed unexpectedly";
-}
 
 export async function markAnalysisFailed(
   id: string,
@@ -30,19 +25,30 @@ export async function markAnalysisFailed(
   const failed = await getAnalysis(id);
   if (!failed) return;
 
-  const message = errorMessage(error);
+  // Full detail stays server-side only
+  logServerError("analysis_failed", error, {
+    id,
+    website: context?.website ?? failed.website,
+    userId: context?.userId,
+  });
+
+  const clientMessage = toClientErrorMessage(
+    error,
+    clientAiGatewayError()
+  );
 
   await saveAnalysis({
     ...failed,
     status: "failed",
-    error: message,
+    error: clientMessage,
   });
 
   logEvent("analysis_failed", {
     id,
     website: context?.website ?? failed.website,
     userId: context?.userId,
-    error: message,
+    error: clientMessage,
+    errorDetail: rawErrorMessage(error).slice(0, 500),
   });
   trackActivity({
     eventType: "analysis_failed",
@@ -50,7 +56,7 @@ export async function markAnalysisFailed(
     website: context?.website ?? failed.website,
     userId: context?.userId,
     status: "failed",
-    metadata: { error: message },
+    metadata: { error: clientMessage },
   });
 }
 

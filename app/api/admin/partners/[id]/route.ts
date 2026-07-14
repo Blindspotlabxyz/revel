@@ -60,7 +60,15 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Update failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("admin_partner_update_failed", error);
+    return NextResponse.json(
+      {
+        error: toClientErrorMessage(error, "Could not update partner."),
+      },
+      { status: 500 }
+    );
   }
 }

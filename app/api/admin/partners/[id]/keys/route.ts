@@ -50,7 +50,15 @@ export async function POST(
       emailed: Boolean(partner.contactEmail),
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Key issue failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("admin_partner_key_failed", error);
+    return NextResponse.json(
+      {
+        error: toClientErrorMessage(error, "Could not issue partner key."),
+      },
+      { status: 500 }
+    );
   }
 }

@@ -74,12 +74,19 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ id });
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "We couldn't start the analysis. Please try again.";
-
-    return NextResponse.json({ error: message }, { status: 400 });
+    const { logServerError, toClientErrorMessage } = await import(
+      "@/lib/safe-client-error"
+    );
+    logServerError("analyze_start_failed", error);
+    return NextResponse.json(
+      {
+        error: toClientErrorMessage(
+          error,
+          "We couldn't start the analysis. Please try again."
+        ),
+      },
+      { status: 400 }
+    );
   }
   });
 }
