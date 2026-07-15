@@ -1,14 +1,57 @@
 import sharp from "sharp";
-import { copyFileSync, writeFileSync } from "fs";
+import { copyFileSync, existsSync, writeFileSync } from "fs";
 import { join } from "path";
 
+/**
+ * Regenerate all Revel platform + UI icons from the 3D keyhole master.
+ *
+ * Source priority:
+ * 1. public/brand/revel-avatar-3d-master.jpg (1024×1024 preferred)
+ * 2. public/brand/revel-avatar-3d-440.png
+ * 3. public/revel-new.jpg (legacy fallback)
+ */
 const root = process.cwd();
-const source = join(root, "public/revel-new.jpg");
 const cream = { r: 247, g: 242, b: 235 };
 
-// Keep a stable brand path as the master raster mark
+const candidates = [
+  join(root, "public/brand/revel-avatar-3d-master.jpg"),
+  join(root, "public/brand/revel-avatar-3d-440.png"),
+  join(root, "public/brand/revel-avatar-3d-440-okx.jpg"),
+  join(root, "public/revel-new.jpg"),
+];
+
+const source = candidates.find((p) => existsSync(p));
+if (!source) {
+  console.error("No brand source image found. Expected one of:\n" + candidates.join("\n"));
+  process.exit(1);
+}
+console.log(`source: ${source}`);
+
+// Keep stable brand paths as the master raster mark
 const master = join(root, "public/brand/revel-mark.jpg");
-copyFileSync(source, master);
+const masterPng = join(root, "public/brand/revel-icon-source.png");
+
+await sharp(source)
+  .resize(1024, 1024, { fit: "cover", position: "centre" })
+  .flatten({ background: cream })
+  .removeAlpha()
+  .jpeg({ quality: 95, mozjpeg: true })
+  .toFile(master);
+
+await sharp(source)
+  .resize(1024, 1024, { fit: "cover", position: "centre" })
+  .flatten({ background: cream })
+  .removeAlpha()
+  .png({ compressionLevel: 9 })
+  .toFile(masterPng);
+
+// Also refresh revel-new.jpg so older scripts stay consistent
+await sharp(source)
+  .resize(1024, 1024, { fit: "cover", position: "centre" })
+  .flatten({ background: cream })
+  .removeAlpha()
+  .jpeg({ quality: 95, mozjpeg: true })
+  .toFile(join(root, "public/revel-new.jpg"));
 
 async function renderPng(size, file, { fit = "cover" } = {}) {
   await sharp(source)
@@ -20,23 +63,43 @@ async function renderPng(size, file, { fit = "cover" } = {}) {
   console.log(`wrote ${file} (${size}x${size})`);
 }
 
-// Platform + browser assets (full-bleed square from revel-new.jpg)
-const outputs = [
+async function renderJpg(size, file) {
+  await sharp(source)
+    .resize(size, size, { fit: "cover", position: "centre" })
+    .flatten({ background: cream })
+    .removeAlpha()
+    .jpeg({ quality: 95, mozjpeg: true })
+    .toFile(join(root, file));
+  console.log(`wrote ${file} (${size}x${size})`);
+}
+
+// Platform + browser assets + in-app marks
+const pngOutputs = [
   { file: "public/favicon-16x16.png", size: 16 },
   { file: "public/favicon-32x32.png", size: 32 },
   { file: "public/icon.png", size: 32 },
   { file: "public/apple-touch-icon.png", size: 180 },
   { file: "public/android-chrome-192x192.png", size: 192 },
   { file: "public/android-chrome-512x512.png", size: 512 },
-  // In-app / UI mark (crisp enough for navbar)
   { file: "public/brand/revel-icon.png", size: 128 },
   { file: "public/brand/revel-icon-256.png", size: 256 },
-  // OKX ASP avatar spec
   { file: "public/brand/revel-avatar-440.png", size: 440 },
+  { file: "public/brand/revel-avatar-3d-440.png", size: 440 },
+  { file: "public/brand/revel-avatar-candidate-440.png", size: 440 },
 ];
 
-for (const { file, size } of outputs) {
+for (const { file, size } of pngOutputs) {
   await renderPng(size, file);
+}
+
+const jpgOutputs = [
+  { file: "public/brand/revel-avatar-440-okx.jpg", size: 440 },
+  { file: "public/brand/revel-avatar-3d-440-okx.jpg", size: 440 },
+  { file: "public/brand/revel-avatar-candidate-440.jpg", size: 440 },
+];
+
+for (const { file, size } of jpgOutputs) {
+  await renderJpg(size, file);
 }
 
 // favicon.ico from 32×32
@@ -48,7 +111,7 @@ await sharp(source)
   .toFile(join(root, "public/favicon.ico"));
 console.log("wrote public/favicon.ico (32×32)");
 
-// Wordmark: mark + "Revel" text as PNG for consistent branding
+// Wordmark: mark + "Revel" text as PNG
 const mark64 = await sharp(source)
   .resize(64, 64, { fit: "cover", position: "centre" })
   .flatten({ background: cream })
@@ -69,7 +132,7 @@ await sharp(wordBg)
   .toFile(join(root, "public/brand/revel-logo.png"));
 console.log("wrote public/brand/revel-logo.png");
 
-// SVG stubs that point consumers at the raster mark (UI uses PNG/inline Image)
+// SVG stubs that point consumers at the raster mark
 writeFileSync(
   join(root, "public/brand/revel-icon.svg"),
   `<?xml version="1.0" encoding="UTF-8"?>
@@ -91,6 +154,17 @@ writeFileSync(
 `
 );
 console.log("wrote public/brand/revel-logo.svg");
+
+// Lightweight SVG avatar placeholder (OKX still uses JPEG CDN)
+writeFileSync(
+  join(root, "public/brand/revel-avatar-okx.svg"),
+  `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 440 440" width="440" height="440" role="img" aria-label="Revel">
+  <image href="/brand/revel-avatar-440.png" xlink:href="/brand/revel-avatar-440.png" width="440" height="440" preserveAspectRatio="xMidYMid slice"/>
+</svg>
+`
+);
+console.log("wrote public/brand/revel-avatar-okx.svg");
 
 writeFileSync(
   join(root, "public/site.webmanifest"),
@@ -130,3 +204,4 @@ writeFileSync(
   )
 );
 console.log("wrote public/site.webmanifest");
+console.log("done — all icons now use the 3D keyhole mark");
