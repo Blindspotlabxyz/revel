@@ -15,6 +15,26 @@ import { normalizeUrlSafe } from "@/lib/validation";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
+const corsHeaders: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "Content-Type, PAYMENT-SIGNATURE, X-PAYMENT",
+  "Access-Control-Expose-Headers": "PAYMENT-REQUIRED, PAYMENT-RESPONSE",
+};
+
+function applyCors(response: Response): NextResponse {
+  const next = new NextResponse(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+  for (const [key, value] of Object.entries(corsHeaders)) {
+    next.headers.set(key, value);
+  }
+  return next;
+}
+
 async function auditHandler(request: NextRequest): Promise<NextResponse> {
   await ensureOkxResourceServerReady();
 
@@ -66,14 +86,21 @@ async function auditHandler(request: NextRequest): Promise<NextResponse> {
   }
 }
 
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: corsHeaders });
+}
+
 export async function GET() {
-  return NextResponse.json({
-    service: "revel-audit",
-    billing: getOkxBillingManifest(),
-    method: "POST",
-    body: { url: "https://example.com" },
-    docs: "/docs/mcp",
-  });
+  return NextResponse.json(
+    {
+      service: "revel-audit",
+      billing: getOkxBillingManifest(),
+      method: "POST",
+      body: { url: "https://example.com" },
+      docs: "/docs/mcp",
+    },
+    { headers: corsHeaders }
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -84,7 +111,7 @@ export async function POST(request: NextRequest) {
         hint: "Set OKX_API_KEY, OKX_SECRET_KEY, OKX_PASSPHRASE, and OKX_PAY_TO. Free website access: /mission-control (3/day).",
         billing: getOkxBillingManifest(),
       },
-      { status: 503 }
+      { status: 503, headers: corsHeaders }
     );
   }
 
@@ -98,5 +125,7 @@ export async function POST(request: NextRequest) {
     }
   );
 
-  return paidPost(request);
+  // The x402 wrapper generates an unpaid 402 itself, before auditHandler is
+  // reached. Wrap its output so browser clients can receive the challenge.
+  return applyCors(await paidPost(request));
 }

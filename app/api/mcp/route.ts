@@ -26,7 +26,9 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
   "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Revel-MCP-Key, Mcp-Session-Id, PAYMENT-SIGNATURE, X-PAYMENT, payment-signature, x-payment",
+    "Content-Type, Authorization, X-Revel-MCP-Key, Mcp-Session-Id, MCP-Protocol-Version, PAYMENT-SIGNATURE, X-PAYMENT",
+  "Access-Control-Expose-Headers":
+    "MCP-Protocol-Version, Mcp-Session-Id, PAYMENT-REQUIRED, PAYMENT-RESPONSE",
 };
 
 function applyCors(response: Response): NextResponse {
@@ -143,7 +145,10 @@ export async function POST(request: NextRequest) {
       getOkxResourceServer(),
       getOkxPaywallConfig()
     );
-    return paidPost(requestWithBody);
+    // withX402 returns an unpaid 402 before it calls mcpPostHandler, so CORS
+    // must be applied here as well for browser-based A2MCP clients to receive
+    // and read the PAYMENT-REQUIRED challenge.
+    return applyCors(await paidPost(requestWithBody));
   }
 
   return applyCors(mcpUnauthorizedResponse());

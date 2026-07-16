@@ -12,6 +12,7 @@
     "test:mcp": "npx tsx scripts/test-mcp.ts",
     "test:mcp:http": "npx tsx scripts/test-mcp-http.ts",
     "test:mcp:prod": "npx tsx scripts/test-mcp-http.ts https://tryrevel.xyz/api/mcp",
+    "test:mcp:cors": "node scripts/test-mcp-browser-cors.mjs",
     "test:mcp:marketplace": "npx tsx scripts/test-mcp-marketplace-flow.ts",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
