@@ -7,7 +7,10 @@ import {
   getOkxResourceServer,
   isOkxBillingEnabled,
 } from "@/lib/billing/okx-x402";
-import { applyX402Cors } from "@/lib/billing/x402-response";
+import {
+  applyX402Cors,
+  asX402ApiClientRequest,
+} from "@/lib/billing/x402-response";
 import { runWithActivityContext } from "@/lib/activity-context";
 import { trackActivity } from "@/lib/activity";
 import { startWebsiteAnalysis } from "@/lib/mcp/handlers";
@@ -108,13 +111,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // No paywallConfig — always return standard JSON 402 + PAYMENT-REQUIRED
-  // (HTML paywall fails OKX x402 marketplace validation).
+  // Force API-client Accept/UA so withX402 never returns HTML without
+  // PAYMENT-REQUIRED (fails OKX marketplace x402 standard validation).
+  const bodyText = await request.text();
+  const paidRequest = asX402ApiClientRequest(request, bodyText);
+
   const paidPost = withX402(
-    auditHandler,
+    async (req) => {
+      // Handler needs a fresh readable body
+      return auditHandler(asX402ApiClientRequest(req, bodyText));
+    },
     getAuditRouteConfig(),
     getOkxResourceServer()
   );
 
-  return applyCors(await paidPost(request));
+  return applyCors(await paidPost(paidRequest));
 }

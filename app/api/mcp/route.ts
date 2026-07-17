@@ -7,7 +7,10 @@ import {
   getOkxResourceServer,
   isOkxBillingEnabled,
 } from "@/lib/billing/okx-x402";
-import { applyX402Cors } from "@/lib/billing/x402-response";
+import {
+  applyX402Cors,
+  asX402ApiClientRequest,
+} from "@/lib/billing/x402-response";
 import {
   isMcpHttpEnabled,
   mcpUnauthorizedResponse,
@@ -131,16 +134,14 @@ export async function POST(request: NextRequest) {
     }
 
     await ensureOkxResourceServerReady();
-    // Do NOT pass paywallConfig — browser HTML paywall omits PAYMENT-REQUIRED
-    // and fails OKX marketplace x402 standard validation.
+    // Force non-browser headers so SDK emits PAYMENT-REQUIRED (not HTML paywall).
+    const paidRequest = asX402ApiClientRequest(requestWithBody, bodyText);
     const paidPost = withX402(
       (req) => mcpPostHandler(req, true),
       getMcpRouteConfig(),
       getOkxResourceServer()
     );
-    // withX402 returns unpaid 402 before mcpPostHandler; applyX402Cors keeps
-    // JSON + PAYMENT-REQUIRED for all clients (including Mozilla browsers).
-    return applyCors(await paidPost(requestWithBody));
+    return applyCors(await paidPost(paidRequest));
   }
 
   return applyCors(mcpUnauthorizedResponse());

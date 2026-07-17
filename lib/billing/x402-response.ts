@@ -1,15 +1,41 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Ensure unpaid x402 challenges always look like the OKX / marketplace standard:
+ * OKX x402 marketplace standard:
  * - HTTP 402
  * - PAYMENT-REQUIRED header (base64 JSON, x402 v2)
- * - JSON body with the same challenge (helps validators that only inspect body)
- * - Never HTML paywall (browser Accept/UA must still get the header)
+ * - JSON body with the same challenge
+ * - Never HTML paywall (validators fail without PAYMENT-REQUIRED)
  *
- * Passing paywallConfig into withX402 causes HTML responses for Mozilla +
- * Accept: text/html — that fails OKX "x402 standard validation".
+ * @okxweb3/app-x402-next treats Accept:text/html + Mozilla UA as a browser and
+ * returns HTML *without* PAYMENT-REQUIRED — even with paywallConfig undefined.
+ * Force API client headers before withX402 so challenges stay standard.
  */
+export function asX402ApiClientRequest(
+  request: NextRequest,
+  bodyText?: string
+): NextRequest {
+  const headers = new Headers(request.headers);
+  // isWebBrowser = accept.includes("text/html") && ua.includes("Mozilla")
+  headers.set("Accept", "application/json");
+  headers.delete("accept");
+  headers.set("Accept", "application/json");
+  const ua = headers.get("user-agent") ?? headers.get("User-Agent") ?? "";
+  if (/Mozilla/i.test(ua)) {
+    headers.set("User-Agent", "Revel-A2MCP-x402-client/1.0");
+  }
+
+  const hasBody = typeof bodyText === "string";
+  const init: ConstructorParameters<typeof NextRequest>[1] = {
+    method: request.method,
+    headers,
+    ...(hasBody && bodyText!.length > 0
+      ? { body: bodyText, duplex: "half" as const }
+      : {}),
+  };
+  return new NextRequest(request.url, init);
+}
+
 export function applyX402Cors(
   response: Response,
   corsHeaders: Record<string, string>
@@ -50,6 +76,22 @@ export function applyX402Cors(
     }
 
     return NextResponse.json(body, { status: 402, headers });
+  }
+
+  // HTML 402 without header should never ship — surface as error for logs
+  if (status === 402) {
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("text/html")) {
+      console.error(
+        JSON.stringify({
+          level: "error",
+          source: "revel",
+          scope: "x402_html_paywall_leaked",
+          message:
+            "HTML 402 without PAYMENT-REQUIRED — force API client headers before withX402",
+        })
+      );
+    }
   }
 
   const next = new NextResponse(response.body, {
