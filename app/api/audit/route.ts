@@ -7,6 +7,7 @@ import {
   getOkxResourceServer,
   isOkxBillingEnabled,
 } from "@/lib/billing/okx-x402";
+import { applyX402Cors } from "@/lib/billing/x402-response";
 import { runWithActivityContext } from "@/lib/activity-context";
 import { trackActivity } from "@/lib/activity";
 import { startWebsiteAnalysis } from "@/lib/mcp/handlers";
@@ -19,20 +20,12 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers":
-    "Content-Type, PAYMENT-SIGNATURE, X-PAYMENT",
+    "Content-Type, PAYMENT-SIGNATURE, X-PAYMENT, payment-signature, x-payment",
   "Access-Control-Expose-Headers": "PAYMENT-REQUIRED, PAYMENT-RESPONSE",
 };
 
 function applyCors(response: Response): NextResponse {
-  const next = new NextResponse(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: response.headers,
-  });
-  for (const [key, value] of Object.entries(corsHeaders)) {
-    next.headers.set(key, value);
-  }
-  return next;
+  return applyX402Cors(response, corsHeaders);
 }
 
 async function auditHandler(request: NextRequest): Promise<NextResponse> {
@@ -115,17 +108,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // No paywallConfig — always return standard JSON 402 + PAYMENT-REQUIRED
+  // (HTML paywall fails OKX x402 marketplace validation).
   const paidPost = withX402(
     auditHandler,
     getAuditRouteConfig(),
-    getOkxResourceServer(),
-    {
-      appName: "Revel",
-      appLogo: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://tryrevel.xyz"}/brand/revel-icon-256.png`,
-    }
+    getOkxResourceServer()
   );
 
-  // The x402 wrapper generates an unpaid 402 itself, before auditHandler is
-  // reached. Wrap its output so browser clients can receive the challenge.
   return applyCors(await paidPost(request));
 }

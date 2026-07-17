@@ -4,10 +4,10 @@ import {
   ensureOkxResourceServerReady,
   getMcpRouteConfig,
   getOkxBillingManifest,
-  getOkxPaywallConfig,
   getOkxResourceServer,
   isOkxBillingEnabled,
 } from "@/lib/billing/okx-x402";
+import { applyX402Cors } from "@/lib/billing/x402-response";
 import {
   isMcpHttpEnabled,
   mcpUnauthorizedResponse,
@@ -26,21 +26,13 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
   "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-Revel-MCP-Key, Mcp-Session-Id, MCP-Protocol-Version, PAYMENT-SIGNATURE, X-PAYMENT",
+    "Content-Type, Authorization, X-Revel-MCP-Key, Mcp-Session-Id, MCP-Protocol-Version, PAYMENT-SIGNATURE, X-PAYMENT, payment-signature, x-payment",
   "Access-Control-Expose-Headers":
     "MCP-Protocol-Version, Mcp-Session-Id, PAYMENT-REQUIRED, PAYMENT-RESPONSE",
 };
 
 function applyCors(response: Response): NextResponse {
-  const next = new NextResponse(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: response.headers,
-  });
-  for (const [key, value] of Object.entries(corsHeaders)) {
-    next.headers.set(key, value);
-  }
-  return next;
+  return applyX402Cors(response, corsHeaders);
 }
 
 function cloneRequestWithBody(
@@ -139,15 +131,15 @@ export async function POST(request: NextRequest) {
     }
 
     await ensureOkxResourceServerReady();
+    // Do NOT pass paywallConfig — browser HTML paywall omits PAYMENT-REQUIRED
+    // and fails OKX marketplace x402 standard validation.
     const paidPost = withX402(
       (req) => mcpPostHandler(req, true),
       getMcpRouteConfig(),
-      getOkxResourceServer(),
-      getOkxPaywallConfig()
+      getOkxResourceServer()
     );
-    // withX402 returns an unpaid 402 before it calls mcpPostHandler, so CORS
-    // must be applied here as well for browser-based A2MCP clients to receive
-    // and read the PAYMENT-REQUIRED challenge.
+    // withX402 returns unpaid 402 before mcpPostHandler; applyX402Cors keeps
+    // JSON + PAYMENT-REQUIRED for all clients (including Mozilla browsers).
     return applyCors(await paidPost(requestWithBody));
   }
 

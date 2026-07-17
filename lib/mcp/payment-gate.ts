@@ -42,8 +42,9 @@ function messageRequiresPayment(message: unknown): boolean {
   const method =
     typeof message.method === "string" ? message.method : undefined;
 
+  // Non-MCP / probe payloads (bare POST {}, marketplace curl) → require 402
   if (!method) {
-    return false;
+    return true;
   }
 
   if (FREE_MCP_METHODS.has(method) || method.startsWith("notifications/")) {
@@ -51,6 +52,7 @@ function messageRequiresPayment(message: unknown): boolean {
   }
 
   if (method !== "tools/call") {
+    // Unknown MCP methods stay free so handshake does not break
     return false;
   }
 
@@ -64,10 +66,17 @@ function messageRequiresPayment(message: unknown): boolean {
   return BILLABLE_TOOL_SET.has(toolName);
 }
 
+/**
+ * OKX A2MCP self-check for paid endpoints:
+ *   curl -i -X POST https://endpoint  → expect HTTP 402 + PAYMENT-REQUIRED
+ *
+ * Empty body / non-MCP JSON must 402. Only known free MCP methods skip paywall.
+ */
 export function mcpBodyRequiresPayment(bodyText: string): boolean {
   const trimmed = bodyText.trim();
+  // Bare POST (marketplace validator) → paid
   if (!trimmed) {
-    return false;
+    return true;
   }
 
   let parsed: unknown;
@@ -78,7 +87,8 @@ export function mcpBodyRequiresPayment(bodyText: string): boolean {
   }
 
   if (Array.isArray(parsed)) {
-    if (parsed.length === 0) return false;
+    // Empty batch is not a free discovery call
+    if (parsed.length === 0) return true;
     return parsed.some((item) => messageRequiresPayment(item));
   }
 

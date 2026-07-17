@@ -62,6 +62,11 @@ export function getOkxBillingManifest() {
   };
 }
 
+/**
+ * @deprecated Do not pass to withX402 for API/MCP routes.
+ * Browser HTML paywalls omit PAYMENT-REQUIRED and fail OKX marketplace x402 validation.
+ * Prefer no paywallConfig so all clients get JSON 402 + PAYMENT-REQUIRED header.
+ */
 export function getOkxPaywallConfig() {
   return {
     appName: "Revel",
